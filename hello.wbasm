@@ -1,0 +1,44 @@
+
+# Create a text allocation from application data.
+MACRO newTextAlloc, dest, startLbl, endLbl
+    newAlloc dest, 0, ?endLbl - ?startLbl
+    wrtBuff dest[0]:s8, startLbl, ?endLbl - ?startLbl
+END
+
+FUNC init, init_ID
+    
+    # Create text allocations we will need.
+    VAR termName, s32
+    VAR welcomeMessage, s32
+    newTextAlloc termName, termNameStart, termNameEnd
+    newTextAlloc welcomeMessage, welcomeMessageStart, welcomeMessageEnd
+    
+    # Open the terminal application, and find the wrtTerm function.
+    VAR termHandle, s32
+    VAR wrtTermIndex, s32
+    openFile termHandle, termName
+    findFunc wrtTermIndex, termHandle, wrtTerm_ID
+    
+    # Invoke wrtTerm on the terminal application.
+    newArgFrame 12
+    wrt nextArgFrame[0]:s32, 0
+    wrt nextArgFrame[4]:s32, 0
+    wrt nextArgFrame[8]:s32, welcomeMessage
+    callRemote termHandle, wrtTermIndex
+    
+    # Clean up.
+    closeFile termHandle
+    
+END
+
+APP_DATA
+    LBL termNameStart
+    DATA "term"
+    LBL termNameEnd
+    
+    LBL welcomeMessageStart
+    DATA "Hello world!"
+    LBL welcomeMessageEnd
+END
+
+
