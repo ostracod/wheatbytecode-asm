@@ -6,10 +6,10 @@ process.env.NODE_PATH = pathUtils.dirname(__filename);
 require("module")._initPaths();
 export let projectPath = pathUtils.dirname(__dirname);
 
-import {BytecodeAppAssembler} from "objects/assembler";
+import {Assembler} from "objects/assembler";
 
 const assemblerClassMap = {
-    ".wbasm": BytecodeAppAssembler,
+    ".wbasm": Assembler,
 };
 
 function printPermittedFileExtensions() {

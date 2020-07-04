@@ -40,17 +40,21 @@ export interface Scope {
 }
 
 export interface Assembler {
-    rootRegionType: number;
-    funcsRegionType: number;
     shouldBeVerbose: boolean;
     rootLineList: AssemblyLine[];
     aliasDefinitionMap: IdentifierMap<AliasDefinition>;
     macroDefinitionMap: {[name: string]: MacroDefinition};
-    functionDefinitionList: FunctionDefinition[];
     nextMacroInvocationId: number;
+    functionDefinitionList: FunctionDefinition[];
+    privateFunctionDefinitionMap: IdentifierMap<PrivateFunctionDefinition>;
+    publicFunctionDefinitionList: PublicFunctionDefinition[];
     scope: Scope;
+    globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
+    globalFrameLength: FrameLength;
+    appDataLineList: DataLineList;
     fileRegion: Region;
     
+    getDisplayString(): string;
     processLines(processLine: LineProcessor): void;
     processExpressionsInLines(
         processExpression: ExpressionProcessor,
@@ -64,29 +68,15 @@ export interface Assembler {
     processIncludeDirectives(lineList: AssemblyLine[]): {lineList: AssemblyLine[], includeCount: number};
     extractAliasDefinitions(lineList: AssemblyLine[]): AssemblyLine[];
     expandAliasInvocations(): void;
-    populateScopeInRootLines(): void;
-    addFunctionDefinition(functionDefinition: FunctionDefinition): void;
-    generateFileRegion(): void;
-    
-    // Concrete subclasses may override these methods:
-    getDisplayString(): string;
     extractDefinitions(): void;
-    populateScopeDefinitions(): void;
-    createFileSubregions(): Region[];
-    
-    // Concrete subclasses must implement these methods:
     extractFunctionDefinitions(): void;
-}
-
-export interface BytecodeAppAssembler extends Assembler {
-    privateFunctionDefinitionMap: IdentifierMap<PrivateFunctionDefinition>;
-    publicFunctionDefinitionList: PublicFunctionDefinition[];
-    appDataLineList: DataLineList;
-    globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
-    globalFrameLength: FrameLength;
-    
-    extractAppDataDefinitions(): void;
     extractGlobalVariableDefinitions(): void;
+    extractAppDataDefinitions(): void;
+    populateScopeInRootLines(): void;
+    populateScopeDefinitions(): void;
+    addFunctionDefinition(functionDefinition: FunctionDefinition): void;
+    createFileSubregions(): Region[];
+    generateFileRegion(): void;
 }
 
 export interface AssemblyError {
@@ -267,10 +257,6 @@ export interface GuardFunctionDefinition extends ArgPermFunctionDefinition {
     interfaceIndexExpression: Expression;
 }
 
-export interface InterfaceFunctionDefinition extends ArgPermFunctionDefinition {
-    arbiterIndexExpression: Expression;
-}
-
 export interface Identifier {
     name: string;
     
@@ -310,6 +296,8 @@ export interface MacroDefinition extends Displayable {
 
 export interface VariableDefinition extends IndexDefinition {
     dataType: DataType;
+    
+    getDisplayStringHelper(): string;
 }
 
 export interface ArgVariableDefinition extends VariableDefinition {

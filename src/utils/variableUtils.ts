@@ -16,9 +16,10 @@ export class VariableUtils {
     
     extractVariableDefinitionHelper(
         line: AssemblyLine,
+        directiveName: string,
         variableDefinitionClass: VariableDefinitionClass
     ): VariableDefinition {
-        if (line.directiveName !== "VAR") {
+        if (line.directiveName !== directiveName) {
             return null;
         }
         let tempArgList = line.argList;
@@ -31,27 +32,26 @@ export class VariableUtils {
     }
     
     extractGlobalVariableDefinition(line: AssemblyLine): VariableDefinition {
-        return variableUtils.extractVariableDefinitionHelper(line, GlobalVariableDefinition);
+        return variableUtils.extractVariableDefinitionHelper(
+            line,
+            "VAR",
+            GlobalVariableDefinition
+        );
     }
     
     extractLocalVariableDefinition(line: AssemblyLine): VariableDefinition {
-        return variableUtils.extractVariableDefinitionHelper(line, LocalVariableDefinition);
+        return variableUtils.extractVariableDefinitionHelper(
+            line,
+            "VAR",
+            LocalVariableDefinition
+        );
     }
     
-    // TODO: Combine this with extractVariableDefinitionHelper.
     extractArgVariableDefinition(line: AssemblyLine): ArgVariableDefinition {
-        if (line.directiveName !== "ARG") {
-            return null;
-        }
-        let tempArgList = line.argList;
-        if (tempArgList.length !== 2) {
-            throw new AssemblyError("Expected 2 arguments.");
-        }
-        let tempIdentifier = tempArgList[0].evaluateToIdentifier();
-        let tempDataType = tempArgList[1].evaluateToDataType();
-        return new ArgVariableDefinition(
-            tempIdentifier,
-            tempDataType
+        return variableUtils.extractVariableDefinitionHelper(
+            line,
+            "ARG",
+            ArgVariableDefinition
         );
     }
     

@@ -1,13 +1,9 @@
 
 import {DataType} from "models/delegates";
-import {VariableDefinition as VariableDefinitionInterface, ArgVariableDefinition as ArgVariableDefinitionInterface, Identifier, InstructionArg} from "models/objects";
+import {VariableDefinition as VariableDefinitionInterface, ArgVariableDefinition as ArgVariableDefinitionInterface, Identifier} from "models/objects";
 
-import {PointerType} from "delegates/dataType";
-
-import {AssemblyError} from "objects/assemblyError";
 import {IndexRefConverter, IndexDefinition} from "objects/indexDefinition";
 import {INSTRUCTION_REF_PREFIX} from "objects/instruction";
-import {NumberConstant} from "objects/constant";
 
 export interface VariableDefinition extends VariableDefinitionInterface {}
 
@@ -18,8 +14,12 @@ export class VariableDefinition extends IndexDefinition {
         this.dataType = dataType;
     }
     
+    getDisplayStringHelper(): string {
+        return "VAR";
+    }
+    
     getDisplayString(): string {
-        return `VAR ${this.identifier.getDisplayString()}, ${this.dataType.getName()}`;
+        return `${this.getDisplayStringHelper()} ${this.identifier.getDisplayString()}, ${this.dataType.getName()}`;
     }
 }
 
@@ -45,13 +45,8 @@ export class ArgVariableDefinition extends VariableDefinition {
         super(identifier, dataType, INSTRUCTION_REF_PREFIX.prevArgFrame);
     }
     
-    // TODO: Make this less stupid.
-    getDisplayString(): string {
-        let tempTextList = [
-            this.identifier.getDisplayString(),
-            this.dataType.getName()
-        ]
-        return "ARG " + tempTextList.join(", ");
+    getDisplayStringHelper(): string {
+        return "ARG";
     }
 }
 

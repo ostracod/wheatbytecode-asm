@@ -87,6 +87,7 @@ export interface ParseUtils {
 export interface VariableUtils {
     extractVariableDefinitionHelper(
         line: AssemblyLine,
+        directiveName: string,
         VariableDefinitionClass: VariableDefinitionClass
     ): VariableDefinition;
     extractGlobalVariableDefinition(line: AssemblyLine): VariableDefinition;

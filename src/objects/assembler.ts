@@ -4,15 +4,14 @@ import * as fs from "fs";
 import {LineProcessor, ExpressionProcessor} from "models/items";
 import {
     Assembler as AssemblerInterface,
-    BytecodeAppAssembler as BytecodeAppAssemblerInterface,
-    AssemblyLine, FunctionDefinition, Identifier, IndexDefinition, Region} from "models/objects";
+    AssemblyLine, FunctionDefinition, Region} from "models/objects";
 
 import {AssemblyError} from "objects/assemblyError";
 import {IdentifierMap} from "objects/identifier";
 import {Scope} from "objects/scope";
 import {MacroDefinition} from "objects/macroDefinition";
 import {AliasDefinition} from "objects/aliasDefinition";
-import {PrivateFunctionDefinition, PublicFunctionDefinition, GuardFunctionDefinition, InterfaceFunctionDefinition} from "objects/functionDefinition";
+import {PrivateFunctionDefinition, PublicFunctionDefinition, GuardFunctionDefinition} from "objects/functionDefinition";
 import {AppDataLineList} from "objects/labeledLineList";
 import {REGION_TYPE, AtomicRegion, CompositeRegion} from "objects/region";
 
@@ -22,19 +21,51 @@ import {variableUtils} from "utils/variableUtils";
 
 export interface Assembler extends AssemblerInterface {}
 
-export abstract class Assembler {
+export class Assembler {
     
-    constructor(rootRegionType: number, funcsRegionType: number, shouldBeVerbose: boolean) {
-        this.rootRegionType = rootRegionType;
-        this.funcsRegionType = funcsRegionType;
+    constructor(shouldBeVerbose: boolean) {
         this.shouldBeVerbose = shouldBeVerbose;
         this.rootLineList = [];
         this.aliasDefinitionMap = new IdentifierMap();
         this.macroDefinitionMap = {};
-        this.functionDefinitionList = [];
         this.nextMacroInvocationId = 0;
+        this.functionDefinitionList = [];
+        this.privateFunctionDefinitionMap = new IdentifierMap();
+        this.publicFunctionDefinitionList = [];
         this.scope = new Scope();
+        this.globalVariableDefinitionMap = new IdentifierMap();
+        this.globalFrameLength = null;
+        this.appDataLineList = null;
         this.fileRegion = null;
+    }
+    
+    getDisplayString(): string {
+        let tempTextList = [];
+        tempTextList.push("\n= = = GLOBAL VARIABLE DEFINITIONS = = =\n");
+        this.globalVariableDefinitionMap.iterate(variableDefinition => {
+            tempTextList.push(variableDefinition.getDisplayString());
+        });
+        tempTextList.push("\n= = = APP DATA LINE LIST = = =\n");
+        tempTextList.push(this.appDataLineList.getDisplayString("Data body"));
+        tempTextList.push("\n= = = ALIAS DEFINITIONS = = =\n");
+        this.aliasDefinitionMap.iterate(definition => {
+            tempTextList.push(definition.getDisplayString());
+        });
+        tempTextList.push("\n= = = MACRO DEFINITIONS = = =\n");
+        for (let name in this.macroDefinitionMap) {
+            let tempDefinition = this.macroDefinitionMap[name];
+            tempTextList.push(tempDefinition.getDisplayString());
+            tempTextList.push("");
+        }
+        tempTextList.push("= = = FUNCTION DEFINITIONS = = =\n");
+        for (let functionDefinition of this.functionDefinitionList) {
+            tempTextList.push(functionDefinition.getDisplayString());
+            tempTextList.push("");
+        };
+        tempTextList.push("\n= = = APP FILE REGION = = =\n");
+        tempTextList.push(this.fileRegion.getDisplayString());
+        tempTextList.push("");
+        return tempTextList.join("\n");
     }
     
     processLines(processLine: LineProcessor): void {
@@ -198,149 +229,8 @@ export abstract class Assembler {
     
     extractDefinitions(): void {
         this.extractFunctionDefinitions();
-    }
-    
-    populateScopeDefinitions(): void {
-        this.scope.indexDefinitionMapList = [];
-    }
-    
-    createFileSubregions(): Region[] {
-        let funcRegionList = this.functionDefinitionList.map(functionDefinition => {
-            return functionDefinition.createRegion();
-        });
-        let appFuncsRegion = new CompositeRegion(this.funcsRegionType, funcRegionList);
-        return [
-            appFuncsRegion
-        ];
-    }
-    
-    generateFileRegion(): void {
-        if (this.rootLineList.length > 0) {
-            let tempLine = this.rootLineList[0];
-            throw new AssemblyError(
-                "Unknown directive.",
-                tempLine.lineNumber,
-                tempLine.filePath
-            );
-        }
-        let tempRegionList = this.createFileSubregions();
-        this.fileRegion = new CompositeRegion(this.rootRegionType, tempRegionList);
-    }
-    
-    getDisplayString(): string {
-        let tempTextList = [];
-        tempTextList.push("\n= = = ALIAS DEFINITIONS = = =\n");
-        this.aliasDefinitionMap.iterate(definition => {
-            tempTextList.push(definition.getDisplayString());
-        });
-        tempTextList.push("\n= = = MACRO DEFINITIONS = = =\n");
-        for (let name in this.macroDefinitionMap) {
-            let tempDefinition = this.macroDefinitionMap[name];
-            tempTextList.push(tempDefinition.getDisplayString());
-            tempTextList.push("");
-        }
-        tempTextList.push("= = = FUNCTION DEFINITIONS = = =\n");
-        for (let functionDefinition of this.functionDefinitionList) {
-            tempTextList.push(functionDefinition.getDisplayString());
-            tempTextList.push("");
-        };
-        tempTextList.push("\n= = = APP FILE REGION = = =\n");
-        tempTextList.push(this.fileRegion.getDisplayString());
-        tempTextList.push("");
-        return tempTextList.join("\n");
-    }
-    
-    assembleCodeFile(sourcePath: string, destinationPath: string): void {
-        
-        console.log(`Assembling "${sourcePath}"...`);
-        
-        try {
-            this.rootLineList = this.loadAndParseAssemblyFile(sourcePath);
-            this.expandAliasInvocations();
-            this.populateScopeInRootLines();
-            this.extractDefinitions();
-            this.populateScopeDefinitions();
-            this.generateFileRegion();
-        } catch(error) {
-            if (error instanceof AssemblyError) {
-                if (error.lineNumber === null || error.filePath === null) {
-                    console.log("Error: " + error.message);
-                } else {
-                    console.log(`Error in "${error.filePath}" on line ${error.lineNumber}: ${error.message}`);
-                }
-                return;
-            } else {
-                throw error;
-            }
-        }
-        
-        if (this.shouldBeVerbose) {
-            console.log(this.getDisplayString());
-        }
-        
-        fs.writeFileSync(destinationPath, this.fileRegion.createBuffer());
-        console.log("Finished assembling.");
-        console.log(`Destination path: "${destinationPath}"`);
-    }
-}
-
-export interface BytecodeAppAssembler extends BytecodeAppAssemblerInterface {}
-
-export class BytecodeAppAssembler extends Assembler {
-    
-    constructor(shouldBeVerbose: boolean) {
-        super(REGION_TYPE.appFile, REGION_TYPE.appFuncs, shouldBeVerbose);
-        this.privateFunctionDefinitionMap = new IdentifierMap();
-        this.publicFunctionDefinitionList = [];
-        this.appDataLineList = null;
-        this.globalVariableDefinitionMap = new IdentifierMap();
-        this.globalFrameLength = null;
-    }
-    
-    getDisplayString(): string {
-        let tempTextList = [];
-        tempTextList.push("\n= = = GLOBAL VARIABLE DEFINITIONS = = =\n");
-        this.globalVariableDefinitionMap.iterate(variableDefinition => {
-            tempTextList.push(variableDefinition.getDisplayString());
-        });
-        tempTextList.push("\n= = = APP DATA LINE LIST = = =\n");
-        tempTextList.push(this.appDataLineList.getDisplayString("Data body"));
-        tempTextList.push(super.getDisplayString());
-        return tempTextList.join("\n");
-    }
-    
-    extractDefinitions(): void {
-        super.extractDefinitions();
-        this.extractAppDataDefinitions();
         this.extractGlobalVariableDefinitions();
-    }
-    
-    populateScopeDefinitions(): void {
-        super.populateScopeDefinitions();
-        this.scope.indexDefinitionMapList.push(
-            this.globalVariableDefinitionMap,
-            this.appDataLineList.labelDefinitionMap,
-            this.privateFunctionDefinitionMap
-        );
-        this.scope.publicFunctionDefinitionList = this.publicFunctionDefinitionList;
-    }
-    
-    createFileSubregions(): Region[] {
-        let output = super.createFileSubregions();
-        let globalFrameLengthRegion = new AtomicRegion(
-            REGION_TYPE.globalFrameLen,
-            this.globalFrameLength.createBuffer()
-        );
-        output.push(globalFrameLengthRegion);
-        let tempBuffer = this.appDataLineList.createBuffer();
-        if (tempBuffer.length > 0) {
-            let appDataRegion = new AtomicRegion(
-                REGION_TYPE.appData,
-                tempBuffer
-            );
-            output.push(appDataRegion);
-        }
-        return output;
+        this.extractAppDataDefinitions();
     }
     
     extractFunctionDefinitions(): void {
@@ -427,6 +317,85 @@ export class BytecodeAppAssembler extends Assembler {
         this.globalFrameLength = variableUtils.populateVariableDefinitionIndexes(
             this.globalVariableDefinitionMap
         );
+    }
+    
+    populateScopeDefinitions(): void {
+        this.scope.indexDefinitionMapList = [
+            this.globalVariableDefinitionMap,
+            this.appDataLineList.labelDefinitionMap,
+            this.privateFunctionDefinitionMap
+        ];
+        this.scope.publicFunctionDefinitionList = this.publicFunctionDefinitionList;
+    }
+    
+    createFileSubregions(): Region[] {
+        let funcRegionList = this.functionDefinitionList.map(functionDefinition => {
+            return functionDefinition.createRegion();
+        });
+        let appFuncsRegion = new CompositeRegion(REGION_TYPE.appFuncs, funcRegionList);
+        let globalFrameLengthRegion = new AtomicRegion(
+            REGION_TYPE.globalFrameLen,
+            this.globalFrameLength.createBuffer()
+        );
+        let output = [
+            appFuncsRegion,
+            globalFrameLengthRegion
+        ];
+        let tempBuffer = this.appDataLineList.createBuffer();
+        if (tempBuffer.length > 0) {
+            let appDataRegion = new AtomicRegion(
+                REGION_TYPE.appData,
+                tempBuffer
+            );
+            output.push(appDataRegion);
+        }
+        return output;
+    }
+    
+    generateFileRegion(): void {
+        if (this.rootLineList.length > 0) {
+            let tempLine = this.rootLineList[0];
+            throw new AssemblyError(
+                "Unknown directive.",
+                tempLine.lineNumber,
+                tempLine.filePath
+            );
+        }
+        let tempRegionList = this.createFileSubregions();
+        this.fileRegion = new CompositeRegion(REGION_TYPE.appFile, tempRegionList);
+    }
+    
+    assembleCodeFile(sourcePath: string, destinationPath: string): void {
+        
+        console.log(`Assembling "${sourcePath}"...`);
+        
+        try {
+            this.rootLineList = this.loadAndParseAssemblyFile(sourcePath);
+            this.expandAliasInvocations();
+            this.populateScopeInRootLines();
+            this.extractDefinitions();
+            this.populateScopeDefinitions();
+            this.generateFileRegion();
+        } catch(error) {
+            if (error instanceof AssemblyError) {
+                if (error.lineNumber === null || error.filePath === null) {
+                    console.log("Error: " + error.message);
+                } else {
+                    console.log(`Error in "${error.filePath}" on line ${error.lineNumber}: ${error.message}`);
+                }
+                return;
+            } else {
+                throw error;
+            }
+        }
+        
+        if (this.shouldBeVerbose) {
+            console.log(this.getDisplayString());
+        }
+        
+        fs.writeFileSync(destinationPath, this.fileRegion.createBuffer());
+        console.log("Finished assembling.");
+        console.log(`Destination path: "${destinationPath}"`);
     }
 }
 

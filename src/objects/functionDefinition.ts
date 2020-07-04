@@ -7,14 +7,11 @@ import {
     ArgPermFunctionDefinition as ArgPermFunctionDefinitionInterface,
     PublicFunctionDefinition as PublicFunctionDefinitionInterface,
     GuardFunctionDefinition as GuardFunctionDefinitionInterface,
-    InterfaceFunctionDefinition as InterfaceFunctionDefinitionInterface,
     AssemblyLine, Expression, Region, LabeledLineList
 } from "models/objects";
 
 import {niceUtils} from "utils/niceUtils";
 import {variableUtils} from "utils/variableUtils";
-
-import {PointerType} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 import {IndexDefinition, indexConstantConverter} from "objects/indexDefinition";
@@ -355,41 +352,6 @@ export class GuardFunctionDefinition extends ArgPermFunctionDefinition {
         let tempBuffer = Buffer.alloc(4);
         tempBuffer.writeUInt32LE(this.interfaceIndexExpression.evaluateToNumber(), 0);
         output.push(new AtomicRegion(REGION_TYPE.guardFuncAttrs, tempBuffer));
-        return output;
-    }
-}
-
-export interface InterfaceFunctionDefinition extends InterfaceFunctionDefinitionInterface {}
-
-export class InterfaceFunctionDefinition extends ArgPermFunctionDefinition {
-    
-    constructor(identifier: Identifier, arbiterIndexExpression: Expression, lineList: AssemblyLine[]) {
-        super(identifier, lineList, REGION_TYPE.ifaceFunc);
-        this.arbiterIndexExpression = arbiterIndexExpression;
-    }
-    
-    getTitlePrefix(): string {
-        return "Interface";
-    }
-    
-    getTitleSuffix(): string {
-        if (this.arbiterIndexExpression === null) {
-            return null;
-        }
-        return this.arbiterIndexExpression.getDisplayString();
-    }
-    
-    createSubregions(): Region[] {
-        let output = super.createSubregions();
-        let tempBuffer = Buffer.alloc(4);
-        let tempNumber;
-        if (this.arbiterIndexExpression === null) {
-            tempNumber = -1;
-        } else {
-            tempNumber = this.arbiterIndexExpression.evaluateToNumber();
-        }
-        tempBuffer.writeInt32LE(tempNumber, 0);
-        output.push(new AtomicRegion(REGION_TYPE.ifaceFuncAttrs, tempBuffer));
         return output;
     }
 }
