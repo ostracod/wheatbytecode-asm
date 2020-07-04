@@ -195,16 +195,13 @@ export interface FunctionImplementation {
     localVariableDefinitionMap: IdentifierMap<VariableDefinition>;
     localFrameLength: FrameLength;
     instructionList: Instruction[];
-    jumpTableLineList: DataLineList;
     
     getDisplayString(indentationLevel: number): string;
     getScope(): Scope;
     getLineList(): InstructionLineList;
     processLines(processLine: LineProcessor): void;
     extractDefinitions(): void;
-    extractJumpTables(): void;
     extractLocalVariableDefinitions(): void;
-    extractLabelDefinitions(): void;
     populateScopeDefinitions(): void;
     assembleInstructions(): void;
     createSubregions(): Region[];

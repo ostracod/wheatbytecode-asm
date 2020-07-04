@@ -4,8 +4,6 @@ import {AssemblyLine, VariableDefinition, IdentifierMap} from "models/objects";
 import {VariableDefinitionClass} from "models/items";
 import {BetaType} from "delegates/dataType";
 
-import {PointerType} from "delegates/dataType";
-
 import {GlobalVariableDefinition, LocalVariableDefinition, ArgVariableDefinition} from "objects/variableDefinition";
 import {AssemblyError} from "objects/assemblyError";
 import {FrameLength} from "objects/frameLength";
@@ -61,14 +59,9 @@ export class VariableUtils {
         let nextAlphaIndex = 0;
         let nextBetaIndex = 0;
         identifierMap.iterate(variableDefinition => {
-            if (variableDefinition.dataType instanceof PointerType) {
-                variableDefinition.index = nextAlphaIndex;
-                nextAlphaIndex += 1;
-            } else {
-                let tempBetaType = variableDefinition.dataType as BetaType;
-                variableDefinition.index = nextBetaIndex;
-                nextBetaIndex += tempBetaType.byteAmount;
-            }
+            let tempBetaType = variableDefinition.dataType as BetaType;
+            variableDefinition.index = nextBetaIndex;
+            nextBetaIndex += tempBetaType.byteAmount;
         });
         return new FrameLength(nextAlphaIndex, nextBetaIndex);
     }

@@ -23,13 +23,6 @@ export class InstructionLabelDefinition extends LabelDefinition {
     }
 }
 
-export class JumpTableLabelDefinition extends LabelDefinition {
-    
-    constructor(identifier: Identifier, lineIndex: number) {
-        super(identifier, indexConstantConverter, lineIndex);
-    }
-}
-
 export class AppDataLabelDefinition extends LabelDefinition {
     
     constructor(identifier: Identifier, lineIndex: number) {

@@ -12,7 +12,7 @@ import {variableUtils} from "utils/variableUtils";
 import {AssemblyError} from "objects/assemblyError";
 import {IndexDefinition, indexConstantConverter} from "objects/indexDefinition";
 import {Scope} from "objects/scope";
-import {InstructionLineList, JumpTableLineList} from "objects/labeledLineList";
+import {InstructionLineList} from "objects/labeledLineList";
 import {Identifier, IdentifierMap} from "objects/identifier";
 import {REGION_TYPE, AtomicRegion, CompositeRegion} from "objects/region";
 
@@ -25,7 +25,6 @@ export class FunctionImplementation {
         this.localVariableDefinitionMap = new IdentifierMap();
         this.localFrameLength = null;
         this.instructionList = [];
-        this.jumpTableLineList = null;
     }
     
     getDisplayString(indentationLevel: number): string {
@@ -37,10 +36,6 @@ export class FunctionImplementation {
         tempTextList.push(niceUtils.getDisplayableListDisplayString(
             "Assembled instructions",
             this.instructionList,
-            indentationLevel
-        ));
-        tempTextList.push(this.jumpTableLineList.getDisplayString(
-            "Jump table",
             indentationLevel
         ));
         tempTextList.push(niceUtils.getIdentifierMapDisplayString(
@@ -64,26 +59,8 @@ export class FunctionImplementation {
     }
     
     extractDefinitions(): void {
-        this.extractJumpTables();
         this.extractLocalVariableDefinitions();
-        this.extractLabelDefinitions();
-    }
-    
-    extractJumpTables(): void {
-        let tempLineList = [];
-        this.processLines(line => {
-            if (line.directiveName === "JMP_TABLE") {
-                if (line.argList.length !== 0) {
-                    throw new AssemblyError("Expected 0 arguments.");
-                }
-                for (let tempLine of line.codeBlock) {
-                    tempLineList.push(tempLine);
-                }
-                return [];
-            }
-            return null;
-        });
-        this.jumpTableLineList = new JumpTableLineList(tempLineList, this.getScope());
+        this.getLineList().extractLabelDefinitions();
     }
     
     extractLocalVariableDefinitions(): void {
@@ -100,16 +77,10 @@ export class FunctionImplementation {
         );
     }
     
-    extractLabelDefinitions(): void {
-        this.getLineList().extractLabelDefinitions();
-        this.jumpTableLineList.extractLabelDefinitions();
-    }
-    
     populateScopeDefinitions(): void {
         this.getScope().indexDefinitionMapList.push(
             this.localVariableDefinitionMap,
-            this.getLineList().labelDefinitionMap,
-            this.jumpTableLineList.labelDefinitionMap
+            this.getLineList().labelDefinitionMap
         );
     }
     
@@ -126,12 +97,7 @@ export class FunctionImplementation {
             this.instructionList.map(instruction => instruction.createBuffer())
         );
         let instructionsRegion = new AtomicRegion(REGION_TYPE.instrs, tempBuffer);
-        let output = [localFrameLengthRegion, instructionsRegion];
-        tempBuffer = this.jumpTableLineList.createBuffer();
-        if (tempBuffer.length > 0) {
-            output.push(new AtomicRegion(REGION_TYPE.jmpTable, tempBuffer));
-        }
-        return output;
+        return [localFrameLengthRegion, instructionsRegion];
     }
 }
 

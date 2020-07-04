@@ -7,7 +7,7 @@ import {
 } from "models/objects";
 import {DataType, IntegerType} from "models/delegates";
 
-import {UnsignedIntegerType, SignedIntegerType, unsignedIntegerTypeList, signedIntegerTypeList, PointerType, pointerType, unsignedInteger64Type, BetaType, NumberType, StringType} from "delegates/dataType";
+import {UnsignedIntegerType, SignedIntegerType, unsignedIntegerTypeList, signedIntegerTypeList, signedInteger32Type, unsignedInteger64Type, BetaType, NumberType, StringType} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 
@@ -107,29 +107,8 @@ export class StringConstant extends Constant {
     }
 }
 
-export class NullConstant extends Constant {
-    
-    getDataType(): DataType {
-        return pointerType;
-    }
-    
-    setDataType(dataType: DataType): void {
-        if (!(dataType instanceof PointerType)) {
-            throw new AssemblyError("Cannot convert alpha type to beta type.");
-        }
-    }
-    
-    copy(): Constant {
-        return new NullConstant();
-    }
-    
-    createBuffer(): Buffer {
-        return Buffer.alloc(0);
-    }
-}
-
 export const builtInConstantSet = {
-    null: new NullConstant()
+    null: new NumberConstant(-1, signedInteger32Type)
 };
 
 let tempNumberSet = {

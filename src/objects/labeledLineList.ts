@@ -10,7 +10,7 @@ import {
 import {BetaType, unsignedInteger64Type} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
-import {InstructionLabelDefinition, JumpTableLabelDefinition, AppDataLabelDefinition} from "objects/labelDefinition";
+import {InstructionLabelDefinition, AppDataLabelDefinition} from "objects/labelDefinition";
 import {IdentifierMap} from "objects/identifier";
 
 import {niceUtils} from "utils/niceUtils";
@@ -150,23 +150,6 @@ export class DataLineList extends LabeledLineList {
             return null;
         });
         return Buffer.concat(bufferList);
-    }
-}
-
-export class JumpTableLineList extends DataLineList {
-    
-    getLabelDefinitionClass(): LabelDefinitionClass {
-        return JumpTableLabelDefinition;
-    }
-    
-    getLineElementLength(line: AssemblyLine): number {
-        return line.argList.length;
-    }
-    
-    convertExpressionToConstant(expression: Expression): Constant {
-        let output = expression.evaluateToConstant();
-        output.setDataType(unsignedInteger64Type);
-        return output;
     }
 }
 

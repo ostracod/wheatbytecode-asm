@@ -19,7 +19,7 @@ import {Identifier, MacroIdentifier} from "objects/identifier";
 import {InstructionRef, PointerInstructionRef, ConstantInstructionArg, RefInstructionArg, nameInstructionRefMap} from "objects/instruction";
 import {builtInConstantSet, NumberConstant, StringConstant} from "objects/constant";
 
-import {PointerType, pointerType, signedInteger64Type, StringType} from "delegates/dataType";
+import {signedInteger32Type, signedInteger64Type, StringType} from "delegates/dataType";
 import {macroIdentifierOperator} from "delegates/operator";
 
 import {dataTypeUtils} from "utils/dataTypeUtils";
@@ -179,7 +179,7 @@ export abstract class Expression {
     
     evaluateToInstructionRef(): InstructionRef {
         let tempArg = this.evaluateToInstructionArg();
-        if (!(tempArg.getDataType() instanceof PointerType)) {
+        if (!tempArg.getDataType().equals(signedInteger32Type)) {
             throw this.createError("Expected pointer for instruction ref.");
         }
         return new PointerInstructionRef(tempArg);

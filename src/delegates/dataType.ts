@@ -26,20 +26,7 @@ export abstract class DataType {
     }
 }
 
-export class PointerType extends DataType {
-    
-    constructor() {
-        super(0);
-    }
-    
-    getName(): string {
-        return "p";
-    }
-    
-    equals(dataType: DataType): boolean {
-        return (dataType instanceof PointerType);
-    }
-}
+// TODO: Merge BetaType with DataType.
 
 export interface BetaType extends BetaTypeInterface {}
 
@@ -250,7 +237,6 @@ export class StringType extends BetaType {
     }
 }
 
-export const pointerType = new PointerType();
 export const unsignedInteger8Type = new UnsignedIntegerType(1, 1);
 export const unsignedInteger16Type = new UnsignedIntegerType(2, 2);
 export const unsignedInteger32Type = new UnsignedIntegerType(3, 4);
