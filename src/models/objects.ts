@@ -29,14 +29,9 @@ export interface IndexDefinition extends Displayable {
 
 export interface Scope {
     indexDefinitionMapList: IdentifierMap<IndexDefinition>[];
-    publicFunctionDefinitionList: PublicFunctionDefinition[];
     parentScope: Scope;
     
     getIndexDefinitionByIdentifier(identifier: Identifier): IndexDefinition;
-    getPublicFunctionDefinition(
-        identifier: Identifier,
-        interfaceIndex: number
-    ): PublicFunctionDefinition;
 }
 
 export interface Assembler {
@@ -45,9 +40,8 @@ export interface Assembler {
     aliasDefinitionMap: IdentifierMap<AliasDefinition>;
     macroDefinitionMap: {[name: string]: MacroDefinition};
     nextMacroInvocationId: number;
-    functionDefinitionList: FunctionDefinition[];
-    privateFunctionDefinitionMap: IdentifierMap<PrivateFunctionDefinition>;
-    publicFunctionDefinitionList: PublicFunctionDefinition[];
+    functionDefinitionMap: IdentifierMap<FunctionDefinition>;
+    nextFunctionDefinitionIndex: number;
     scope: Scope;
     globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
     globalFrameLength: FrameLength;
@@ -218,7 +212,6 @@ export interface FunctionImplementation {
 
 export interface FunctionDefinition extends IndexDefinition {
     lineList: InstructionLineList;
-    regionType: number;
     argVariableDefinitionMap: IdentifierMap<ArgVariableDefinition>;
     argFrameLength: FrameLength;
     scope: Scope;
@@ -230,31 +223,7 @@ export interface FunctionDefinition extends IndexDefinition {
     extractArgVariableDefinitions(): void;
     populateScopeDefinitions(): void;
     createRegion(): Region;
-    
-    // Concrete subclasses may override these methods:
     createSubregions(): Region[];
-    getTitleSuffix(): string;
-    
-    // Concrete subclasses must implement these methods:
-    getTitlePrefix(): string;
-    
-}
-
-export interface PrivateFunctionDefinition extends FunctionDefinition {
-    
-}
-
-export interface ArgPermFunctionDefinition extends FunctionDefinition {
-    getArgPermsRegion(): Region;
-}
-
-export interface PublicFunctionDefinition extends ArgPermFunctionDefinition {
-    interfaceIndexExpression: Expression;
-    arbiterIndexExpression: Expression;
-}
-
-export interface GuardFunctionDefinition extends ArgPermFunctionDefinition {
-    interfaceIndexExpression: Expression;
 }
 
 export interface Identifier {

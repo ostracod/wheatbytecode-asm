@@ -3,11 +3,7 @@ import {LineProcessor} from "models/items";
 import {
     FunctionImplementation as FunctionImplementationInterface,
     FunctionDefinition as FunctionDefinitionInterface,
-    PrivateFunctionDefinition as PrivateFunctionDefinitionInterface,
-    ArgPermFunctionDefinition as ArgPermFunctionDefinitionInterface,
-    PublicFunctionDefinition as PublicFunctionDefinitionInterface,
-    GuardFunctionDefinition as GuardFunctionDefinitionInterface,
-    AssemblyLine, Expression, Region, LabeledLineList
+    AssemblyLine, Region
 } from "models/objects";
 
 import {niceUtils} from "utils/niceUtils";
@@ -141,16 +137,15 @@ export class FunctionImplementation {
 
 export interface FunctionDefinition extends FunctionDefinitionInterface {}
 
-export abstract class FunctionDefinition extends IndexDefinition {
+export class FunctionDefinition extends IndexDefinition {
     
-    constructor(identifier: Identifier, lineList: AssemblyLine[], regionType: number) {
+    constructor(identifier: Identifier, lineList: AssemblyLine[]) {
         super(identifier, indexConstantConverter);
         this.lineList = new InstructionLineList(lineList);
-        this.regionType = regionType;
         this.argVariableDefinitionMap = new IdentifierMap();
         this.argFrameLength = null;
         this.scope = null;
-        this.functionImplementation = null;
+        this.functionImplementation = new FunctionImplementation(this);
     }
     
     processLines(processLine: LineProcessor): void {
@@ -170,11 +165,7 @@ export abstract class FunctionDefinition extends IndexDefinition {
     }
     
     getDisplayString(): string {
-        let tempTitle = `${this.getTitlePrefix()} function ${this.identifier.name}`;
-        let tempSuffix = this.getTitleSuffix();
-        if (tempSuffix !== null) {
-            tempTitle += ` (${tempSuffix})`;
-        }
+        let tempTitle = `function ${this.identifier.name}`;
         let tempTextList = [tempTitle + ":"];
         if (this.functionImplementation !== null) {
             tempTextList.push(this.functionImplementation.getDisplayString(1));
@@ -223,7 +214,7 @@ export abstract class FunctionDefinition extends IndexDefinition {
             this.functionImplementation.assembleInstructions();
         }
         let tempRegionList = this.createSubregions();
-        return new CompositeRegion(this.regionType, tempRegionList);
+        return new CompositeRegion(REGION_TYPE.privFunc, tempRegionList);
     }
     
     createSubregions(): Region[] {
@@ -238,120 +229,6 @@ export abstract class FunctionDefinition extends IndexDefinition {
                 output.push(region);
             }
         }
-        return output;
-    }
-    
-    getTitleSuffix(): string {
-        return null;
-    }
-}
-
-export interface PrivateFunctionDefinition extends PrivateFunctionDefinitionInterface {}
-
-export class PrivateFunctionDefinition extends FunctionDefinition {
-    
-    constructor(identifier: Identifier, lineList: AssemblyLine[]) {
-        super(identifier, lineList, REGION_TYPE.privFunc);
-        this.functionImplementation = new FunctionImplementation(this);
-    }
-    
-    getTitlePrefix(): string {
-        return "Private";
-    }
-}
-
-export interface ArgPermFunctionDefinition extends ArgPermFunctionDefinitionInterface {}
-
-export abstract class ArgPermFunctionDefinition extends FunctionDefinition {
-    
-    createSubregions(): Region[] {
-        let output = super.createSubregions();
-        let nameRegion = new AtomicRegion(REGION_TYPE.name, Buffer.from(this.identifier.name));
-        let argPermsRegion = this.getArgPermsRegion();
-        output.push(nameRegion);
-        if (argPermsRegion !== null) {
-            output.push(argPermsRegion);
-        }
-        return output;
-    }
-    
-    // TODO: Get rid of this.
-    getArgPermsRegion(): Region {
-        return null;
-    }
-}
-
-export interface PublicFunctionDefinition extends PublicFunctionDefinitionInterface {}
-
-export class PublicFunctionDefinition extends ArgPermFunctionDefinition {
-    
-    constructor(
-        identifier: Identifier,
-        interfaceIndexExpression: Expression,
-        arbiterIndexExpression: Expression,
-        lineList: AssemblyLine[]
-    ) {
-        super(identifier, lineList, REGION_TYPE.pubFunc);
-        this.interfaceIndexExpression = interfaceIndexExpression;
-        this.arbiterIndexExpression = arbiterIndexExpression;
-        this.functionImplementation = new FunctionImplementation(this);
-    }
-    
-    getTitlePrefix(): string {
-        return "Public";
-    }
-    
-    getTitleSuffix(): string {
-        let output = this.interfaceIndexExpression.getDisplayString();
-        if (this.arbiterIndexExpression !== null) {
-            output += ", " + this.arbiterIndexExpression.getDisplayString();
-        }
-        return output;
-    }
-    
-    createSubregions(): Region[] {
-        let output = super.createSubregions();
-        let tempBuffer = Buffer.alloc(8);
-        tempBuffer.writeUInt32LE(this.interfaceIndexExpression.evaluateToNumber(), 0);
-        let tempNumber;
-        if (this.arbiterIndexExpression === null) {
-            tempNumber = -1;
-        } else {
-            tempNumber = this.arbiterIndexExpression.evaluateToNumber();
-        }
-        tempBuffer.writeInt32LE(tempNumber, 4);
-        output.push(new AtomicRegion(REGION_TYPE.pubFuncAttrs, tempBuffer));
-        return output;
-    }
-}
-
-export interface GuardFunctionDefinition extends GuardFunctionDefinitionInterface {}
-
-export class GuardFunctionDefinition extends ArgPermFunctionDefinition {
-    
-    constructor(
-        identifier: Identifier,
-        interfaceIndexExpression: Expression,
-        lineList: AssemblyLine[]
-    ) {
-        super(identifier, lineList, REGION_TYPE.guardFunc);
-        this.interfaceIndexExpression = interfaceIndexExpression;
-        this.functionImplementation = new FunctionImplementation(this);
-    }
-    
-    getTitlePrefix(): string {
-        return "Guard";
-    }
-    
-    getTitleSuffix(): string {
-        return this.interfaceIndexExpression.getDisplayString();
-    }
-    
-    createSubregions(): Region[] {
-        let output = super.createSubregions();
-        let tempBuffer = Buffer.alloc(4);
-        tempBuffer.writeUInt32LE(this.interfaceIndexExpression.evaluateToNumber(), 0);
-        output.push(new AtomicRegion(REGION_TYPE.guardFuncAttrs, tempBuffer));
         return output;
     }
 }

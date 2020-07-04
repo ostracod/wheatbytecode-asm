@@ -1,7 +1,7 @@
 
 import {
     Scope as ScopeInterface,
-    IdentifierMap, IndexDefinition, Identifier, PublicFunctionDefinition
+    IdentifierMap, IndexDefinition, Identifier
 } from "models/objects";
 
 export interface Scope extends ScopeInterface {}
@@ -10,7 +10,6 @@ export class Scope {
     
     constructor(parentScope?: Scope) {
         this.indexDefinitionMapList = null;
-        this.publicFunctionDefinitionList = null;
         if (typeof parentScope === "undefined") {
             this.parentScope = null;
         } else {
@@ -29,26 +28,6 @@ export class Scope {
             return null;
         } else {
             return this.parentScope.getIndexDefinitionByIdentifier(identifier);
-        }
-    }
-    
-    getPublicFunctionDefinition(
-        identifier: Identifier,
-        interfaceIndex: number
-    ): PublicFunctionDefinition {
-        if (this.publicFunctionDefinitionList !== null) {
-            for (let functionDefinition of this.publicFunctionDefinitionList) {
-                let tempExpression = functionDefinition.interfaceIndexExpression;
-                if (identifier.equals(functionDefinition.identifier)
-                        && interfaceIndex === tempExpression.evaluateToNumber()) {
-                    return functionDefinition;
-                }
-            }
-        }
-        if (this.parentScope === null) {
-            return null;
-        } else {
-            return this.parentScope.getPublicFunctionDefinition(identifier, interfaceIndex);
         }
     }
 }

@@ -189,30 +189,6 @@ export class TypeCoercionOperator extends BinaryOperator {
     }
 }
 
-export class PublicFunctionOperator extends BinaryOperator {
-    
-    constructor() {
-        super(".", 1);
-    }
-    
-    getConstantDataType(operand1: Expression, operand2: Expression): DataType {
-        return signedInteger64Type;
-    }
-    
-    createConstantOrNull(operand1: Expression, operand2: Expression): Constant {
-        let tempInterfaceIndex = operand1.evaluateToNumber();
-        let tempIdentifier = operand2.evaluateToIdentifier();
-        let tempDefinition = operand1.scope.getPublicFunctionDefinition(
-            tempIdentifier,
-            tempInterfaceIndex
-        );
-        if (tempDefinition === null) {
-            throw new AssemblyError("Unknown public function.");
-        }
-        return new NumberConstant(tempDefinition.index, unsignedInteger64Type)
-    }
-}
-
 export interface BinaryNumberOperator extends BinaryNumberOperatorInterface {}
 
 export abstract class BinaryNumberOperator extends BinaryOperator {
@@ -458,7 +434,6 @@ export const macroIdentifierOperator = new MacroIdentifierOperator();
 new IndexOperator();
 
 new TypeCoercionOperator();
-new PublicFunctionOperator();
 new AdditionOperator();
 new SubtractionOperator();
 new MultiplicationOperator();

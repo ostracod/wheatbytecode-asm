@@ -2,16 +2,14 @@
 import * as fs from "fs";
 
 import {LineProcessor, ExpressionProcessor} from "models/items";
-import {
-    Assembler as AssemblerInterface,
-    AssemblyLine, FunctionDefinition, Region} from "models/objects";
+import {Assembler as AssemblerInterface, AssemblyLine, Region} from "models/objects";
 
 import {AssemblyError} from "objects/assemblyError";
 import {IdentifierMap} from "objects/identifier";
 import {Scope} from "objects/scope";
 import {MacroDefinition} from "objects/macroDefinition";
 import {AliasDefinition} from "objects/aliasDefinition";
-import {PrivateFunctionDefinition, PublicFunctionDefinition, GuardFunctionDefinition} from "objects/functionDefinition";
+import {FunctionDefinition} from "objects/functionDefinition";
 import {AppDataLineList} from "objects/labeledLineList";
 import {REGION_TYPE, AtomicRegion, CompositeRegion} from "objects/region";
 
@@ -29,9 +27,8 @@ export class Assembler {
         this.aliasDefinitionMap = new IdentifierMap();
         this.macroDefinitionMap = {};
         this.nextMacroInvocationId = 0;
-        this.functionDefinitionList = [];
-        this.privateFunctionDefinitionMap = new IdentifierMap();
-        this.publicFunctionDefinitionList = [];
+        this.functionDefinitionMap = new IdentifierMap();
+        this.nextFunctionDefinitionIndex = 0;
         this.scope = new Scope();
         this.globalVariableDefinitionMap = new IdentifierMap();
         this.globalFrameLength = null;
@@ -58,10 +55,10 @@ export class Assembler {
             tempTextList.push("");
         }
         tempTextList.push("= = = FUNCTION DEFINITIONS = = =\n");
-        for (let functionDefinition of this.functionDefinitionList) {
-            tempTextList.push(functionDefinition.getDisplayString());
+        this.functionDefinitionMap.iterate(definition => {
+            tempTextList.push(definition.getDisplayString());
             tempTextList.push("");
-        };
+        });
         tempTextList.push("\n= = = APP FILE REGION = = =\n");
         tempTextList.push(this.fileRegion.getDisplayString());
         tempTextList.push("");
@@ -220,11 +217,12 @@ export class Assembler {
     }
     
     addFunctionDefinition(functionDefinition: FunctionDefinition): void {
-        functionDefinition.index = this.functionDefinitionList.length;
+        functionDefinition.index = this.nextFunctionDefinitionIndex;
+        this.nextFunctionDefinitionIndex += 1;
         functionDefinition.populateScope(this.scope);
         functionDefinition.extractDefinitions();
         functionDefinition.populateScopeDefinitions();
-        this.functionDefinitionList.push(functionDefinition);
+        this.functionDefinitionMap.setIndexDefinition(functionDefinition);
     }
     
     extractDefinitions(): void {
@@ -237,47 +235,13 @@ export class Assembler {
         this.processLines(line => {
             let tempDirectiveName = line.directiveName;
             let tempArgList = line.argList;
-            if (tempDirectiveName === "PRIV_FUNC") {
+            if (tempDirectiveName === "FUNC") {
                 if (tempArgList.length !== 1) {
                     throw new AssemblyError("Expected 1 argument.");
                 }
                 let tempIdentifier = tempArgList[0].evaluateToIdentifier();
-                let tempDefinition = new PrivateFunctionDefinition(
+                let tempDefinition = new FunctionDefinition(
                     tempIdentifier,
-                    line.codeBlock
-                );
-                this.addFunctionDefinition(tempDefinition);
-                this.privateFunctionDefinitionMap.setIndexDefinition(tempDefinition);
-                return [];
-            }
-            if (tempDirectiveName === "PUB_FUNC") {
-                let tempArbiterIndexExpression;
-                if (tempArgList.length === 3) {
-                    tempArbiterIndexExpression = tempArgList[2];
-                } else if (tempArgList.length === 2) {
-                    tempArbiterIndexExpression = null;
-                } else {
-                    throw new AssemblyError("Expected 2 or 3 arguments.");
-                }
-                let tempIdentifier = tempArgList[0].evaluateToIdentifier();
-                let tempDefinition = new PublicFunctionDefinition(
-                    tempIdentifier,
-                    tempArgList[1],
-                    tempArbiterIndexExpression,
-                    line.codeBlock
-                );
-                this.addFunctionDefinition(tempDefinition);
-                this.publicFunctionDefinitionList.push(tempDefinition);
-                return [];
-            }
-            if (tempDirectiveName === "GUARD_FUNC") {
-                if (tempArgList.length !== 2) {
-                    throw new AssemblyError("Expected 2 arguments.");
-                }
-                let tempIdentifier = tempArgList[0].evaluateToIdentifier();
-                let tempDefinition = new GuardFunctionDefinition(
-                    tempIdentifier,
-                    tempArgList[1],
                     line.codeBlock
                 );
                 this.addFunctionDefinition(tempDefinition);
@@ -323,13 +287,16 @@ export class Assembler {
         this.scope.indexDefinitionMapList = [
             this.globalVariableDefinitionMap,
             this.appDataLineList.labelDefinitionMap,
-            this.privateFunctionDefinitionMap
+            this.functionDefinitionMap
         ];
-        this.scope.publicFunctionDefinitionList = this.publicFunctionDefinitionList;
     }
     
     createFileSubregions(): Region[] {
-        let funcRegionList = this.functionDefinitionList.map(functionDefinition => {
+        let functionDefinitionList = [];
+        this.functionDefinitionMap.iterate(definition => {
+            functionDefinitionList[definition.index] = definition;
+        });
+        let funcRegionList = functionDefinitionList.map(functionDefinition => {
             return functionDefinition.createRegion();
         });
         let appFuncsRegion = new CompositeRegion(REGION_TYPE.appFuncs, funcRegionList);

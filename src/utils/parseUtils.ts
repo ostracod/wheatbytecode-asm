@@ -14,7 +14,7 @@ import {NumberConstant} from "objects/constant";
 import {unaryOperatorList, binaryOperatorList} from "delegates/operator";
 import {signedInteger64Type, float64Type, signedIntegerTypeList} from "delegates/dataType";
 
-const codeBlockDirectiveNameSet = ["PRIV_FUNC", "PUB_FUNC", "GUARD_FUNC", "IFACE_FUNC", "JMP_TABLE", "APP_DATA", "MACRO"];
+const codeBlockDirectiveNameSet = ["FUNC", "JMP_TABLE", "APP_DATA", "MACRO"];
 
 export interface ParseUtils extends ParseUtilsInterface {}
 
