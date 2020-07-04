@@ -112,16 +112,4 @@ export interface MathUtils {
     convertBufferToHexadecimal(buffer: Buffer): string;
 }
 
-export interface DependencyUtils {
-    evaluateDependencyArgs(
-        argList: Expression[],
-        modifiersStartIndex: number
-    ): {identifier: Identifier, path: string, dependencyModifierList: number[]};
-}
-
-export interface DescriptionUtils {
-    extractDescriptionLine(line: AssemblyLine): string;
-    createDescriptionRegion(descriptionLineList: string[]): Region;
-}
-
 

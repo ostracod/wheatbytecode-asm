@@ -13,7 +13,6 @@ import {
 
 import {niceUtils} from "utils/niceUtils";
 import {variableUtils} from "utils/variableUtils";
-import {descriptionUtils} from "utils/descriptionUtils";
 
 import {PointerType} from "delegates/dataType";
 
@@ -153,7 +152,6 @@ export abstract class FunctionDefinition extends IndexDefinition {
         this.regionType = regionType;
         this.argVariableDefinitionMap = new IdentifierMap();
         this.argFrameLength = null;
-        this.descriptionLineList = [];
         this.scope = null;
         this.functionImplementation = null;
     }
@@ -169,7 +167,6 @@ export abstract class FunctionDefinition extends IndexDefinition {
     
     extractDefinitions(): void {
         this.extractArgVariableDefinitions();
-        this.extractDescriptionLines();
         if (this.functionImplementation !== null) {
             this.functionImplementation.extractDefinitions();
         }
@@ -190,11 +187,6 @@ export abstract class FunctionDefinition extends IndexDefinition {
             this.argVariableDefinitionMap,
             1
         ));
-        tempTextList.push(niceUtils.getTextListDisplayString(
-            "Description",
-            this.descriptionLineList,
-            1
-        ));
         return niceUtils.joinTextList(tempTextList);
     }
     
@@ -210,17 +202,6 @@ export abstract class FunctionDefinition extends IndexDefinition {
         this.argFrameLength = variableUtils.populateVariableDefinitionIndexes(
             this.argVariableDefinitionMap
         );
-    }
-    
-    extractDescriptionLines(): void {
-        this.processLines(line => {
-            let tempText = descriptionUtils.extractDescriptionLine(line);
-            if (tempText !== null) {
-                this.descriptionLineList.push(tempText);
-                return [];
-            }
-            return null;
-        });
     }
     
     populateScopeDefinitions(): void {
@@ -254,12 +235,6 @@ export abstract class FunctionDefinition extends IndexDefinition {
             this.argFrameLength.createBuffer()
         );
         let output: Region[] = [argFrameLengthRegion];
-        let descriptionRegion = descriptionUtils.createDescriptionRegion(
-            this.descriptionLineList
-        );
-        if (descriptionRegion !== null) {
-            output.push(descriptionRegion);
-        }
         if (this.functionImplementation !== null) {
             let tempRegionList = this.functionImplementation.createSubregions();
             for (let region of tempRegionList) {
@@ -303,20 +278,9 @@ export abstract class ArgPermFunctionDefinition extends FunctionDefinition {
         return output;
     }
     
+    // TODO: Get rid of this.
     getArgPermsRegion(): Region {
-        let bufferList = [];
-        this.argVariableDefinitionMap.iterate(definition => {
-            if (!(definition.dataType instanceof PointerType)) {
-                return;
-            }
-            for (let argPerm of definition.permList) {
-                bufferList.push(argPerm.createBuffer(definition.index));
-            }
-        });
-        if (bufferList.length <= 0) {
-            return null;
-        }
-        return new AtomicRegion(REGION_TYPE.argPerms, Buffer.concat(bufferList));
+        return null;
     }
 }
 

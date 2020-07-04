@@ -8,9 +8,8 @@ import {Expression} from "models/objects";
 
 import {AssemblyError} from "objects/assemblyError";
 import {AssemblyLine} from "objects/assemblyLine";
-import {SubscriptExpression, ArgWord, ArgNumber, ArgVersionNumber, ArgString} from "objects/expression";
+import {SubscriptExpression, ArgWord, ArgNumber, ArgString} from "objects/expression";
 import {NumberConstant} from "objects/constant";
-import {VersionNumber} from "objects/versionNumber";
 
 import {unaryOperatorList, binaryOperatorList} from "delegates/operator";
 import {signedInteger64Type, float64Type, signedIntegerTypeList} from "delegates/dataType";
@@ -156,13 +155,6 @@ export class ParseUtils {
         } else if (tempComponentList.length === 2) {
             let tempConstant = new NumberConstant(parseFloat(tempText), float64Type);
             tempArgNumeric = new ArgNumber(tempConstant);
-        } else if (tempComponentList.length === 3) {
-            let tempVersionNumber = new VersionNumber(
-                parseInt(tempComponentList[0]),
-                parseInt(tempComponentList[1]),
-                parseInt(tempComponentList[2])
-            );
-            tempArgNumeric = new ArgVersionNumber(tempVersionNumber);
         } else {
             throw new AssemblyError("Malformed numeric argument.");
         }
@@ -227,7 +219,7 @@ export class ParseUtils {
                 index = tempResult1.index;
                 outputExpression = tempResult1.argWord;
             } else if (parseUtils.isFirstArgNumericCharacter(tempCharacter)) {
-                // Parse number literal or version number.
+                // Parse number literal.
                 let tempResult2 = parseUtils.parseArgNumeric(text, index);
                 index = tempResult2.index;
                 outputExpression = tempResult2.argNumeric;

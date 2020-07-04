@@ -5,8 +5,7 @@ import {LineProcessor, ExpressionProcessor} from "models/items";
 import {
     Assembler as AssemblerInterface,
     BytecodeAppAssembler as BytecodeAppAssemblerInterface,
-    InterfaceAssembler as InterfaceAssemblerInterface,
-    AssemblyLine, FunctionDefinition, Identifier, IndexDefinition, Region, DependencyDefinition} from "models/objects";
+    AssemblyLine, FunctionDefinition, Identifier, IndexDefinition, Region} from "models/objects";
 
 import {AssemblyError} from "objects/assemblyError";
 import {IdentifierMap} from "objects/identifier";
@@ -16,13 +15,10 @@ import {AliasDefinition} from "objects/aliasDefinition";
 import {PrivateFunctionDefinition, PublicFunctionDefinition, GuardFunctionDefinition, InterfaceFunctionDefinition} from "objects/functionDefinition";
 import {AppDataLineList} from "objects/labeledLineList";
 import {REGION_TYPE, AtomicRegion, CompositeRegion} from "objects/region";
-import {PathDependencyDefinition, VersionDependencyDefinition, InterfaceDependencyDefinition} from "objects/dependencyDefinition";
 
 import {parseUtils} from "utils/parseUtils";
 import {lineUtils} from "utils/lineUtils";
 import {variableUtils} from "utils/variableUtils";
-import {dependencyUtils} from "utils/dependencyUtils";
-import {descriptionUtils} from "utils/descriptionUtils";
 
 export interface Assembler extends AssemblerInterface {}
 
@@ -36,11 +32,8 @@ export abstract class Assembler {
         this.aliasDefinitionMap = new IdentifierMap();
         this.macroDefinitionMap = {};
         this.functionDefinitionList = [];
-        this.dependencyDefinitionMap = new IdentifierMap();
         this.nextMacroInvocationId = 0;
         this.scope = new Scope();
-        this.fileFormatVersionNumber = null;
-        this.descriptionLineList = [];
         this.fileRegion = null;
     }
     
@@ -203,133 +196,22 @@ export abstract class Assembler {
         this.functionDefinitionList.push(functionDefinition);
     }
     
-    addDependencyDefinition(dependencyDefinition: DependencyDefinition): void {
-        dependencyDefinition.index = this.dependencyDefinitionMap.getSize();
-        this.dependencyDefinitionMap.setIndexDefinition(dependencyDefinition);
-    }
-    
-    extractDependencyDefinitions(): void {
-        this.processLines(line => {
-            let tempDirectiveName = line.directiveName;
-            let tempArgList = line.argList;
-            if (tempDirectiveName === "PATH_DEP") {
-                let tempResult = dependencyUtils.evaluateDependencyArgs(tempArgList, 2);
-                let tempDefinition = new PathDependencyDefinition(
-                    tempResult.identifier,
-                    tempResult.path,
-                    tempResult.dependencyModifierList
-                );
-                this.addDependencyDefinition(tempDefinition);
-                return [];
-            }
-            if (tempDirectiveName === "VER_DEP") {
-                let tempResult = dependencyUtils.evaluateDependencyArgs(tempArgList, 3);
-                let tempVersionNumber = tempArgList[2].evaluateToVersionNumber();
-                let tempDefinition = new VersionDependencyDefinition(
-                    tempResult.identifier,
-                    tempResult.path,
-                    tempVersionNumber,
-                    tempResult.dependencyModifierList
-                );
-                this.addDependencyDefinition(tempDefinition);
-                return [];
-            }
-            if (tempDirectiveName === "IFACE_DEP") {
-                let tempDependencyExpressionList = [];
-                let index = 2;
-                while (index < tempArgList.length) {
-                    let tempExpression = tempArgList[index];
-                    let tempResult = tempExpression.evaluateToDependencyModifierOrNull();
-                    if (tempResult !== null) {
-                        break;
-                    }
-                    tempDependencyExpressionList.push(tempExpression);
-                    index += 1;
-                }
-                let tempResult = dependencyUtils.evaluateDependencyArgs(tempArgList, index);
-                let tempDefinition = new InterfaceDependencyDefinition(
-                    tempResult.identifier,
-                    tempResult.path,
-                    tempDependencyExpressionList,
-                    tempResult.dependencyModifierList
-                );
-                this.addDependencyDefinition(tempDefinition);
-                return [];
-            }
-            return null;
-        });
-    }
-    
-    extractFileFormatVersionNumber(): void {
-        this.processLines(line => {
-            let tempArgList = line.argList;
-            if (line.directiveName === "FORMAT_VER") {
-                if (tempArgList.length !== 1) {
-                    throw new AssemblyError("Expected 1 argument.");
-                }
-                if (this.fileFormatVersionNumber !== null) {
-                    throw new AssemblyError("Extra bytecode version directive.");
-                }
-                this.fileFormatVersionNumber = tempArgList[0].evaluateToVersionNumber();
-                return [];
-            }
-            return null;
-        });
-        if (this.fileFormatVersionNumber === null) {
-            throw new AssemblyError("Missing FORMAT_VER directive.");
-        }
-    }
-    
-    extractDescriptionLines(): void {
-        this.processLines(line => {
-            let tempText = descriptionUtils.extractDescriptionLine(line);
-            if (tempText !== null) {
-                this.descriptionLineList.push(tempText);
-                return [];
-            }
-            return null;
-        });
-    }
-    
     extractDefinitions(): void {
         this.extractFunctionDefinitions();
-        this.extractDependencyDefinitions();
-        this.extractFileFormatVersionNumber();
-        this.extractDescriptionLines();
     }
     
     populateScopeDefinitions(): void {
-        this.scope.indexDefinitionMapList = [this.dependencyDefinitionMap];
+        this.scope.indexDefinitionMapList = [];
     }
     
     createFileSubregions(): Region[] {
-        let formatVersionRegion = new AtomicRegion(
-            REGION_TYPE.fileFormatVer,
-            this.fileFormatVersionNumber.createBuffer()
-        );
         let funcRegionList = this.functionDefinitionList.map(functionDefinition => {
             return functionDefinition.createRegion();
         });
         let appFuncsRegion = new CompositeRegion(this.funcsRegionType, funcRegionList);
-        let dependencyRegionList = [];
-        this.dependencyDefinitionMap.iterate(dependencyDefinition => {
-            let tempRegion = dependencyDefinition.createRegion();
-            dependencyRegionList.push(tempRegion);
-        });
-        let output: Region[] = [
-            formatVersionRegion,
+        return [
             appFuncsRegion
         ];
-        if (dependencyRegionList.length > 0) {
-            output.push(new CompositeRegion(REGION_TYPE.deps, dependencyRegionList));
-        }
-        let descriptionRegion = descriptionUtils.createDescriptionRegion(
-            this.descriptionLineList
-        );
-        if (descriptionRegion !== null) {
-            output.push(descriptionRegion);
-        }
-        return output;
     }
     
     generateFileRegion(): void {
@@ -347,12 +229,6 @@ export abstract class Assembler {
     
     getDisplayString(): string {
         let tempTextList = [];
-        tempTextList.push("\n= = = FILE FORMAT VERSION = = =\n");
-        tempTextList.push(this.fileFormatVersionNumber.getDisplayString());
-        tempTextList.push("\n= = = DEPENDENCY DEFINITIONS = = =\n");
-        this.dependencyDefinitionMap.iterate(dependencyDefinition => {
-            tempTextList.push(dependencyDefinition.getDisplayString());
-        });
         tempTextList.push("\n= = = ALIAS DEFINITIONS = = =\n");
         this.aliasDefinitionMap.iterate(definition => {
             tempTextList.push(definition.getDisplayString());
@@ -368,8 +244,6 @@ export abstract class Assembler {
             tempTextList.push(functionDefinition.getDisplayString());
             tempTextList.push("");
         };
-        tempTextList.push("= = = DESCRIPTION = = =\n");
-        tempTextList.push(this.descriptionLineList.join("\n"));
         tempTextList.push("\n= = = APP FILE REGION = = =\n");
         tempTextList.push(this.fileRegion.getDisplayString());
         tempTextList.push("");
@@ -553,40 +427,6 @@ export class BytecodeAppAssembler extends Assembler {
         this.globalFrameLength = variableUtils.populateVariableDefinitionIndexes(
             this.globalVariableDefinitionMap
         );
-    }
-}
-
-export interface InterfaceAssembler extends InterfaceAssemblerInterface {}
-
-export class InterfaceAssembler extends Assembler {
-    
-    constructor(shouldBeVerbose: boolean) {
-        super(REGION_TYPE.ifaceFile, REGION_TYPE.ifaceFuncs, shouldBeVerbose);
-    }
-    
-    extractFunctionDefinitions(): void {
-        this.processLines(line => {
-            let tempArgList = line.argList;
-            if (line.directiveName === "IFACE_FUNC") {
-                let tempArbiterIndexExpression;
-                if (tempArgList.length === 2) {
-                    tempArbiterIndexExpression = tempArgList[1];
-                } else if (tempArgList.length === 1) {
-                    tempArbiterIndexExpression = null;
-                } else {
-                    throw new AssemblyError("Expected 1 or 2 arguments.");
-                }
-                let tempIdentifier = tempArgList[0].evaluateToIdentifier();
-                let tempDefinition = new InterfaceFunctionDefinition(
-                    tempIdentifier,
-                    tempArbiterIndexExpression,
-                    line.codeBlock
-                );
-                this.addFunctionDefinition(tempDefinition);
-                return [];
-            }
-            return null;
-        });
     }
 }
 

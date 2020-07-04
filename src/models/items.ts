@@ -1,6 +1,6 @@
 
 import {NumberType} from "models/delegates";
-import {Expression, AssemblyLine, VariableDefinition, LabelDefinition, ArgNumber, ArgVersionNumber} from "models/objects";
+import {Expression, AssemblyLine, VariableDefinition, LabelDefinition, ArgNumber} from "models/objects";
 
 export type ExpressionProcessor = ((expression: Expression) => Expression);
 
@@ -12,7 +12,8 @@ export type VariableDefinitionClass = (new (...args: any[]) => VariableDefinitio
 
 export type LabelDefinitionClass = (new (...args: any[]) => LabelDefinition);
 
-export type ArgNumeric = (ArgNumber | ArgVersionNumber);
+// In BreadBytecode assembly language, ArgNumeric can also be an ArgVersionNumber.
+export type ArgNumeric = ArgNumber;
 
 export type MixedNumber = (number | bigint);
 

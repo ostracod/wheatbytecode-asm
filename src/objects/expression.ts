@@ -6,21 +6,18 @@ import {
     ArgTerm as ArgTermInterface,
     ArgWord as ArgWordInterface,
     ArgNumber as ArgNumberInterface,
-    ArgVersionNumber as ArgVersionNumberInterface,
     ArgString as ArgStringInterface,
     UnaryExpression as UnaryExpressionInterface,
     MacroIdentifierExpression as MacroIdentifierExpressionInterface,
     BinaryExpression as BinaryExpressionInterface,
     SubscriptExpression as SubscriptExpressionInterface,
-    IdentifierMap, FunctionDefinition, Constant, InstructionArg, IndexDefinition, VersionNumber
+    IdentifierMap, FunctionDefinition, Constant, InstructionArg, IndexDefinition
 } from "models/objects";
 
 import {AssemblyError} from "objects/assemblyError";
 import {Identifier, MacroIdentifier} from "objects/identifier";
-import {ArgPerm} from "objects/argPerm";
 import {InstructionRef, PointerInstructionRef, ConstantInstructionArg, RefInstructionArg, nameInstructionRefMap} from "objects/instruction";
 import {builtInConstantSet, NumberConstant, StringConstant} from "objects/constant";
-import {DEPENDENCY_MODIFIER} from "objects/dependencyDefinition";
 
 import {PointerType, pointerType, signedInteger64Type, StringType} from "delegates/dataType";
 import {macroIdentifierOperator} from "delegates/operator";
@@ -111,14 +108,6 @@ export abstract class Expression {
         return Number(tempNumberConstant.value);
     }
     
-    evaluateToDependencyModifier(): number {
-        let output = this.evaluateToDependencyModifierOrNull();
-        if (output === null) {
-            throw this.createError("Expected dependency modifier.");
-        }
-        return output;
-    }
-    
     substituteIdentifiers(identifierExpressionMap: IdentifierMap<Expression>): Expression {
         let tempIdentifier = this.evaluateToIdentifierOrNull();
         if (tempIdentifier === null) {
@@ -165,18 +154,6 @@ export abstract class Expression {
     
     evaluateToDataType(): DataType {
         throw this.createError("Expected data type.");
-    }
-    
-    evaluateToArgPerm(): ArgPerm {
-        throw this.createError("Expected arg perm.");
-    }
-    
-    evaluateToVersionNumber(): VersionNumber {
-        throw this.createError("Expected version number.");
-    }
-    
-    evaluateToDependencyModifierOrNull(): number {
-        return null;
     }
     
     evaluateToInstructionArg(): InstructionArg {
@@ -266,17 +243,6 @@ export class ArgWord extends ArgTerm {
         return dataTypeUtils.getDataTypeByName(this.text);
     }
     
-    evaluateToArgPerm(): ArgPerm {
-        return new ArgPerm(this.text);
-    }
-    
-    evaluateToDependencyModifierOrNull(): number {
-        if (this.text in DEPENDENCY_MODIFIER) {
-            return DEPENDENCY_MODIFIER[this.text];
-        }
-        return super.evaluateToDependencyModifierOrNull();
-    }
-    
     evaluateToInstructionRef(): InstructionRef {
         if (this.text in nameInstructionRefMap) {
             return nameInstructionRefMap[this.text];
@@ -312,28 +278,6 @@ export class ArgNumber extends ArgTerm {
     
     getConstantDataTypeHelper(): DataType {
         return this.constant.numberType;
-    }
-}
-
-export interface ArgVersionNumber extends ArgVersionNumberInterface {}
-
-export class ArgVersionNumber extends ArgTerm {
-    
-    constructor(versionNumber: VersionNumber) {
-        super();
-        this.versionNumber = versionNumber;
-    }
-    
-    copy(): Expression {
-        return new ArgVersionNumber(this.versionNumber.copy());
-    }
-    
-    getDisplayString(): string {
-        return this.versionNumber.getDisplayString();
-    }
-    
-    evaluateToVersionNumber(): VersionNumber {
-        return this.versionNumber.copy();
     }
 }
 

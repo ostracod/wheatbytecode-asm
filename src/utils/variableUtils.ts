@@ -1,6 +1,6 @@
 
 import {VariableUtils as VariableUtilsInterface} from "models/utils";
-import {AssemblyLine, ArgPerm, VariableDefinition, IdentifierMap} from "models/objects";
+import {AssemblyLine, VariableDefinition, IdentifierMap} from "models/objects";
 import {VariableDefinitionClass} from "models/items";
 import {BetaType} from "delegates/dataType";
 
@@ -38,26 +38,20 @@ export class VariableUtils {
         return variableUtils.extractVariableDefinitionHelper(line, LocalVariableDefinition);
     }
     
+    // TODO: Combine this with extractVariableDefinitionHelper.
     extractArgVariableDefinition(line: AssemblyLine): ArgVariableDefinition {
         if (line.directiveName !== "ARG") {
             return null;
         }
         let tempArgList = line.argList;
-        if (tempArgList.length < 2) {
-            throw new AssemblyError("Expected at least 2 arguments.");
+        if (tempArgList.length !== 2) {
+            throw new AssemblyError("Expected 2 arguments.");
         }
         let tempIdentifier = tempArgList[0].evaluateToIdentifier();
         let tempDataType = tempArgList[1].evaluateToDataType();
-        let tempPermList: ArgPerm[] = [];
-        for (let index = 2; index < tempArgList.length; index++) {
-            let tempArg = tempArgList[index];
-            let tempPerm = tempArg.evaluateToArgPerm();
-            tempPermList.push(tempPerm);
-        }
         return new ArgVariableDefinition(
             tempIdentifier,
-            tempDataType,
-            tempPermList
+            tempDataType
         );
     }
     

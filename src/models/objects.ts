@@ -27,15 +27,6 @@ export interface IndexDefinition extends Displayable {
     createInstructionArgOrNull(): InstructionArg;
 }
 
-export interface ArgPerm {
-    access: number;
-    recipient: number;
-    hasAttributeMap: {[attribute: string]: boolean};
-    
-    getDisplayString(): string;
-    createBuffer(index: number): Buffer;
-}
-
 export interface Scope {
     indexDefinitionMapList: IdentifierMap<IndexDefinition>[];
     publicFunctionDefinitionList: PublicFunctionDefinition[];
@@ -56,11 +47,8 @@ export interface Assembler {
     aliasDefinitionMap: IdentifierMap<AliasDefinition>;
     macroDefinitionMap: {[name: string]: MacroDefinition};
     functionDefinitionList: FunctionDefinition[];
-    dependencyDefinitionMap: IdentifierMap<DependencyDefinition>;
     nextMacroInvocationId: number;
     scope: Scope;
-    fileFormatVersionNumber: VersionNumber;
-    descriptionLineList: string[];
     fileRegion: Region;
     
     processLines(processLine: LineProcessor): void;
@@ -78,10 +66,6 @@ export interface Assembler {
     expandAliasInvocations(): void;
     populateScopeInRootLines(): void;
     addFunctionDefinition(functionDefinition: FunctionDefinition): void;
-    addDependencyDefinition(dependencyDefinition: DependencyDefinition): void;
-    extractDependencyDefinitions(): void;
-    extractFileFormatVersionNumber(): void;
-    extractDescriptionLines(): void;
     generateFileRegion(): void;
     
     // Concrete subclasses may override these methods:
@@ -103,10 +87,6 @@ export interface BytecodeAppAssembler extends Assembler {
     
     extractAppDataDefinitions(): void;
     extractGlobalVariableDefinitions(): void;
-}
-
-export interface InterfaceAssembler extends Assembler {
-    
 }
 
 export interface AssemblyError {
@@ -169,7 +149,6 @@ export interface Expression {
     evaluateToIndexDefinitionOrNull(): IndexDefinition;
     evaluateToConstant(): Constant;
     evaluateToNumber(): number;
-    evaluateToDependencyModifier(): number;
     substituteIdentifiers(identifierExpressionMap: IdentifierMap<Expression>): Expression;
     getConstantDataType(): DataType;
     
@@ -179,9 +158,6 @@ export interface Expression {
     evaluateToConstantOrNull(): Constant;
     evaluateToString(): string;
     evaluateToDataType(): DataType;
-    evaluateToArgPerm(): ArgPerm;
-    evaluateToVersionNumber(): VersionNumber;
-    evaluateToDependencyModifierOrNull(): number;
     evaluateToInstructionArg(): InstructionArg;
     evaluateToInstructionRef(): InstructionRef;
     populateMacroInvocationId(macroInvocationId: number): void;
@@ -203,10 +179,6 @@ export interface ArgWord extends ArgTerm {
 
 export interface ArgNumber extends ArgTerm {
     constant: NumberConstant;
-}
-
-export interface ArgVersionNumber extends ArgTerm {
-    versionNumber: VersionNumber;
 }
 
 export interface ArgString extends ArgTerm {
@@ -259,7 +231,6 @@ export interface FunctionDefinition extends IndexDefinition {
     regionType: number;
     argVariableDefinitionMap: IdentifierMap<ArgVariableDefinition>;
     argFrameLength: FrameLength;
-    descriptionLineList: string[];
     scope: Scope;
     functionImplementation: FunctionImplementation;
     
@@ -267,7 +238,6 @@ export interface FunctionDefinition extends IndexDefinition {
     populateScope(parentScope: Scope): void;
     extractDefinitions(): void;
     extractArgVariableDefinitions(): void;
-    extractDescriptionLines(): void;
     populateScopeDefinitions(): void;
     createRegion(): Region;
     
@@ -343,7 +313,7 @@ export interface VariableDefinition extends IndexDefinition {
 }
 
 export interface ArgVariableDefinition extends VariableDefinition {
-    permList: ArgPerm[];
+    
 }
 
 export interface LabeledLineList {
@@ -435,36 +405,6 @@ export interface FrameLength {
     betaLength: number;
     
     createBuffer(): Buffer;
-}
-
-export interface VersionNumber {
-    majorNumber: number;
-    minorNumber: number;
-    patchNumber: number;
-    
-    copy(): VersionNumber;
-    getDisplayString(): string;
-    createBuffer(): Buffer;
-}
-
-export interface DependencyDefinition extends IndexDefinition {
-    regionType: number;
-    path: string;
-    dependencyModifierList: number[];
-    
-    createRegion(): Region;
-    
-    // Concrete subclasses may override these methods:
-    getDisplayStringHelper(): string;
-    createRegionHelper(): Region[];
-}
-
-export interface VersionDependencyDefinition extends DependencyDefinition {
-    versionNumber: VersionNumber;
-}
-
-export interface InterfaceDependencyDefinition extends DependencyDefinition {
-    dependencyExpressionList: Expression[];
 }
 
 
