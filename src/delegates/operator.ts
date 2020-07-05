@@ -36,10 +36,6 @@ export class UnaryOperator {
         return new UnaryExpression(this, operand);
     }
     
-    getConstantDataType(operand: Expression): DataType {
-        return operand.getConstantDataType();
-    }
-    
     createConstantOrNull(operand: Expression): Constant {
         return null;
     }
@@ -48,6 +44,10 @@ export class UnaryOperator {
 export interface UnaryNumberOperator extends UnaryNumberOperatorInterface {}
 
 export class UnaryNumberOperator extends UnaryOperator {
+    
+    getConstantDataType(operand: Expression): DataType {
+        return operand.getConstantDataType();
+    }
     
     createConstantOrNull(operand: Expression): Constant {
         let tempConstant = operand.evaluateToConstantOrNull();
@@ -120,6 +120,10 @@ export class IndexOperator extends UnaryOperator {
     
     constructor() {
         super("?");
+    }
+    
+    getConstantDataType(operand: Expression): DataType {
+        return unsignedInteger64Type;
     }
     
     createConstantOrNull(operand: Expression): Constant {
