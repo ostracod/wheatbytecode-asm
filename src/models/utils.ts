@@ -1,7 +1,7 @@
 
 import {ExpressionProcessor, LineProcessor, NumberTypeClass, VariableDefinitionClass, ArgNumeric, MixedNumber} from "models/items";
 import {Operator, DataType, NumberType} from "models/delegates";
-import {Expression, AssemblyLine, Identifier, IdentifierMap, Displayable, ArgWord, ArgNumber, ArgString, VariableDefinition, ArgVariableDefinition, InstructionArg, Region} from "models/objects";
+import {Expression, AssemblyLine, Identifier, IdentifierMap, Displayable, ArgWord, ArgNumber, ArgString, VariableDefinition, ArgVariableDefinition, InstructionArg} from "models/objects";
 
 export interface DataTypeUtils {
     getDataTypeByName(name: string): DataType;
@@ -52,6 +52,7 @@ export interface NiceUtils {
         identifierMap: IdentifierMap<Displayable>,
         indentationLevel?: number
     ): string;
+    getBufferDisplayString(title: string, buffer: Buffer): string;
     joinTextList(textList: string[]): string;
     getReverseMap(map: {[key: string]: any}): {[key: string]: any};
     pluralize(word: string, amount: number): string;

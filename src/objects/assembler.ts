@@ -1,21 +1,24 @@
 
 import * as fs from "fs";
+import * as assert from "assert";
 
 import {LineProcessor, ExpressionProcessor} from "models/items";
-import {Assembler as AssemblerInterface, AssemblyLine, Region} from "models/objects";
+import {Assembler as AssemblerInterface, AssemblyLine} from "models/objects";
 
 import {AssemblyError} from "objects/assemblyError";
 import {IdentifierMap} from "objects/identifier";
 import {Scope} from "objects/scope";
 import {MacroDefinition} from "objects/macroDefinition";
 import {AliasDefinition} from "objects/aliasDefinition";
-import {FunctionDefinition} from "objects/functionDefinition";
+import {FunctionDefinition, functionTableEntrySize} from "objects/functionDefinition";
 import {AppDataLineList} from "objects/labeledLineList";
-import {REGION_TYPE, AtomicRegion, CompositeRegion} from "objects/region";
 
 import {parseUtils} from "utils/parseUtils";
 import {lineUtils} from "utils/lineUtils";
 import {variableUtils} from "utils/variableUtils";
+import {niceUtils} from "utils/niceUtils";
+
+const fileHeaderSize = 12;
 
 export interface Assembler extends AssemblerInterface {}
 
@@ -33,7 +36,11 @@ export class Assembler {
         this.globalVariableDefinitionMap = new IdentifierMap();
         this.globalFrameSize = null;
         this.appDataLineList = null;
-        this.fileRegion = null;
+        this.headerBuffer = null;
+        this.functionTableBuffer = null;
+        this.instructionsBuffer = null;
+        this.appDataBuffer = null;
+        this.fileBuffer = null;
     }
     
     getDisplayString(): string {
@@ -59,9 +66,23 @@ export class Assembler {
             tempTextList.push(definition.getDisplayString());
             tempTextList.push("");
         });
-        tempTextList.push("\n= = = APP FILE REGION = = =\n");
-        tempTextList.push(this.fileRegion.getDisplayString());
-        tempTextList.push("");
+        tempTextList.push("\n= = = FILE BUFFERS = = =\n");
+        tempTextList.push(niceUtils.getBufferDisplayString(
+            "Header",
+            this.headerBuffer
+        ));
+        tempTextList.push(niceUtils.getBufferDisplayString(
+            "Function table",
+            this.functionTableBuffer
+        ));
+        tempTextList.push(niceUtils.getBufferDisplayString(
+            "Instructions",
+            this.instructionsBuffer
+        ));
+        tempTextList.push(niceUtils.getBufferDisplayString(
+            "App data",
+            this.appDataBuffer
+        ));
         return tempTextList.join("\n");
     }
     
@@ -291,28 +312,10 @@ export class Assembler {
         ];
     }
     
-    createFileSubregions(): Region[] {
-        let functionDefinitionList = [];
-        this.functionDefinitionMap.iterate(definition => {
-            functionDefinitionList[definition.index] = definition;
-        });
-        let funcRegionList = functionDefinitionList.map(functionDefinition => {
-            return functionDefinition.createRegion();
-        });
-        let appFuncsRegion = new CompositeRegion(REGION_TYPE.appFuncs, funcRegionList);
-        let output: Region[] = [appFuncsRegion];
-        let tempBuffer = this.appDataLineList.createBuffer();
-        if (tempBuffer.length > 0) {
-            let appDataRegion = new AtomicRegion(
-                REGION_TYPE.appData,
-                tempBuffer
-            );
-            output.push(appDataRegion);
-        }
-        return output;
-    }
-    
-    generateFileRegion(): void {
+    generateFileBuffer(): void {
+        
+        // If any root assembly lines are left over, it means they
+        // were not recognized in any parsing step.
         if (this.rootLineList.length > 0) {
             let tempLine = this.rootLineList[0];
             throw new AssemblyError(
@@ -321,8 +324,50 @@ export class Assembler {
                 tempLine.filePath
             );
         }
-        let tempRegionList = this.createFileSubregions();
-        this.fileRegion = new CompositeRegion(REGION_TYPE.appFile, tempRegionList);
+        
+        // Create a list of function definitions in the correct order.
+        let functionDefinitionList = [];
+        this.functionDefinitionMap.iterate(definition => {
+            functionDefinitionList[definition.index] = definition;
+        });
+        
+        // Create the header buffer. App data file position will not
+        // be known until later.
+        this.headerBuffer = Buffer.alloc(fileHeaderSize);
+        this.headerBuffer.writeUInt32LE(this.globalFrameSize, 0);
+        this.headerBuffer.writeUInt32LE(functionDefinitionList.length, 4);
+        
+        // Create function table buffer and instructions buffer.
+        let functionTableSize = functionDefinitionList.length * functionTableEntrySize;
+        let instructionsFilePos = this.headerBuffer.length + functionTableSize;
+        let functionTableBufferList = [];
+        let instructionsBufferList = [];
+        for (let definition of functionDefinitionList) {
+            let tempInstructionsBuffer = definition.createInstructionsBuffer();
+            let tempEntryBuffer = definition.createTableEntryBuffer(
+                instructionsFilePos,
+                tempInstructionsBuffer.length
+            );
+            instructionsFilePos += tempInstructionsBuffer.length;
+            functionTableBufferList.push(tempEntryBuffer);
+            instructionsBufferList.push(tempInstructionsBuffer);
+        }
+        this.functionTableBuffer = Buffer.concat(functionTableBufferList);
+        this.instructionsBuffer = Buffer.concat(instructionsBufferList);
+        assert(functionTableSize === this.functionTableBuffer.length);
+        
+        // Populate app data file position, then create app data buffer.
+        this.headerBuffer.writeUInt32LE(this.headerBuffer.length
+            + this.functionTableBuffer.length + this.instructionsBuffer.length, 8);
+        this.appDataBuffer = this.appDataLineList.createBuffer();
+        
+        // Concatenate everything together.
+        this.fileBuffer = Buffer.concat([
+            this.headerBuffer,
+            this.functionTableBuffer,
+            this.instructionsBuffer,
+            this.appDataBuffer
+        ]);
     }
     
     assembleCodeFile(sourcePath: string, destinationPath: string): void {
@@ -335,7 +380,7 @@ export class Assembler {
             this.populateScopeInRootLines();
             this.extractDefinitions();
             this.populateScopeDefinitions();
-            this.generateFileRegion();
+            this.generateFileBuffer();
         } catch(error) {
             if (error instanceof AssemblyError) {
                 if (error.lineNumber === null || error.filePath === null) {
@@ -353,7 +398,7 @@ export class Assembler {
             console.log(this.getDisplayString());
         }
         
-        fs.writeFileSync(destinationPath, this.fileRegion.createBuffer());
+        fs.writeFileSync(destinationPath, this.fileBuffer);
         console.log("Finished assembling.");
         console.log(`Destination path: "${destinationPath}"`);
     }

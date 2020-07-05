@@ -3,7 +3,7 @@ import {LineProcessor} from "models/items";
 import {
     FunctionImplementation as FunctionImplementationInterface,
     FunctionDefinition as FunctionDefinitionInterface,
-    AssemblyLine, Region
+    AssemblyLine
 } from "models/objects";
 
 import {niceUtils} from "utils/niceUtils";
@@ -14,7 +14,8 @@ import {IndexDefinition, indexConstantConverter} from "objects/indexDefinition";
 import {Scope} from "objects/scope";
 import {InstructionLineList} from "objects/labeledLineList";
 import {Identifier, IdentifierMap} from "objects/identifier";
-import {REGION_TYPE, AtomicRegion, CompositeRegion} from "objects/region";
+
+export const functionTableEntrySize = 21;
 
 export interface FunctionImplementation extends FunctionImplementationInterface {}
 
@@ -87,14 +88,6 @@ export class FunctionImplementation {
     assembleInstructions(): void {
         this.instructionList = this.getLineList().assembleInstructions();
     }
-    
-    createSubregions(): Region[] {
-        let tempBuffer = Buffer.concat(
-            this.instructionList.map(instruction => instruction.createBuffer())
-        );
-        let instructionsRegion = new AtomicRegion(REGION_TYPE.instrs, tempBuffer);
-        return [instructionsRegion];
-    }
 }
 
 export interface FunctionDefinition extends FunctionDefinitionInterface {}
@@ -161,33 +154,28 @@ export class FunctionDefinition extends IndexDefinition {
         }
     }
     
-    createRegion(): Region {
-        if (this.functionImplementation === null) {
-            let tempLineList = this.lineList.lineList;
-            if (tempLineList.length > 0) {
-                let tempLine = tempLineList[0];
-                throw new AssemblyError(
-                    "Unknown directive.",
-                    tempLine.lineNumber,
-                    tempLine.filePath
-                );
-            }
-        } else {
-            this.functionImplementation.assembleInstructions();
-        }
-        let tempRegionList = this.createSubregions();
-        return new CompositeRegion(REGION_TYPE.privFunc, tempRegionList);
+    createTableEntryBuffer(
+        instructionsFilePos: number,
+        instructionsSize: number
+    ): Buffer {
+        let output = Buffer.alloc(functionTableEntrySize);
+        // TODO: Populate missing parameters.
+        //output.writeInt32LE(this.id, 0);
+        //output.writeUInt8LE(this.isGuarded ? 1 : 0, 4);
+        output.writeUInt32LE(this.argFrameSize, 5);
+        output.writeUInt32LE(this.functionImplementation.localFrameSize, 9);
+        output.writeUInt32LE(instructionsFilePos, 13);
+        output.writeUInt32LE(instructionsSize, 17);
+        return output;
     }
     
-    createSubregions(): Region[] {
-        let output: Region[] = [];
-        if (this.functionImplementation !== null) {
-            let tempRegionList = this.functionImplementation.createSubregions();
-            for (let region of tempRegionList) {
-                output.push(region);
-            }
-        }
-        return output;
+    createInstructionsBuffer(): Buffer {
+        this.functionImplementation.assembleInstructions();
+        return Buffer.concat(
+            this.functionImplementation.instructionList.map(instruction => {
+                return instruction.createBuffer()
+            })
+        );
     }
 }
 

@@ -1,6 +1,7 @@
 
 import {NiceUtils as NiceUtilsInterface} from "models/utils";
 import {Displayable, IdentifierMap} from "models/objects";
+import {mathUtils} from "utils/mathUtils";
 
 export interface NiceUtils extends NiceUtilsInterface {}
 
@@ -56,6 +57,23 @@ export class NiceUtils {
             identifierMap.getValueList(),
             indentationLevel
         );
+    }
+    
+    getBufferDisplayString(title: string, buffer: Buffer): string {
+        let tempTextList = [title + ":"];
+        let tempIndentation = niceUtils.getIndentation(1);
+        let startIndex = 0;
+        while (startIndex < buffer.length) {
+            let endIndex = startIndex + 12;
+            if (endIndex >= buffer.length) {
+                endIndex = buffer.length;
+            }
+            let tempBuffer = buffer.slice(startIndex, endIndex);
+            let tempText = mathUtils.convertBufferToHexadecimal(tempBuffer);
+            tempTextList.push(tempIndentation + tempText);
+            startIndex = endIndex;
+        }
+        return tempTextList.join("\n") + "\n";
     }
     
     // Excludes empty strings.

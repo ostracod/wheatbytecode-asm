@@ -46,7 +46,11 @@ export interface Assembler {
     globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
     globalFrameSize: number;
     appDataLineList: DataLineList;
-    fileRegion: Region;
+    headerBuffer: Buffer;
+    functionTableBuffer: Buffer;
+    instructionsBuffer: Buffer;
+    appDataBuffer: Buffer;
+    fileBuffer: Buffer;
     
     getDisplayString(): string;
     processLines(processLine: LineProcessor): void;
@@ -69,8 +73,7 @@ export interface Assembler {
     populateScopeInRootLines(): void;
     populateScopeDefinitions(): void;
     addFunctionDefinition(functionDefinition: FunctionDefinition): void;
-    createFileSubregions(): Region[];
-    generateFileRegion(): void;
+    generateFileBuffer(): void;
 }
 
 export interface AssemblyError {
@@ -204,7 +207,6 @@ export interface FunctionImplementation {
     extractLocalVariableDefinitions(): void;
     populateScopeDefinitions(): void;
     assembleInstructions(): void;
-    createSubregions(): Region[];
 }
 
 export interface FunctionDefinition extends IndexDefinition {
@@ -219,8 +221,11 @@ export interface FunctionDefinition extends IndexDefinition {
     extractDefinitions(): void;
     extractArgVariableDefinitions(): void;
     populateScopeDefinitions(): void;
-    createRegion(): Region;
-    createSubregions(): Region[];
+    createTableEntryBuffer(
+        instructionsFilePos: number,
+        instructionsSize: number
+    ): Buffer;
+    createInstructionsBuffer(): Buffer;
 }
 
 export interface Identifier {
@@ -333,25 +338,6 @@ export interface RefInstructionArg extends InstructionArg {
     instructionRef: InstructionRef;
     dataType: DataType;
     indexArg: InstructionArg;
-}
-
-export interface Region {
-    regionType: number;
-    
-    createBuffer(): Buffer;
-    getDisplayString(indentationLevel?: number): string;
-    
-    // Concrete subclasses must implement these methods:
-    getContentBuffer(): Buffer;
-    getDisplayStringHelper(indentationLevel: number): string[];
-}
-
-export interface AtomicRegion extends Region {
-    contentBuffer: Buffer;
-}
-
-export interface CompositeRegion extends Region {
-    regionList: Region[];
 }
 
 

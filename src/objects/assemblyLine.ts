@@ -22,7 +22,7 @@ export class AssemblyLine {
         this.filePath = null;
         // List of AssemblyLine or null.
         this.codeBlock = null;
-        for (let arg of argList) {
+        for (let arg of this.argList) {
             arg.processExpressions(expression => {
                 expression.line = this;
                 return null;
