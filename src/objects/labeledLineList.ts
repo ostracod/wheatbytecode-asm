@@ -7,7 +7,7 @@ import {
     AssemblyLine, FunctionDefinition, Instruction, Scope, Expression, Constant
 } from "models/objects";
 
-import {BetaType, unsignedInteger64Type} from "delegates/dataType";
+import {unsignedInteger64Type} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 import {InstructionLabelDefinition, AppDataLabelDefinition} from "objects/labelDefinition";
@@ -141,9 +141,6 @@ export class DataLineList extends LabeledLineList {
         this.processLines(line => {
             let tempBufferList = line.argList.map(arg => {
                 let tempConstant = this.convertExpressionToConstant(arg);
-                if (!(tempConstant.getDataType() instanceof BetaType)) {
-                    throw new AssemblyError("Expected beta type.");
-                }
                 return tempConstant.createBuffer();
             });
             bufferList.push(Buffer.concat(tempBufferList));
@@ -163,10 +160,7 @@ export class AppDataLineList extends DataLineList {
         let output = 0;
         for (let expression of line.argList) {
             let tempDataType = expression.getConstantDataType();
-            if (!(tempDataType instanceof BetaType)) {
-                throw new AssemblyError("Expected beta type.");
-            }
-            output += (tempDataType as BetaType).byteAmount;
+            output += tempDataType.byteAmount;
         }
         return output;
     }

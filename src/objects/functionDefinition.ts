@@ -23,7 +23,7 @@ export class FunctionImplementation {
     constructor(functionDefinition: FunctionDefinition) {
         this.functionDefinition = functionDefinition;
         this.localVariableDefinitionMap = new IdentifierMap();
-        this.localFrameLength = null;
+        this.localFrameSize = null;
         this.instructionList = [];
     }
     
@@ -72,7 +72,7 @@ export class FunctionImplementation {
             }
             return null;
         });
-        this.localFrameLength = variableUtils.populateVariableDefinitionIndexes(
+        this.localFrameSize = variableUtils.populateVariableDefinitionIndexes(
             this.localVariableDefinitionMap
         );
     }
@@ -89,15 +89,11 @@ export class FunctionImplementation {
     }
     
     createSubregions(): Region[] {
-        let localFrameLengthRegion = new AtomicRegion(
-            REGION_TYPE.localFrameLen,
-            this.localFrameLength.createBuffer()
-        );
         let tempBuffer = Buffer.concat(
             this.instructionList.map(instruction => instruction.createBuffer())
         );
         let instructionsRegion = new AtomicRegion(REGION_TYPE.instrs, tempBuffer);
-        return [localFrameLengthRegion, instructionsRegion];
+        return [instructionsRegion];
     }
 }
 
@@ -109,7 +105,7 @@ export class FunctionDefinition extends IndexDefinition {
         super(identifier, indexConstantConverter);
         this.lineList = new InstructionLineList(lineList);
         this.argVariableDefinitionMap = new IdentifierMap();
-        this.argFrameLength = null;
+        this.argFrameSize = null;
         this.scope = null;
         this.functionImplementation = new FunctionImplementation(this);
     }
@@ -153,7 +149,7 @@ export class FunctionDefinition extends IndexDefinition {
             }
             return null;
         });
-        this.argFrameLength = variableUtils.populateVariableDefinitionIndexes(
+        this.argFrameSize = variableUtils.populateVariableDefinitionIndexes(
             this.argVariableDefinitionMap
         );
     }
@@ -184,11 +180,7 @@ export class FunctionDefinition extends IndexDefinition {
     }
     
     createSubregions(): Region[] {
-        let argFrameLengthRegion = new AtomicRegion(
-            REGION_TYPE.argFrameLen,
-            this.argFrameLength.createBuffer()
-        );
-        let output: Region[] = [argFrameLengthRegion];
+        let output: Region[] = [];
         if (this.functionImplementation !== null) {
             let tempRegionList = this.functionImplementation.createSubregions();
             for (let region of tempRegionList) {

@@ -44,7 +44,7 @@ export interface Assembler {
     nextFunctionDefinitionIndex: number;
     scope: Scope;
     globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
-    globalFrameLength: FrameLength;
+    globalFrameSize: number;
     appDataLineList: DataLineList;
     fileRegion: Region;
     
@@ -193,7 +193,7 @@ export interface SubscriptExpression extends Expression {
 export interface FunctionImplementation {
     functionDefinition: FunctionDefinition;
     localVariableDefinitionMap: IdentifierMap<VariableDefinition>;
-    localFrameLength: FrameLength;
+    localFrameSize: number;
     instructionList: Instruction[];
     
     getDisplayString(indentationLevel: number): string;
@@ -210,7 +210,7 @@ export interface FunctionImplementation {
 export interface FunctionDefinition extends IndexDefinition {
     lineList: InstructionLineList;
     argVariableDefinitionMap: IdentifierMap<ArgVariableDefinition>;
-    argFrameLength: FrameLength;
+    argFrameSize: number;
     scope: Scope;
     functionImplementation: FunctionImplementation;
     
@@ -352,13 +352,6 @@ export interface AtomicRegion extends Region {
 
 export interface CompositeRegion extends Region {
     regionList: Region[];
-}
-
-export interface FrameLength {
-    alphaLength: number;
-    betaLength: number;
-    
-    createBuffer(): Buffer;
 }
 
 

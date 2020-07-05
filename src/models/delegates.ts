@@ -4,18 +4,15 @@ import {Expression, Constant, NumberConstant, InstructionArg, Identifier} from "
 
 export interface DataType {
     argPrefix: number;
+    byteAmount: number;
+    bitAmount: number;
     
     // Concrete subclasses must implement these methods:
     getName(): string;
     equals(dataType: DataType): boolean;
 }
 
-export interface BetaType extends DataType {
-    byteAmount: number;
-    bitAmount: number;
-}
-
-export interface NumberType extends BetaType {
+export interface NumberType extends DataType {
     // Concrete subclasses may override these methods:
     restrictNumber(value: MixedNumber): MixedNumber;
     
@@ -34,7 +31,7 @@ export interface IntegerType extends NumberType {
     getMaximumNumber(): bigint;
 }
 
-export interface StringType extends BetaType {
+export interface StringType extends DataType {
     
 }
 

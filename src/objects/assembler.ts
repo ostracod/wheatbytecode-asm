@@ -31,7 +31,7 @@ export class Assembler {
         this.nextFunctionDefinitionIndex = 0;
         this.scope = new Scope();
         this.globalVariableDefinitionMap = new IdentifierMap();
-        this.globalFrameLength = null;
+        this.globalFrameSize = null;
         this.appDataLineList = null;
         this.fileRegion = null;
     }
@@ -278,7 +278,7 @@ export class Assembler {
             }
             return null;
         });
-        this.globalFrameLength = variableUtils.populateVariableDefinitionIndexes(
+        this.globalFrameSize = variableUtils.populateVariableDefinitionIndexes(
             this.globalVariableDefinitionMap
         );
     }
@@ -300,14 +300,7 @@ export class Assembler {
             return functionDefinition.createRegion();
         });
         let appFuncsRegion = new CompositeRegion(REGION_TYPE.appFuncs, funcRegionList);
-        let globalFrameLengthRegion = new AtomicRegion(
-            REGION_TYPE.globalFrameLen,
-            this.globalFrameLength.createBuffer()
-        );
-        let output = [
-            appFuncsRegion,
-            globalFrameLengthRegion
-        ];
+        let output: Region[] = [appFuncsRegion];
         let tempBuffer = this.appDataLineList.createBuffer();
         if (tempBuffer.length > 0) {
             let appDataRegion = new AtomicRegion(

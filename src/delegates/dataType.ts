@@ -2,7 +2,6 @@
 import {MixedNumber} from "models/items";
 import {
     DataType as DataTypeInterface,
-    BetaType as BetaTypeInterface,
     NumberType as NumberTypeInterface,
     IntegerType as IntegerTypeInterface,
     StringType as StringTypeInterface
@@ -18,38 +17,23 @@ export interface DataType extends DataTypeInterface {}
 
 export abstract class DataType {
     
-    constructor(argPrefix: number) {
+    constructor(argPrefix: number, byteAmount: number) {
         this.argPrefix = argPrefix;
+        this.byteAmount = byteAmount;
+        this.bitAmount = this.byteAmount * 8;
         if (argPrefix !== null) {
             dataTypeList.push(this);
         }
     }
-}
-
-// TODO: Merge BetaType with DataType.
-
-export interface BetaType extends BetaTypeInterface {}
-
-export abstract class BetaType extends DataType {
-    
-    constructor(argPrefix: number, byteAmount: number) {
-        super(argPrefix);
-        this.byteAmount = byteAmount;
-        this.bitAmount = this.byteAmount * 8;
-    }
     
     equals(dataType: DataType): boolean {
-        if (!(dataType instanceof BetaType)) {
-            return false;
-        }
-        let betaType = dataType as BetaType;
-        return (this.byteAmount === betaType.byteAmount);
+        return (this.byteAmount === dataType.byteAmount);
     }
 }
 
 export interface NumberType extends NumberTypeInterface {}
 
-export abstract class NumberType extends BetaType {
+export abstract class NumberType extends DataType {
     
     constructor(argPrefix: number, byteAmount: number) {
         super(argPrefix, byteAmount);
@@ -219,7 +203,7 @@ export class FloatType extends NumberType {
 
 export interface StringType extends StringTypeInterface {}
 
-export class StringType extends BetaType {
+export class StringType extends DataType {
     
     constructor(byteAmount: number) {
         super(null, byteAmount);

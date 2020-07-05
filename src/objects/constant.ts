@@ -7,7 +7,7 @@ import {
 } from "models/objects";
 import {DataType, IntegerType} from "models/delegates";
 
-import {UnsignedIntegerType, SignedIntegerType, unsignedIntegerTypeList, signedIntegerTypeList, signedInteger32Type, unsignedInteger64Type, BetaType, NumberType, StringType} from "delegates/dataType";
+import {UnsignedIntegerType, SignedIntegerType, unsignedIntegerTypeList, signedIntegerTypeList, signedInteger32Type, unsignedInteger64Type, NumberType, StringType} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 
@@ -41,9 +41,6 @@ export class NumberConstant extends Constant {
     }
     
     setDataType(dataType: DataType): void {
-        if (!(dataType instanceof BetaType)) {
-            throw new AssemblyError("Cannot convert beta type to alpha type.");
-        }
         if (!(dataType instanceof NumberType)) {
             throw new AssemblyError("Conversion is only supported between number types.");
         }

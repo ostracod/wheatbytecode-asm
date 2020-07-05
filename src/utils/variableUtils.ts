@@ -2,11 +2,9 @@
 import {VariableUtils as VariableUtilsInterface} from "models/utils";
 import {AssemblyLine, VariableDefinition, IdentifierMap} from "models/objects";
 import {VariableDefinitionClass} from "models/items";
-import {BetaType} from "delegates/dataType";
 
 import {GlobalVariableDefinition, LocalVariableDefinition, ArgVariableDefinition} from "objects/variableDefinition";
 import {AssemblyError} from "objects/assemblyError";
-import {FrameLength} from "objects/frameLength";
 
 export interface VariableUtils extends VariableUtilsInterface {}
 
@@ -55,15 +53,13 @@ export class VariableUtils {
     
     populateVariableDefinitionIndexes(
         identifierMap: IdentifierMap<VariableDefinition>
-    ): FrameLength {
-        let nextAlphaIndex = 0;
-        let nextBetaIndex = 0;
+    ): number {
+        let nextVariableIndex = 0;
         identifierMap.iterate(variableDefinition => {
-            let tempBetaType = variableDefinition.dataType as BetaType;
-            variableDefinition.index = nextBetaIndex;
-            nextBetaIndex += tempBetaType.byteAmount;
+            variableDefinition.index = nextVariableIndex;
+            nextVariableIndex += variableDefinition.dataType.byteAmount;
         });
-        return new FrameLength(nextAlphaIndex, nextBetaIndex);
+        return nextVariableIndex;
     }
 }
 
