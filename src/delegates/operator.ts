@@ -14,7 +14,7 @@ import {Expression, Constant, InstructionArg, Identifier} from "models/objects";
 import {dataTypeUtils} from "utils/dataTypeUtils";
 import {mathUtils} from "utils/mathUtils";
 
-import {unsignedInteger64Type, signedInteger64Type, NumberType, IntegerType} from "delegates/dataType";
+import {signedInteger32Type, NumberType, IntegerType} from "delegates/dataType";
 
 import {UnaryExpression, MacroIdentifierExpression, BinaryExpression} from "objects/expression";
 import {AssemblyError} from "objects/assemblyError";
@@ -123,7 +123,7 @@ export class IndexOperator extends UnaryOperator {
     }
     
     getConstantDataType(operand: Expression): DataType {
-        return unsignedInteger64Type;
+        return signedInteger32Type;
     }
     
     createConstantOrNull(operand: Expression): Constant {
@@ -134,7 +134,7 @@ export class IndexOperator extends UnaryOperator {
         if (tempDefinition === null) {
             throw new AssemblyError("Expected index definition.");
         }
-        return new NumberConstant(tempDefinition.index, unsignedInteger64Type);
+        return new NumberConstant(tempDefinition.index, signedInteger32Type);
     }
 }
 

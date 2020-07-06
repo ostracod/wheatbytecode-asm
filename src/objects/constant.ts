@@ -7,7 +7,7 @@ import {
 } from "models/objects";
 import {DataType, IntegerType} from "models/delegates";
 
-import {UnsignedIntegerType, SignedIntegerType, unsignedIntegerTypeList, signedIntegerTypeList, signedInteger32Type, unsignedInteger64Type, NumberType, StringType} from "delegates/dataType";
+import {UnsignedIntegerType, SignedIntegerType, unsignedIntegerTypeList, signedIntegerTypeList, signedInteger32Type, NumberType, StringType} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 
@@ -109,35 +109,36 @@ export const builtInConstantSet = {
 };
 
 let tempNumberSet = {
-    errSType: 0x0001,
-    funcHandleSType: 0x0002,
-    threadSType: 0x0003,
-    launchOptSType: 0x0004,
-    agentSType: 0x0005,
-    mutexSType: 0x0006,
-    fileHandleSType: 0x0007,
-    protabSType: 0x0008,
-    permSType: 0x0009,
+    genericErr: 0x00,
+    noImplErr: 0x01,
+    typeErr: 0x02,
+    numRangeErr: 0x03,
+    indexErr: 0x04,
+    ptrErr: 0x05,
+    nullErr: 0x06,
+    dataErr: 0x07,
+    argFrameErr: 0x08,
+    missingErr: 0x09,
+    stateErr: 0x0A,
+    permErr: 0x0B,
+    capacityErr: 0x0C,
+    throttleErr: 0x0D,
     
-    genericErr: 0x0000,
-    noImplErr: 0x0001,
-    typeErr: 0x0002,
-    numRangeErr: 0x0003,
-    indexErr: 0x0004,
-    nullErr: 0x0005,
-    dataErr: 0x0006,
-    argFrameErr: 0x0007,
-    missingErr: 0x0008,
-    stateErr: 0x0009,
-    compatErr: 0x000A,
-    permErr: 0x000B,
-    capacityErr: 0x000C,
-    throttleErr: 0x000D
+    init_ID: -1,
+    kill_ID: -2,
+    listenTerm_ID: -3,
+    termSize_ID: -4,
+    wrtTerm_ID: -5,
+    termInput_ID: -6,
+    startSerial_ID: -7,
+    stopSerial_ID: -8,
+    wrtSerial_ID: -9,
+    serialInput_ID: -10
 };
 
 for (let key in tempNumberSet) {
     let tempNumber = tempNumberSet[key];
-    builtInConstantSet[key] = new NumberConstant(tempNumber, unsignedInteger64Type);
+    builtInConstantSet[key] = new NumberConstant(tempNumber, signedInteger32Type);
 }
 
 

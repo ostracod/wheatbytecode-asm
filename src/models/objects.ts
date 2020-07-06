@@ -132,6 +132,7 @@ export interface Expression {
     createError(message: string): AssemblyError;
     handleError(error: Error): void;
     processExpressions(processExpression: ExpressionProcessor, shouldRecurAfterProcess?: boolean): Expression;
+    evaluateToIdentifierName(): string;
     evaluateToIdentifier(): Identifier;
     evaluateToIndexDefinitionOrNull(): IndexDefinition;
     evaluateToConstant(): Constant;
@@ -140,7 +141,7 @@ export interface Expression {
     getConstantDataType(): DataType;
     
     // Concrete subclasses may override these methods:
-    evaluateToIdentifierName(): string;
+    evaluateToIdentifierNameOrNull(): string;
     evaluateToIdentifierOrNull(): Identifier;
     evaluateToConstantOrNull(): Constant;
     evaluateToString(): string;
@@ -210,6 +211,8 @@ export interface FunctionImplementation {
 }
 
 export interface FunctionDefinition extends IndexDefinition {
+    idExpression: Expression;
+    isGuarded: boolean;
     lineList: InstructionLineList;
     argVariableDefinitionMap: IdentifierMap<ArgVariableDefinition>;
     argFrameSize: number;

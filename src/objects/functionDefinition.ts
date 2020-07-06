@@ -3,7 +3,7 @@ import {LineProcessor} from "models/items";
 import {
     FunctionImplementation as FunctionImplementationInterface,
     FunctionDefinition as FunctionDefinitionInterface,
-    AssemblyLine
+    AssemblyLine, Expression
 } from "models/objects";
 
 import {niceUtils} from "utils/niceUtils";
@@ -30,6 +30,17 @@ export class FunctionImplementation {
     
     getDisplayString(indentationLevel: number): string {
         let tempTextList = [];
+        let tempIndentation = niceUtils.getIndentation(indentationLevel);
+        let tempIsGuarded = this.functionDefinition.isGuarded;
+        tempTextList.push(`${tempIndentation}Is guarded: ${tempIsGuarded}`);
+        let tempIdExpression = this.functionDefinition.idExpression;
+        let tempIdText;
+        if (this.functionDefinition.idExpression === null) {
+            tempIdText = "0";
+        } else {
+            tempIdText = tempIdExpression.getDisplayString();
+        }
+        tempTextList.push(`${tempIndentation}Function ID: ${tempIdText}`);
         tempTextList.push(this.getLineList().getDisplayString(
             "Instruction body",
             indentationLevel
@@ -94,8 +105,15 @@ export interface FunctionDefinition extends FunctionDefinitionInterface {}
 
 export class FunctionDefinition extends IndexDefinition {
     
-    constructor(identifier: Identifier, lineList: AssemblyLine[]) {
+    constructor(
+        identifier: Identifier,
+        idExpression: Expression,
+        isGuarded: boolean,
+        lineList: AssemblyLine[]
+    ) {
         super(identifier, indexConstantConverter);
+        this.idExpression = idExpression;
+        this.isGuarded = isGuarded
         this.lineList = new InstructionLineList(lineList);
         this.argVariableDefinitionMap = new IdentifierMap();
         this.argFrameSize = null;
@@ -159,9 +177,14 @@ export class FunctionDefinition extends IndexDefinition {
         instructionsSize: number
     ): Buffer {
         let output = Buffer.alloc(functionTableEntrySize);
-        // TODO: Populate missing parameters.
-        //output.writeInt32LE(this.id, 0);
-        //output.writeUInt8LE(this.isGuarded ? 1 : 0, 4);
+        let tempId;
+        if (this.idExpression === null) {
+            tempId = 0;
+        } else {
+            tempId = this.idExpression.evaluateToNumber();
+        }
+        output.writeInt32LE(tempId, 0);
+        output.writeUInt8(this.isGuarded ? 1 : 0, 4);
         output.writeUInt32LE(this.argFrameSize, 5);
         output.writeUInt32LE(this.functionImplementation.localFrameSize, 9);
         output.writeUInt32LE(instructionsFilePos, 13);

@@ -19,7 +19,7 @@ import {Identifier, MacroIdentifier} from "objects/identifier";
 import {InstructionRef, PointerInstructionRef, ConstantInstructionArg, RefInstructionArg, nameInstructionRefMap} from "objects/instruction";
 import {builtInConstantSet, NumberConstant, StringConstant} from "objects/constant";
 
-import {signedInteger32Type, signedInteger64Type, StringType} from "delegates/dataType";
+import {signedInteger32Type, StringType} from "delegates/dataType";
 import {macroIdentifierOperator} from "delegates/operator";
 
 import {dataTypeUtils} from "utils/dataTypeUtils";
@@ -67,6 +67,14 @@ export abstract class Expression {
             if (!shouldRecurAfterProcess) {
                 break;
             }
+        }
+        return output;
+    }
+    
+    evaluateToIdentifierName(): string {
+        let output = this.evaluateToIdentifierNameOrNull();
+        if (output === null) {
+            throw this.createError("Expected identifier name.");
         }
         return output;
     }
@@ -127,8 +135,8 @@ export abstract class Expression {
         return this.constantDataType;
     }
     
-    evaluateToIdentifierName(): string {
-        throw this.createError("Expected identifier name.");
+    evaluateToIdentifierNameOrNull(): string {
+        return null;
     }
     
     evaluateToIdentifierOrNull(): Identifier {
@@ -224,7 +232,7 @@ export class ArgWord extends ArgTerm {
         return this.text;
     }
     
-    evaluateToIdentifierName(): string {
+    evaluateToIdentifierNameOrNull(): string {
         return this.text;
     }
     
@@ -251,7 +259,7 @@ export class ArgWord extends ArgTerm {
     }
     
     getConstantDataTypeHelper(): DataType {
-        return signedInteger64Type;
+        return signedInteger32Type;
     }
 }
 

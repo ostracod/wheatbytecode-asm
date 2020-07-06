@@ -256,13 +256,39 @@ export class Assembler {
         this.processLines(line => {
             let tempDirectiveName = line.directiveName;
             let tempArgList = line.argList;
+            let tempArgCount = tempArgList.length;
             if (tempDirectiveName === "FUNC") {
-                if (tempArgList.length !== 1) {
-                    throw new AssemblyError("Expected 1 argument.");
+                if (tempArgCount < 1 || tempArgCount > 3) {
+                    throw new AssemblyError("Expected between 1 and 3 arguments.");
                 }
                 let tempIdentifier = tempArgList[0].evaluateToIdentifier();
+                let tempIsGuarded;
+                let tempIdIndex;
+                if (tempArgCount >= 2) {
+                    let tempExpression = tempArgList[tempArgCount - 1];
+                    let tempName = tempExpression.evaluateToIdentifierNameOrNull();
+                    tempIsGuarded = (tempName !== null && tempName === "guarded");
+                    if (tempIsGuarded) {
+                        tempIdIndex = tempArgCount - 2
+                    } else {
+                        tempIdIndex = tempArgCount - 1
+                    }
+                } else {
+                    tempIsGuarded = false;
+                    tempIdIndex = null;
+                }
+                let tempIdExpression = null;
+                if (tempIdIndex !== null) {
+                    if (tempIdIndex > 1) {
+                        throw new AssemblyError("Unexpected expression.");
+                    } else if (tempIdIndex > 0) {
+                        tempIdExpression = tempArgList[tempIdIndex];
+                    }
+                }
                 let tempDefinition = new FunctionDefinition(
                     tempIdentifier,
+                    tempIdExpression,
+                    tempIsGuarded,
                     line.codeBlock
                 );
                 this.addFunctionDefinition(tempDefinition);
