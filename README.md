@@ -63,7 +63,7 @@ Built-in identifiers:
 * `prevArgFrame` refers to the argument frame supplied by the caller
 * `nextArgFrame` refers to the argument frame for the next function invocation
 * `appData` refers to the application data region
-* `null` refers to a null pointer value
+* `null` refers to the null pointer value
 * All of the WheatSystem function IDs with the suffix `_ID` (Ex: `init_ID`, `kill_ID`)
 * All of the error constants (Ex: `typeErr`, `permErr`)
 

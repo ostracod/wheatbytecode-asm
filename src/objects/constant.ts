@@ -105,10 +105,13 @@ export class StringConstant extends Constant {
 }
 
 export const builtInConstantSet = {
-    null: new NumberConstant(-1, signedInteger32Type)
+    
 };
 
 let tempNumberSet = {
+    
+    null: 0,
+    
     genericErr: 0x00,
     noImplErr: 0x01,
     typeErr: 0x02,
