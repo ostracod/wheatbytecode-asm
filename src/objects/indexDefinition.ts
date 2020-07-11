@@ -9,7 +9,7 @@ import {DataType} from "models/delegates";
 
 import {instructionUtils} from "utils/instructionUtils";
 
-import {unsignedInteger64Type} from "delegates/dataType";
+import {signedInteger32Type} from "delegates/dataType";
 
 import {INSTRUCTION_REF_PREFIX} from "objects/instruction";
 import {NumberConstant} from "objects/constant";
@@ -26,7 +26,7 @@ export abstract class IndexConverter {
 export class IndexConstantConverter extends IndexConverter {
     
     createConstantOrNull(index): Constant {
-        return new NumberConstant(index, unsignedInteger64Type);
+        return new NumberConstant(index, signedInteger32Type);
     }
     
     createInstructionArgOrNull(index): InstructionArg {
@@ -79,7 +79,7 @@ export abstract class IndexDefinition {
 export let indexConstantConverter = new IndexConstantConverter();
 export let appDataIndexConverter = new IndexRefConverter(
     INSTRUCTION_REF_PREFIX.appData,
-    unsignedInteger64Type
+    signedInteger32Type
 );
 
 

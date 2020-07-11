@@ -45,7 +45,7 @@ export interface Assembler {
     scope: Scope;
     globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
     globalFrameSize: number;
-    appDataLineList: DataLineList;
+    appDataLineList: AppDataLineList;
     headerBuffer: Buffer;
     functionTableBuffer: Buffer;
     instructionsBuffer: Buffer;
@@ -299,10 +299,8 @@ export interface InstructionLineList extends LabeledLineList {
     assembleInstructions(): Instruction[];
 }
 
-export interface DataLineList extends LabeledLineList {
+export interface AppDataLineList extends LabeledLineList {
     createBuffer(): Buffer;
-    
-    // Concrete subclasses must implement these methods:
     convertExpressionToConstant(expression: Expression): Constant;
 }
 

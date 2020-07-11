@@ -3,11 +3,9 @@ import {LineProcessor, LabelDefinitionClass} from "models/items";
 import {
     LabeledLineList as LabeledLineListInterface,
     InstructionLineList as InstructionLineListInterface,
-    DataLineList as DataLineListInterface,
+    AppDataLineList as AppDataLineListInterface,
     AssemblyLine, FunctionDefinition, Instruction, Scope, Expression, Constant
 } from "models/objects";
-
-import {unsignedInteger64Type} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 import {InstructionLabelDefinition, AppDataLabelDefinition} from "objects/labelDefinition";
@@ -117,9 +115,9 @@ export class InstructionLineList extends LabeledLineList {
     }
 }
 
-export interface DataLineList extends DataLineListInterface {}
+export interface AppDataLineList extends AppDataLineListInterface {}
 
-export class DataLineList extends LabeledLineList {
+export class AppDataLineList extends LabeledLineList {
     
     constructor(lineList: AssemblyLine[], scope: Scope) {
         super(lineList);
@@ -136,22 +134,6 @@ export class DataLineList extends LabeledLineList {
         });
     }
     
-    createBuffer(): Buffer {
-        let bufferList = [];
-        this.processLines(line => {
-            let tempBufferList = line.argList.map(arg => {
-                let tempConstant = this.convertExpressionToConstant(arg);
-                return tempConstant.createBuffer();
-            });
-            bufferList.push(Buffer.concat(tempBufferList));
-            return null;
-        });
-        return Buffer.concat(bufferList);
-    }
-}
-
-export class AppDataLineList extends DataLineList {
-    
     getLabelDefinitionClass(): LabelDefinitionClass {
         return AppDataLabelDefinition;
     }
@@ -163,6 +145,19 @@ export class AppDataLineList extends DataLineList {
             output += tempDataType.byteAmount;
         }
         return output;
+    }
+    
+    createBuffer(): Buffer {
+        let bufferList = [];
+        this.processLines(line => {
+            let tempBufferList = line.argList.map(arg => {
+                let tempConstant = this.convertExpressionToConstant(arg);
+                return tempConstant.createBuffer();
+            });
+            bufferList.push(Buffer.concat(tempBufferList));
+            return null;
+        });
+        return Buffer.concat(bufferList);
     }
     
     convertExpressionToConstant(expression: Expression): Constant {
