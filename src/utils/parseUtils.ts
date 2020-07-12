@@ -12,7 +12,7 @@ import {SubscriptExpression, ArgWord, ArgNumber, ArgString} from "objects/expres
 import {NumberConstant} from "objects/constant";
 
 import {unaryOperatorList, binaryOperatorList} from "delegates/operator";
-import {signedInteger64Type, float64Type, signedIntegerTypeList} from "delegates/dataType";
+import {compressibleIntegerType, float64Type, signedIntegerTypeList} from "delegates/dataType";
 
 const codeBlockDirectiveNameSet = ["FUNC", "APP_DATA", "MACRO"];
 
@@ -148,7 +148,7 @@ export class ParseUtils {
             } else {
                 let tempConstant = new NumberConstant(
                     parseInt(tempComponentList[0]),
-                    signedInteger64Type
+                    compressibleIntegerType
                 );
                 tempArgNumeric = new ArgNumber(tempConstant);
             }

@@ -14,6 +14,8 @@ import {IdentifierMap} from "objects/identifier";
 import {niceUtils} from "utils/niceUtils";
 import {lineUtils} from "utils/lineUtils";
 
+import {SignedIntegerType, signedInteger32Type} from "delegates/dataType";
+
 export interface LabeledLineList extends LabeledLineListInterface {}
 
 export class LabeledLineList {
@@ -142,6 +144,10 @@ export class AppDataLineList extends LabeledLineList {
         let output = 0;
         for (let expression of line.argList) {
             let tempDataType = expression.getConstantDataType();
+            if (tempDataType instanceof SignedIntegerType
+                    && tempDataType.getIsCompressible()) {
+                tempDataType = signedInteger32Type;
+            }
             output += tempDataType.byteAmount;
         }
         return output;
@@ -152,6 +158,7 @@ export class AppDataLineList extends LabeledLineList {
         this.processLines(line => {
             let tempBufferList = line.argList.map(arg => {
                 let tempConstant = this.convertExpressionToConstant(arg);
+                tempConstant.compress([signedInteger32Type]);
                 return tempConstant.createBuffer();
             });
             bufferList.push(Buffer.concat(tempBufferList));

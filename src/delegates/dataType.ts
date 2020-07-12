@@ -9,9 +9,9 @@ import {
 } from "models/delegates";
 import {mathUtils} from "utils/mathUtils";
 
+export let instructionDataTypeList: SignedIntegerType[] = [];
 export let numberTypeList: NumberType[] = [];
 export let numberTypeMap: {[name: string]: NumberType} = {};
-export let unsignedIntegerTypeList: UnsignedIntegerType[] = [];
 export let signedIntegerTypeList: SignedIntegerType[] = [];
 
 export interface DataType extends DataTypeInterface {}
@@ -48,6 +48,10 @@ export abstract class NumberType extends DataType {
     restrictNumber(value: MixedNumber): MixedNumber {
         return value;
     }
+    
+    getIsCompressible(): boolean {
+        return false;
+    }
 }
 
 export interface IntegerType extends IntegerTypeInterface {}
@@ -72,7 +76,6 @@ export class UnsignedIntegerType extends IntegerType {
     
     constructor(byteAmount: number) {
         super(byteAmount);
-        unsignedIntegerTypeList.push(this);
     }
     
     getNamePrefix(): string {
@@ -121,6 +124,9 @@ export class SignedIntegerType extends IntegerType {
         super(byteAmount);
         this.argPrefix = argPrefix;
         signedIntegerTypeList.push(this);
+        if (this.getArgPrefix() !== null) {
+            instructionDataTypeList.push(this);
+        }
     }
     
     getArgPrefix(): number {
@@ -168,6 +174,21 @@ export class SignedIntegerType extends IntegerType {
             return false;
         }
         return (dataType instanceof SignedIntegerType);
+    }
+}
+
+export class CompressibleIntegerType extends SignedIntegerType {
+    
+    constructor() {
+        super(null, 8);
+    }
+    
+    getClassMergePriority(): number {
+        return 0;
+    }
+    
+    getIsCompressible(): boolean {
+        return true;
     }
 }
 
@@ -238,15 +259,17 @@ export const signedInteger8Type = new SignedIntegerType(0, 1);
 export const signedInteger16Type = new SignedIntegerType(null, 2);
 export const signedInteger32Type = new SignedIntegerType(1, 4);
 export const signedInteger64Type = new SignedIntegerType(null, 8);
+export const compressibleIntegerType = new CompressibleIntegerType();
 export const float32Type = new FloatType(4);
 export const float64Type = new FloatType(8);
 
 for (let numberType of numberTypeList) {
-    numberTypeMap[numberType.getName()] = numberType;
+    if (!numberType.getIsCompressible()) {
+        numberTypeMap[numberType.getName()] = numberType;
+    }
 }
 
 let integerComparator = ((type1, type2) => (type1.byteAmount - type2.byteAmount));
 signedIntegerTypeList.sort(integerComparator);
-unsignedIntegerTypeList.sort(integerComparator);
 
 

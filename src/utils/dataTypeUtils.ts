@@ -18,7 +18,7 @@ export class DataTypeUtils {
     
     getNumberType(numberTypeClass: NumberTypeClass, byteAmount: number): NumberType {
         for (let numberType of numberTypeList) {
-            if (numberType instanceof numberTypeClass
+            if (numberType.constructor === numberTypeClass
                     && numberType.byteAmount === byteAmount) {
                 return numberType;
             }

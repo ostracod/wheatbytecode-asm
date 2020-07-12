@@ -7,7 +7,7 @@ import {
 } from "models/objects";
 import {DataType, IntegerType} from "models/delegates";
 
-import {UnsignedIntegerType, SignedIntegerType, unsignedIntegerTypeList, signedIntegerTypeList, signedInteger32Type, NumberType, StringType} from "delegates/dataType";
+import {SignedIntegerType, signedIntegerTypeList, compressibleIntegerType, NumberType, StringType} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 
@@ -20,7 +20,7 @@ export class Constant {
         
     }
     
-    compress(): void {
+    compress(signedIntegerTypeList: SignedIntegerType[]): void {
         // Do nothing.
         
     }
@@ -56,18 +56,14 @@ export class NumberConstant extends Constant {
         return this.numberType.convertNumberToBuffer(this.value);
     }
     
-    compress(): void {
-        let integerTypeList: IntegerType[];
-        if (this.numberType instanceof UnsignedIntegerType) {
-            integerTypeList = unsignedIntegerTypeList;
-        } else if (this.numberType instanceof SignedIntegerType) {
-            integerTypeList = signedIntegerTypeList;
-        } else {
+    compress(signedIntegerTypeList: SignedIntegerType[]): void {
+        if (!(this.numberType instanceof SignedIntegerType
+                && this.numberType.getIsCompressible())) {
             return;
         }
-        for (let integerType of integerTypeList) {
-            if (integerType.contains(this.value)) {
-                this.numberType = integerType;
+        for (let signedIntegerType of signedIntegerTypeList) {
+            if (signedIntegerType.contains(this.value)) {
+                this.numberType = signedIntegerType;
                 return;
             }
         }
@@ -141,7 +137,7 @@ let tempNumberSet = {
 
 for (let key in tempNumberSet) {
     let tempNumber = tempNumberSet[key];
-    builtInConstantSet[key] = new NumberConstant(tempNumber, signedInteger32Type);
+    builtInConstantSet[key] = new NumberConstant(tempNumber, compressibleIntegerType);
 }
 
 

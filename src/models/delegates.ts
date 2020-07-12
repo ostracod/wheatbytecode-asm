@@ -17,6 +17,7 @@ export interface DataType {
 export interface NumberType extends DataType {
     // Concrete subclasses may override these methods:
     restrictNumber(value: MixedNumber): MixedNumber;
+    getIsCompressible(): boolean;
     
     // Concrete subclasses must implement these methods:
     getNamePrefix(): string;

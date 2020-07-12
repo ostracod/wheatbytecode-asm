@@ -9,7 +9,7 @@ import {DataType} from "models/delegates";
 
 import {instructionUtils} from "utils/instructionUtils";
 
-import {signedInteger32Type} from "delegates/dataType";
+import {signedInteger32Type, compressibleIntegerType} from "delegates/dataType";
 
 import {INSTRUCTION_REF_PREFIX} from "objects/instruction";
 import {NumberConstant} from "objects/constant";
@@ -26,7 +26,7 @@ export abstract class IndexConverter {
 export class IndexConstantConverter extends IndexConverter {
     
     createConstantOrNull(index): Constant {
-        return new NumberConstant(index, signedInteger32Type);
+        return new NumberConstant(index, compressibleIntegerType);
     }
     
     createInstructionArgOrNull(index): InstructionArg {

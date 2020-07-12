@@ -1,6 +1,6 @@
 
 import {LineProcessor, ExpressionProcessor, LabelDefinitionClass, MixedNumber} from "models/items";
-import {UnaryOperator, BinaryOperator, DataType, NumberType, StringType, InstructionType} from "models/delegates";
+import {UnaryOperator, BinaryOperator, DataType, NumberType, SignedIntegerType, StringType, InstructionType} from "models/delegates";
 
 export interface Displayable {
     // Concrete subclasses must implement these methods:
@@ -100,7 +100,7 @@ export interface AssemblyLine {
 
 export interface Constant {
     // Concrete subclasses may override these methods:
-    compress(): void;
+    compress(signedIntegerTypeList: SignedIntegerType[]): void;
     
     // Concrete subclasses must implement these methods:
     getDataType(): DataType;
