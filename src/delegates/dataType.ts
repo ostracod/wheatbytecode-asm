@@ -4,12 +4,13 @@ import {
     DataType as DataTypeInterface,
     NumberType as NumberTypeInterface,
     IntegerType as IntegerTypeInterface,
+    SignedIntegerType as SignedIntegerTypeInterface,
     StringType as StringTypeInterface
 } from "models/delegates";
 import {mathUtils} from "utils/mathUtils";
 
-export let dataTypeList: DataType[] = [];
-export let dataTypeMap: {[name: string]: DataType} = {};
+export let numberTypeList: NumberType[] = [];
+export let numberTypeMap: {[name: string]: NumberType} = {};
 export let unsignedIntegerTypeList: UnsignedIntegerType[] = [];
 export let signedIntegerTypeList: SignedIntegerType[] = [];
 
@@ -17,13 +18,13 @@ export interface DataType extends DataTypeInterface {}
 
 export abstract class DataType {
     
-    constructor(argPrefix: number, byteAmount: number) {
-        this.argPrefix = argPrefix;
+    constructor(byteAmount: number) {
         this.byteAmount = byteAmount;
         this.bitAmount = this.byteAmount * 8;
-        if (argPrefix !== null) {
-            dataTypeList.push(this);
-        }
+    }
+    
+    getArgPrefix(): number {
+        return null;
     }
     
     equals(dataType: DataType): boolean {
@@ -35,8 +36,9 @@ export interface NumberType extends NumberTypeInterface {}
 
 export abstract class NumberType extends DataType {
     
-    constructor(argPrefix: number, byteAmount: number) {
-        super(argPrefix, byteAmount);
+    constructor(byteAmount: number) {
+        super(byteAmount);
+        numberTypeList.push(this);
     }
     
     getName(): string {
@@ -52,8 +54,8 @@ export interface IntegerType extends IntegerTypeInterface {}
 
 export class IntegerType extends NumberType {
     
-    constructor(argPrefix: number, byteAmount: number) {
-        super(argPrefix, byteAmount);
+    constructor(byteAmount: number) {
+        super(byteAmount);
     }
     
     getByteAmountMergePriority(): number {
@@ -68,8 +70,8 @@ export class IntegerType extends NumberType {
 
 export class UnsignedIntegerType extends IntegerType {
     
-    constructor(argPrefix: number, byteAmount: number) {
-        super(argPrefix, byteAmount);
+    constructor(byteAmount: number) {
+        super(byteAmount);
         unsignedIntegerTypeList.push(this);
     }
     
@@ -111,11 +113,18 @@ export class UnsignedIntegerType extends IntegerType {
     }
 }
 
+export interface SignedIntegerType extends SignedIntegerTypeInterface {}
+
 export class SignedIntegerType extends IntegerType {
     
     constructor(argPrefix: number, byteAmount: number) {
-        super(argPrefix, byteAmount);
+        super(byteAmount);
+        this.argPrefix = argPrefix;
         signedIntegerTypeList.push(this);
+    }
+    
+    getArgPrefix(): number {
+        return this.argPrefix;
     }
     
     getNamePrefix(): string {
@@ -164,8 +173,8 @@ export class SignedIntegerType extends IntegerType {
 
 export class FloatType extends NumberType {
     
-    constructor(argPrefix: number, byteAmount: number) {
-        super(argPrefix, byteAmount);
+    constructor(byteAmount: number) {
+        super(byteAmount);
     }
     
     getNamePrefix(): string {
@@ -206,7 +215,7 @@ export interface StringType extends StringTypeInterface {}
 export class StringType extends DataType {
     
     constructor(byteAmount: number) {
-        super(null, byteAmount);
+        super(byteAmount);
     }
     
     getName(): string {
@@ -221,19 +230,19 @@ export class StringType extends DataType {
     }
 }
 
-export const unsignedInteger8Type = new UnsignedIntegerType(1, 1);
-export const unsignedInteger16Type = new UnsignedIntegerType(2, 2);
-export const unsignedInteger32Type = new UnsignedIntegerType(3, 4);
-export const unsignedInteger64Type = new UnsignedIntegerType(4, 8);
-export const signedInteger8Type = new SignedIntegerType(5, 1);
-export const signedInteger16Type = new SignedIntegerType(6, 2);
-export const signedInteger32Type = new SignedIntegerType(7, 4);
-export const signedInteger64Type = new SignedIntegerType(8, 8);
-export const float32Type = new FloatType(9, 4);
-export const float64Type = new FloatType(10, 8);
+export const unsignedInteger8Type = new UnsignedIntegerType(1);
+export const unsignedInteger16Type = new UnsignedIntegerType(2);
+export const unsignedInteger32Type = new UnsignedIntegerType(4);
+export const unsignedInteger64Type = new UnsignedIntegerType(8);
+export const signedInteger8Type = new SignedIntegerType(0, 1);
+export const signedInteger16Type = new SignedIntegerType(null, 2);
+export const signedInteger32Type = new SignedIntegerType(1, 4);
+export const signedInteger64Type = new SignedIntegerType(null, 8);
+export const float32Type = new FloatType(4);
+export const float64Type = new FloatType(8);
 
-for (let dataType of dataTypeList) {
-    dataTypeMap[dataType.getName()] = dataType;
+for (let numberType of numberTypeList) {
+    numberTypeMap[numberType.getName()] = numberType;
 }
 
 let integerComparator = ((type1, type2) => (type1.byteAmount - type2.byteAmount));

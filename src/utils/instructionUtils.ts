@@ -13,7 +13,10 @@ export interface InstructionUtils extends InstructionUtilsInterface {}
 export class InstructionUtils {
     
     createArgBuffer(refPrefix: number, dataType: DataType, buffer: Buffer): Buffer {
-        return Buffer.concat([Buffer.from([(refPrefix << 4) + dataType.argPrefix]), buffer]);
+        return Buffer.concat([
+            Buffer.from([(refPrefix << 4) + dataType.getArgPrefix()]),
+            buffer
+        ]);
     }
     
     createInstructionArgWithIndex(refPrefix: number, dataType: DataType, index: number): InstructionArg {

@@ -173,9 +173,12 @@ export abstract class Expression {
             }
         }
         let tempConstant = this.evaluateToConstantOrNull();
-        if (tempConstant !== null && tempConstant.getDataType().argPrefix !== null) {
+        if (tempConstant !== null) {
+            // TODO: Update constant compression logic.
             tempConstant.compress();
-            return new ConstantInstructionArg(tempConstant);
+            if (tempConstant.getDataType().getArgPrefix() !== null) {
+                return new ConstantInstructionArg(tempConstant);
+            }
         }
         let tempIdentifier = this.evaluateToIdentifierOrNull();
         if (tempIdentifier !== null && !tempIdentifier.getIsBuiltIn()) {

@@ -2,7 +2,7 @@
 import {NumberTypeClass} from "models/items";
 import {DataTypeUtils as DataTypeUtilsInterface} from "models/utils";
 import {DataType, NumberType} from "models/delegates";
-import {dataTypeList, dataTypeMap} from "delegates/dataType";
+import {numberTypeList, numberTypeMap} from "delegates/dataType";
 import {AssemblyError} from "objects/assemblyError";
 
 export interface DataTypeUtils extends DataTypeUtilsInterface {}
@@ -10,19 +10,17 @@ export interface DataTypeUtils extends DataTypeUtilsInterface {}
 export class DataTypeUtils {
     
     getDataTypeByName(name: string): DataType {
-        if (!(name in dataTypeMap)) {
+        if (!(name in numberTypeMap)) {
             throw new AssemblyError("Unrecognized data type.");
         }
-        return dataTypeMap[name];
+        return numberTypeMap[name];
     }
     
     getNumberType(numberTypeClass: NumberTypeClass, byteAmount: number): NumberType {
-        for (let dataType of dataTypeList) {
-            if (dataType instanceof numberTypeClass) {
-                let tempNumberType = dataType as NumberType;
-                if (tempNumberType.byteAmount === byteAmount) {
-                    return dataType;
-                }
+        for (let numberType of numberTypeList) {
+            if (numberType instanceof numberTypeClass
+                    && numberType.byteAmount === byteAmount) {
+                return numberType;
             }
         }
         return null;

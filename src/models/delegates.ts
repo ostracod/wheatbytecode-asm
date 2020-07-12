@@ -3,9 +3,11 @@ import {MixedNumber} from "models/items";
 import {Expression, Constant, NumberConstant, InstructionArg, Identifier} from "models/objects";
 
 export interface DataType {
-    argPrefix: number;
     byteAmount: number;
     bitAmount: number;
+    
+    // Concrete subclasses may override these methods:
+    getArgPrefix(): number;
     
     // Concrete subclasses must implement these methods:
     getName(): string;
@@ -29,6 +31,10 @@ export interface IntegerType extends NumberType {
     // Concrete subclasses must implement these methods:
     getMinimumNumber(): bigint;
     getMaximumNumber(): bigint;
+}
+
+export interface SignedIntegerType extends IntegerType {
+    argPrefix: number;
 }
 
 export interface StringType extends DataType {
