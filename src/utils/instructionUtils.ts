@@ -5,6 +5,7 @@ import {InstructionArg} from "models/objects";
 
 import {compressibleIntegerType, instructionDataTypeList} from "delegates/dataType";
 
+import {AssemblyError} from "objects/assemblyError";
 import {NumberConstant} from "objects/constant";
 import {InstructionRef, ConstantInstructionArg, RefInstructionArg} from "objects/instruction";
 
@@ -13,8 +14,12 @@ export interface InstructionUtils extends InstructionUtilsInterface {}
 export class InstructionUtils {
     
     createArgBuffer(refPrefix: number, dataType: DataType, buffer: Buffer): Buffer {
+        const dataTypePrefix = dataType.getArgPrefix();
+        if (dataTypePrefix === null) {
+            throw new AssemblyError("Unsupported argument data type.");
+        }
         return Buffer.concat([
-            Buffer.from([(refPrefix << 4) + dataType.getArgPrefix()]),
+            Buffer.from([(refPrefix << 4) + dataTypePrefix]),
             buffer
         ]);
     }

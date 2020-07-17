@@ -187,6 +187,10 @@ export class CompressibleIntegerType extends SignedIntegerType {
         return 0;
     }
     
+    getByteAmountMergePriority(): number {
+        return 0;
+    }
+    
     getIsCompressible(): boolean {
         return true;
     }
