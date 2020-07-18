@@ -6,14 +6,19 @@ import {
     InstructionArg as InstructionArgInterface,
     ConstantInstructionArg as ConstantInstructionArgInterface,
     RefInstructionArg as RefInstructionArgInterface,
-    Constant
+    IndexInstructionArg as IndexInstructionArgInterface,
+    Constant, IndexDefinition
 } from "models/objects";
 import {InstructionType, DataType} from "models/delegates";
 
 import {mathUtils} from "utils/mathUtils";
 import {instructionUtils} from "utils/instructionUtils";
 
+import {NumberType, signedInteger32Type} from "delegates/dataType";
+
+import {AssemblyError} from "objects/assemblyError";
 import {SerializableLine} from "objects/serializableLine";
+import {NumberConstant} from "objects/constant";
 
 export const INSTRUCTION_REF_PREFIX = {
     constant: 0,
@@ -128,11 +133,7 @@ export class ConstantInstructionArg extends InstructionArg {
     }
     
     createBuffer(): Buffer {
-        return instructionUtils.createArgBuffer(
-            INSTRUCTION_REF_PREFIX.constant,
-            this.constant.getDataType(),
-            this.constant.createBuffer()
-        );
+        return instructionUtils.createConstantArgBuffer(this.constant);
     }
 }
 
@@ -161,6 +162,36 @@ export class RefInstructionArg extends InstructionArg {
     
     createBuffer(): Buffer {
         return this.instructionRef.createBuffer(this.dataType, this.indexArg);
+    }
+}
+
+export interface IndexInstructionArg extends IndexInstructionArgInterface {}
+
+export class IndexInstructionArg extends InstructionArg {
+    
+    constructor(indexDefinition: IndexDefinition) {
+        super();
+        this.indexDefinition = indexDefinition;
+        this.dataType = signedInteger32Type;
+    }
+    
+    getDataType(): DataType {
+        return this.dataType;
+    }
+    
+    setDataType(dataType: DataType): void {
+        this.dataType = dataType;
+    }
+    
+    createBuffer(): Buffer {
+        if (!(this.dataType instanceof NumberType)) {
+            throw new AssemblyError("Expected number type.");
+        }
+        let tempConstant = new NumberConstant(
+            this.indexDefinition.index,
+            this.dataType as NumberType
+        );
+        return instructionUtils.createConstantArgBuffer(tempConstant);
     }
 }
 

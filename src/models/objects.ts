@@ -10,7 +10,7 @@ export interface Displayable {
 export interface IndexConverter {
     // Concrete subclasses must implement these methods:
     createConstantOrNull(index: number): Constant;
-    createInstructionArgOrNull(index: number): InstructionArg;
+    createInstructionArgOrNull(indexDefinition: IndexDefinition): InstructionArg;
 }
 
 export interface IndexRefConverter {
@@ -350,6 +350,11 @@ export interface RefInstructionArg extends InstructionArg {
     instructionRef: InstructionRef;
     dataType: DataType;
     indexArg: InstructionArg;
+}
+
+export interface IndexInstructionArg extends InstructionArg {
+    indexDefinition: IndexDefinition;
+    dataType: DataType;
 }
 
 

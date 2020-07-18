@@ -11,7 +11,7 @@ import {instructionUtils} from "utils/instructionUtils";
 
 import {signedInteger32Type, compressibleIntegerType} from "delegates/dataType";
 
-import {INSTRUCTION_REF_PREFIX} from "objects/instruction";
+import {INSTRUCTION_REF_PREFIX, IndexInstructionArg} from "objects/instruction";
 import {NumberConstant} from "objects/constant";
 
 export interface IndexConverter extends IndexConverterInterface {}
@@ -29,8 +29,12 @@ export class IndexConstantConverter extends IndexConverter {
         return new NumberConstant(index, compressibleIntegerType);
     }
     
-    createInstructionArgOrNull(index): InstructionArg {
-        return null;
+    createInstructionArgOrNull(indexDefinition: IndexDefinition): InstructionArg {
+        if (indexDefinition.index === null) {
+            return new IndexInstructionArg(indexDefinition);
+        } else {
+            return null;
+        }
     }
 }
 
@@ -48,11 +52,11 @@ export class IndexRefConverter extends IndexConverter {
         return null;
     }
     
-    createInstructionArgOrNull(index): InstructionArg {
+    createInstructionArgOrNull(indexDefinition: IndexDefinition): InstructionArg {
         return instructionUtils.createInstructionArgWithIndex(
             this.instructionRefPrefix,
             this.dataType,
-            index
+            indexDefinition.index
         );
     }
 }
@@ -72,7 +76,7 @@ export abstract class IndexDefinition {
     }
     
     createInstructionArgOrNull(): InstructionArg {
-        return this.indexConverter.createInstructionArgOrNull(this.index);
+        return this.indexConverter.createInstructionArgOrNull(this);
     }
 }
 

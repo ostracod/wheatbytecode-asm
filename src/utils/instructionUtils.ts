@@ -1,13 +1,13 @@
 
 import {InstructionUtils as InstructionUtilsInterface} from "models/utils";
 import {DataType} from "models/delegates";
-import {InstructionArg} from "models/objects";
+import {Constant, InstructionArg} from "models/objects";
 
 import {compressibleIntegerType, instructionDataTypeList} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 import {NumberConstant} from "objects/constant";
-import {InstructionRef, ConstantInstructionArg, RefInstructionArg} from "objects/instruction";
+import {INSTRUCTION_REF_PREFIX, InstructionRef, ConstantInstructionArg, RefInstructionArg} from "objects/instruction";
 
 export interface InstructionUtils extends InstructionUtilsInterface {}
 
@@ -22,6 +22,14 @@ export class InstructionUtils {
             Buffer.from([(refPrefix << 4) + dataTypePrefix]),
             buffer
         ]);
+    }
+    
+    createConstantArgBuffer(constant: Constant): Buffer {
+        return instructionUtils.createArgBuffer(
+            INSTRUCTION_REF_PREFIX.constant,
+            constant.getDataType(),
+            constant.createBuffer()
+        );
     }
     
     createInstructionArgWithIndex(refPrefix: number, dataType: DataType, index: number): InstructionArg {
