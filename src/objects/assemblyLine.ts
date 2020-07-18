@@ -10,6 +10,7 @@ import {instructionTypeMap} from "delegates/instructionType";
 
 import {AssemblyError} from "objects/assemblyError";
 import {Instruction} from "objects/instruction";
+import {AppData} from "objects/serializableLine";
 
 export interface AssemblyLine extends AssemblyLineInterface {}
 
@@ -85,6 +86,10 @@ export class AssemblyLine {
             return expression.evaluateToInstructionArg();
         });
         return new Instruction(tempInstructionType, tempArgList);
+    }
+    
+    assembleAppData(): AppData {
+        return new AppData(this.argList);
     }
 }
 

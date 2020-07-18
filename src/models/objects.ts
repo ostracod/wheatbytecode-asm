@@ -96,6 +96,7 @@ export interface AssemblyLine {
         shouldRecurAfterProcess?: boolean
     ): void;
     assembleInstruction(): Instruction;
+    assembleAppData(): AppData;
 }
 
 export interface Constant {
@@ -207,7 +208,7 @@ export interface FunctionImplementation {
     extractDefinitions(): void;
     extractLocalVariableDefinitions(): void;
     populateScopeDefinitions(): void;
-    assembleInstructions(): void;
+    assembleInstructions(): Buffer;
 }
 
 export interface FunctionDefinition extends IndexDefinition {
@@ -280,36 +281,45 @@ export interface ArgVariableDefinition extends VariableDefinition {
 
 export interface LabeledLineList {
     lineList: AssemblyLine[];
+    serializableLineList: SerializableLine[];
     labelDefinitionMap: IdentifierMap<LabelDefinition>;
     
     populateScope(scope: Scope): void;
     processLines(processLine: LineProcessor): void;
-    getLineElementIndexMap(): {[lineIndex: number]: number};
+    getLineBufferIndexMap(): {[lineIndex: number]: number};
     getDisplayString(title: string, indentationLevel?: number): string;
     populateLabelDefinitionIndexes(): void;
+    assembleSerializableLines(): void;
+    createBuffer(): Buffer;
     
     // Concrete subclasses may override these methods:
     extractLabelDefinitions(): void;
     
     // Concrete subclasses must implement these methods:
     getLabelDefinitionClass(): LabelDefinitionClass;
-    getLineElementLength(line: AssemblyLine): number;
+    assembleSerializableLine(line: AssemblyLine): SerializableLine;
 }
 
 export interface InstructionLineList extends LabeledLineList {
-    assembleInstructions(): Instruction[];
+    
 }
 
 export interface AppDataLineList extends LabeledLineList {
-    createBuffer(): Buffer;
-    convertExpressionToConstant(expression: Expression): Constant;
+    
 }
 
-export interface Instruction extends Displayable {
+export interface SerializableLine extends Displayable {
+    getBufferLength(): number;
+    createBuffer(): Buffer;
+}
+
+export interface AppData extends SerializableLine {
+    expressionList: Expression[];
+}
+
+export interface Instruction extends SerializableLine {
     instructionType: InstructionType;
     argList: InstructionArg[];
-    
-    createBuffer(): Buffer;
 }
 
 export interface InstructionRef {

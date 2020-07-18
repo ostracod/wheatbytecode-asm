@@ -4,7 +4,7 @@ import {
     LabeledLineList as LabeledLineListInterface,
     InstructionLineList as InstructionLineListInterface,
     AppDataLineList as AppDataLineListInterface,
-    AssemblyLine, FunctionDefinition, Instruction, Scope, Expression, Constant
+    AssemblyLine, Scope, SerializableLine
 } from "models/objects";
 
 import {AssemblyError} from "objects/assemblyError";
@@ -22,6 +22,7 @@ export class LabeledLineList {
     
     constructor(lineList: AssemblyLine[]) {
         this.lineList = lineList;
+        this.serializableLineList = null;
         this.labelDefinitionMap = null;
     }
     
@@ -37,17 +38,17 @@ export class LabeledLineList {
         this.lineList = tempResult.lineList;
     }
     
-    getLineElementIndexMap(): {[lineIndex: number]: number} {
+    getLineBufferIndexMap(): {[lineIndex: number]: number} {
         let output = {};
-        let elementIndex = 0;
+        let bufferIndex = 0;
         let lineIndex = 0;
-        output[lineIndex] = elementIndex;
-        this.processLines(line => {
+        output[lineIndex] = bufferIndex;
+        while (lineIndex < this.serializableLineList.length) {
+            let tempLine = this.serializableLineList[lineIndex];
+            bufferIndex += tempLine.getBufferLength();
             lineIndex += 1;
-            elementIndex += this.getLineElementLength(line);
-            output[lineIndex] = elementIndex;
-            return null;
-        });
+            output[lineIndex] = bufferIndex;
+        }
         return output;
     }
     
@@ -72,9 +73,9 @@ export class LabeledLineList {
     }
     
     populateLabelDefinitionIndexes(): void {
-        let lineElementIndexMap = this.getLineElementIndexMap();
+        let lineBufferIndexMap = this.getLineBufferIndexMap();
         this.labelDefinitionMap.iterate(labelDefinition => {
-            labelDefinition.index = lineElementIndexMap[labelDefinition.lineIndex];
+            labelDefinition.index = lineBufferIndexMap[labelDefinition.lineIndex];
         });
     }
     
@@ -95,6 +96,21 @@ export class LabeledLineList {
         ));
         return niceUtils.joinTextList(tempTextList);
     }
+    
+    assembleSerializableLines(): void {
+        this.serializableLineList = [];
+        this.processLines(line => {
+            this.serializableLineList.push(this.assembleSerializableLine(line));
+            return null;
+        });
+    }
+    
+    createBuffer(): Buffer {
+        this.assembleSerializableLines();
+        this.populateLabelDefinitionIndexes();
+        const bufferList = this.serializableLineList.map(line => line.createBuffer());
+        return Buffer.concat(bufferList);
+    }
 }
 
 export interface InstructionLineList extends InstructionLineListInterface {}
@@ -105,18 +121,8 @@ export class InstructionLineList extends LabeledLineList {
         return InstructionLabelDefinition;
     }
     
-    getLineElementLength(line: AssemblyLine): number {
-        return 1;
-    }
-    
-    assembleInstructions(): Instruction[] {
-        this.populateLabelDefinitionIndexes();
-        let output = [];
-        this.processLines(line => {
-            output.push(line.assembleInstruction());
-            return null;
-        });
-        return output;
+    assembleSerializableLine(line: AssemblyLine): SerializableLine {
+        return line.assembleInstruction();
     }
 }
 
@@ -143,36 +149,8 @@ export class AppDataLineList extends LabeledLineList {
         return AppDataLabelDefinition;
     }
     
-    getLineElementLength(line: AssemblyLine): number {
-        let output = 0;
-        for (let expression of line.argList) {
-            let tempDataType = expression.getConstantDataType();
-            if (tempDataType instanceof SignedIntegerType
-                    && tempDataType.getIsCompressible()) {
-                tempDataType = signedInteger32Type;
-            }
-            output += tempDataType.byteAmount;
-        }
-        return output;
-    }
-    
-    createBuffer(): Buffer {
-        this.populateLabelDefinitionIndexes();
-        let bufferList = [];
-        this.processLines(line => {
-            let tempBufferList = line.argList.map(arg => {
-                let tempConstant = this.convertExpressionToConstant(arg);
-                tempConstant.compress([signedInteger32Type]);
-                return tempConstant.createBuffer();
-            });
-            bufferList.push(Buffer.concat(tempBufferList));
-            return null;
-        });
-        return Buffer.concat(bufferList);
-    }
-    
-    convertExpressionToConstant(expression: Expression): Constant {
-        return expression.evaluateToConstant();
+    assembleSerializableLine(line: AssemblyLine): SerializableLine {
+        return line.assembleAppData();
     }
 }
 

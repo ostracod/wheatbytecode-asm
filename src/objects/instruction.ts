@@ -9,8 +9,11 @@ import {
     Constant
 } from "models/objects";
 import {InstructionType, DataType} from "models/delegates";
+
 import {mathUtils} from "utils/mathUtils";
 import {instructionUtils} from "utils/instructionUtils";
+
+import {SerializableLine} from "objects/serializableLine";
 
 export const INSTRUCTION_REF_PREFIX = {
     constant: 0,
@@ -24,9 +27,10 @@ export const INSTRUCTION_REF_PREFIX = {
 
 export interface Instruction extends InstructionInterface {}
 
-export class Instruction {
+export class Instruction extends SerializableLine {
     
     constructor(instructionType: InstructionType, argList: InstructionArg[]) {
+        super();
         this.instructionType = instructionType;
         this.argList = argList;
     }
@@ -38,6 +42,11 @@ export class Instruction {
             output += " " + tempTextList.join(", ");
         }
         return output;
+    }
+    
+    getBufferLength(): number {
+        // TODO: Fix this.
+        return 1;
     }
     
     createBuffer(): Buffer {

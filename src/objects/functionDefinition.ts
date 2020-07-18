@@ -3,7 +3,7 @@ import {LineProcessor} from "models/items";
 import {
     FunctionImplementation as FunctionImplementationInterface,
     FunctionDefinition as FunctionDefinitionInterface,
-    AssemblyLine, Expression
+    AssemblyLine, Expression, Instruction
 } from "models/objects";
 
 import {niceUtils} from "utils/niceUtils";
@@ -25,7 +25,7 @@ export class FunctionImplementation {
         this.functionDefinition = functionDefinition;
         this.localVariableDefinitionMap = new IdentifierMap();
         this.localFrameSize = null;
-        this.instructionList = [];
+        this.instructionList = null;
     }
     
     getDisplayString(indentationLevel: number): string {
@@ -45,11 +45,13 @@ export class FunctionImplementation {
             "Instruction body",
             indentationLevel
         ));
-        tempTextList.push(niceUtils.getDisplayableListDisplayString(
-            "Assembled instructions",
-            this.instructionList,
-            indentationLevel
-        ));
+        if (this.instructionList !== null) {
+            tempTextList.push(niceUtils.getDisplayableListDisplayString(
+                "Assembled instructions",
+                this.instructionList,
+                indentationLevel
+            ));
+        }
         tempTextList.push(niceUtils.getIdentifierMapDisplayString(
             "Local variables",
             this.localVariableDefinitionMap,
@@ -96,8 +98,11 @@ export class FunctionImplementation {
         );
     }
     
-    assembleInstructions(): void {
-        this.instructionList = this.getLineList().assembleInstructions();
+    assembleInstructions(): Buffer {
+        let tempLineList = this.getLineList();
+        const output = tempLineList.createBuffer();
+        this.instructionList = tempLineList.serializableLineList as Instruction[];
+        return output;
     }
 }
 
@@ -193,12 +198,7 @@ export class FunctionDefinition extends IndexDefinition {
     }
     
     createInstructionsBuffer(): Buffer {
-        this.functionImplementation.assembleInstructions();
-        return Buffer.concat(
-            this.functionImplementation.instructionList.map(instruction => {
-                return instruction.createBuffer()
-            })
-        );
+        return this.functionImplementation.assembleInstructions();
     }
 }
 
