@@ -326,6 +326,7 @@ export interface InstructionRef {
     argPrefix: number;
     
     // Concrete subclasses may override these methods:
+    getBufferLength(indexArg: InstructionArg): number;
     createBuffer(dataType: DataType, indexArg: InstructionArg): Buffer;
 }
 
@@ -339,6 +340,7 @@ export interface InstructionArg {
     // Concrete subclasses must implement these methods:
     getDataType(): DataType;
     setDataType(dataType: DataType): void;
+    getBufferLength(): number;
     createBuffer(): Buffer;
 }
 

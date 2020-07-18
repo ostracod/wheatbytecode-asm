@@ -13,6 +13,10 @@ export interface InstructionUtils extends InstructionUtilsInterface {}
 
 export class InstructionUtils {
     
+    getArgBufferLength(bufferLength: number) {
+        return 1 + bufferLength;
+    }
+    
     createArgBuffer(refPrefix: number, dataType: DataType, buffer: Buffer): Buffer {
         const dataTypePrefix = dataType.getArgPrefix();
         if (dataTypePrefix === null) {
@@ -22,6 +26,10 @@ export class InstructionUtils {
             Buffer.from([(refPrefix << 4) + dataTypePrefix]),
             buffer
         ]);
+    }
+    
+    getConstantArgBufferLength(dataType: DataType) {
+        return instructionUtils.getArgBufferLength(dataType.byteAmount);
     }
     
     createConstantArgBuffer(constant: Constant): Buffer {

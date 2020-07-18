@@ -41,7 +41,7 @@ export class Instruction extends SerializableLine {
     }
     
     getDisplayString(): string {
-        let output = mathUtils.convertNumberToHexadecimal(this.instructionType.opcode, 4);
+        let output = mathUtils.convertNumberToHexadecimal(this.instructionType.opcode, 2);
         if (this.argList.length > 0) {
             let tempTextList = this.argList.map(arg => arg.getDisplayString());
             output += " " + tempTextList.join(", ");
@@ -50,14 +50,15 @@ export class Instruction extends SerializableLine {
     }
     
     getBufferLength(): number {
-        // TODO: Fix this.
-        return 1;
+        let output = 1;
+        for (const arg of this.argList) {
+            output += arg.getBufferLength();
+        }
+        return output;
     }
     
     createBuffer(): Buffer {
-        let tempBuffer = Buffer.alloc(3);
-        tempBuffer.writeUInt16LE(this.instructionType.opcode, 0);
-        tempBuffer.writeUInt8(this.argList.length, 2);
+        let tempBuffer = Buffer.from([this.instructionType.opcode]);
         let tempBufferList = [tempBuffer].concat(
             this.argList.map(arg => arg.createBuffer())
         );
@@ -71,6 +72,10 @@ export class InstructionRef {
     
     constructor(argPrefix: number) {
         this.argPrefix = argPrefix;
+    }
+    
+    getBufferLength(indexArg: InstructionArg): number {
+        return instructionUtils.getArgBufferLength(indexArg.getBufferLength());
     }
     
     createBuffer(dataType: DataType, indexArg: InstructionArg): Buffer {
@@ -89,6 +94,12 @@ export class PointerInstructionRef extends InstructionRef {
     constructor(pointerArg: InstructionArg) {
         super(INSTRUCTION_REF_PREFIX.heapAlloc);
         this.pointerArg = pointerArg;
+    }
+    
+    getBufferLength(indexArg: InstructionArg): number {
+        return instructionUtils.getArgBufferLength(
+            this.pointerArg.getBufferLength() + indexArg.getBufferLength()
+        );
     }
     
     createBuffer(dataType: DataType, indexArg: InstructionArg): Buffer {
@@ -132,6 +143,10 @@ export class ConstantInstructionArg extends InstructionArg {
         this.constant.setDataType(dataType);
     }
     
+    getBufferLength(): number {
+        return instructionUtils.getConstantArgBufferLength(this.getDataType());
+    }
+    
     createBuffer(): Buffer {
         return instructionUtils.createConstantArgBuffer(this.constant);
     }
@@ -160,6 +175,10 @@ export class RefInstructionArg extends InstructionArg {
         this.dataType = dataType;
     }
     
+    getBufferLength(): number {
+        return 1 + this.instructionRef.getBufferLength(this.indexArg);
+    }
+    
     createBuffer(): Buffer {
         return this.instructionRef.createBuffer(this.dataType, this.indexArg);
     }
@@ -181,6 +200,10 @@ export class IndexInstructionArg extends InstructionArg {
     
     setDataType(dataType: DataType): void {
         this.dataType = dataType;
+    }
+    
+    getBufferLength(): number {
+        return instructionUtils.getConstantArgBufferLength(this.dataType);
     }
     
     createBuffer(): Buffer {

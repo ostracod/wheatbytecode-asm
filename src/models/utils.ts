@@ -100,7 +100,9 @@ export interface VariableUtils {
 }
 
 export interface InstructionUtils {
+    getArgBufferLength(bufferLength: number);
     createArgBuffer(refPrefix: number, dataType: DataType, buffer: Buffer): Buffer;
+    getConstantArgBufferLength(dataType: DataType);
     createConstantArgBuffer(constant: Constant): Buffer;
     createInstructionArgWithIndex(
         refPrefix: number,
