@@ -69,10 +69,12 @@ export class LabeledLineList {
             index += 1;
             return null;
         });
+    }
+    
+    populateLabelDefinitionIndexes(): void {
         let lineElementIndexMap = this.getLineElementIndexMap();
         this.labelDefinitionMap.iterate(labelDefinition => {
             labelDefinition.index = lineElementIndexMap[labelDefinition.lineIndex];
-            index += 1;
         });
     }
     
@@ -108,6 +110,7 @@ export class InstructionLineList extends LabeledLineList {
     }
     
     assembleInstructions(): Instruction[] {
+        this.populateLabelDefinitionIndexes();
         let output = [];
         this.processLines(line => {
             output.push(line.assembleInstruction());
@@ -154,6 +157,7 @@ export class AppDataLineList extends LabeledLineList {
     }
     
     createBuffer(): Buffer {
+        this.populateLabelDefinitionIndexes();
         let bufferList = [];
         this.processLines(line => {
             let tempBufferList = line.argList.map(arg => {

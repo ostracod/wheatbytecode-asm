@@ -363,6 +363,10 @@ export class Assembler {
         this.headerBuffer.writeUInt32LE(this.globalFrameSize, 0);
         this.headerBuffer.writeUInt32LE(functionDefinitionList.length, 4);
         
+        // Create app data buffer. This must happen before assembling
+        // instructions, because instructions may use app data labels.
+        this.appDataBuffer = this.appDataLineList.createBuffer();
+        
         // Create function table buffer and instructions buffer.
         let functionTableSize = functionDefinitionList.length * functionTableEntrySize;
         let instructionsFilePos = this.headerBuffer.length + functionTableSize;
@@ -382,10 +386,9 @@ export class Assembler {
         this.instructionsBuffer = Buffer.concat(instructionsBufferList);
         assert(functionTableSize === this.functionTableBuffer.length);
         
-        // Populate app data file position, then create app data buffer.
+        // Populate app data file position.
         this.headerBuffer.writeUInt32LE(this.headerBuffer.length
             + this.functionTableBuffer.length + this.instructionsBuffer.length, 8);
-        this.appDataBuffer = this.appDataLineList.createBuffer();
         
         // Concatenate everything together.
         this.fileBuffer = Buffer.concat([

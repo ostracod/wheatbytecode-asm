@@ -286,6 +286,7 @@ export interface LabeledLineList {
     processLines(processLine: LineProcessor): void;
     getLineElementIndexMap(): {[lineIndex: number]: number};
     getDisplayString(title: string, indentationLevel?: number): string;
+    populateLabelDefinitionIndexes(): void;
     
     // Concrete subclasses may override these methods:
     extractLabelDefinitions(): void;
