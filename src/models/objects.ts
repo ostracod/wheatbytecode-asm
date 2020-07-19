@@ -1,5 +1,5 @@
 
-import {LineProcessor, ExpressionProcessor, LabelDefinitionClass, MixedNumber} from "models/items";
+import {LineProcessor, ExpressionProcessor, InstructionArgProcessor, LabelDefinitionClass, MixedNumber} from "models/items";
 import {UnaryOperator, BinaryOperator, DataType, NumberType, SignedIntegerType, StringType, InstructionType} from "models/delegates";
 
 export interface Displayable {
@@ -288,12 +288,12 @@ export interface LabeledLineList {
     processLines(processLine: LineProcessor): void;
     getLineBufferIndexMap(): {[lineIndex: number]: number};
     getDisplayString(title: string, indentationLevel?: number): string;
-    populateLabelDefinitionIndexes(): void;
     assembleSerializableLines(): void;
     createBuffer(): Buffer;
     
     // Concrete subclasses may override these methods:
     extractLabelDefinitions(): void;
+    populateLabelDefinitionIndexes(): boolean;
     
     // Concrete subclasses must implement these methods:
     getLabelDefinitionClass(): LabelDefinitionClass;
@@ -320,12 +320,15 @@ export interface AppData extends SerializableLine {
 export interface Instruction extends SerializableLine {
     instructionType: InstructionType;
     argList: InstructionArg[];
+    
+    processArgs(processArg: InstructionArgProcessor): void;
 }
 
 export interface InstructionRef {
     argPrefix: number;
     
     // Concrete subclasses may override these methods:
+    processArgs(processArg: InstructionArgProcessor): void;
     getBufferLength(indexArg: InstructionArg): number;
     createBuffer(dataType: DataType, indexArg: InstructionArg): Buffer;
 }
@@ -336,6 +339,10 @@ export interface PointerInstructionRef extends InstructionRef {
 
 export interface InstructionArg {
     getDisplayString(): string;
+    
+    // Concrete subclasses may override these methods:
+    processArgs(processArg: InstructionArgProcessor): void;
+    compress(): boolean;
     
     // Concrete subclasses must implement these methods:
     getDataType(): DataType;

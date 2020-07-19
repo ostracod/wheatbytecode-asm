@@ -4,7 +4,7 @@ import {
     LabeledLineList as LabeledLineListInterface,
     InstructionLineList as InstructionLineListInterface,
     AppDataLineList as AppDataLineListInterface,
-    AssemblyLine, Scope, SerializableLine
+    AssemblyLine, Scope, SerializableLine, Instruction
 } from "models/objects";
 
 import {AssemblyError} from "objects/assemblyError";
@@ -72,11 +72,13 @@ export class LabeledLineList {
         });
     }
     
-    populateLabelDefinitionIndexes(): void {
+    // Returns whether we should repeat this function again.
+    populateLabelDefinitionIndexes(): boolean {
         let lineBufferIndexMap = this.getLineBufferIndexMap();
         this.labelDefinitionMap.iterate(labelDefinition => {
             labelDefinition.index = lineBufferIndexMap[labelDefinition.lineIndex];
         });
+        return false;
     }
     
     getDisplayString(title: string, indentationLevel?: number): string {
@@ -107,7 +109,12 @@ export class LabeledLineList {
     
     createBuffer(): Buffer {
         this.assembleSerializableLines();
-        this.populateLabelDefinitionIndexes();
+        while (true) {
+            const tempResult = this.populateLabelDefinitionIndexes();
+            if (!tempResult) {
+                break;
+            }
+        }
         const bufferList = this.serializableLineList.map(line => line.createBuffer());
         return Buffer.concat(bufferList);
     }
@@ -119,6 +126,21 @@ export class InstructionLineList extends LabeledLineList {
     
     getLabelDefinitionClass(): LabelDefinitionClass {
         return InstructionLabelDefinition;
+    }
+    
+    populateLabelDefinitionIndexes(): boolean {
+        super.populateLabelDefinitionIndexes();
+        let output = false;
+        for (const serializableLine of this.serializableLineList) {
+            let tempInstruction = serializableLine as Instruction;
+            tempInstruction.processArgs(arg => {
+                const tempResult = arg.compress();
+                if (tempResult) {
+                    output = true;
+                }
+            });
+        }
+        return output;
     }
     
     assembleSerializableLine(line: AssemblyLine): SerializableLine {

@@ -11,12 +11,13 @@ import {
     RefInstructionArg as RefInstructionArgInterface,
     Constant, IndexDefinition, Expression
 } from "models/objects";
+import {InstructionArgProcessor} from "models/items";
 import {InstructionType, DataType} from "models/delegates";
 
 import {mathUtils} from "utils/mathUtils";
 import {instructionUtils} from "utils/instructionUtils";
 
-import {NumberType, SignedIntegerType, signedInteger32Type} from "delegates/dataType";
+import {NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 import {SerializableLine} from "objects/serializableLine";
@@ -66,6 +67,12 @@ export class Instruction extends SerializableLine {
         );
         return Buffer.concat(tempBufferList);
     }
+    
+    processArgs(processArg: InstructionArgProcessor): void {
+        for (const arg of this.argList) {
+            arg.processArgs(processArg);
+        }
+    }
 }
 
 export interface InstructionRef extends InstructionRefInterface {}
@@ -74,6 +81,11 @@ export class InstructionRef {
     
     constructor(argPrefix: number) {
         this.argPrefix = argPrefix;
+    }
+    
+    processArgs(processArg: InstructionArgProcessor): void {
+        // Do nothing.
+        
     }
     
     getBufferLength(indexArg: InstructionArg): number {
@@ -96,6 +108,10 @@ export class PointerInstructionRef extends InstructionRef {
     constructor(pointerArg: InstructionArg) {
         super(INSTRUCTION_REF_PREFIX.heapAlloc);
         this.pointerArg = pointerArg;
+    }
+    
+    processArgs(processArg: InstructionArgProcessor): void {
+        this.pointerArg.processArgs(processArg);
     }
     
     getBufferLength(indexArg: InstructionArg): number {
@@ -125,6 +141,14 @@ export class InstructionArg {
     getDisplayString(): string {
         let tempBuffer = this.createBuffer();
         return `{${mathUtils.convertBufferToHexadecimal(tempBuffer)}}`;
+    }
+    
+    processArgs(processArg: InstructionArgProcessor): void {
+        processArg(this);
+    }
+    
+    compress(): boolean {
+        return false;
     }
 }
 
@@ -171,6 +195,16 @@ export class IndexInstructionArg extends ConstantInstructionArg {
         super();
         this.indexDefinition = indexDefinition;
         this.dataType = signedInteger32Type;
+    }
+    
+    compress(): boolean {
+        if (this.dataType !== signedInteger8Type
+                && signedInteger8Type.contains(this.indexDefinition.index)) {
+            this.dataType = signedInteger8Type;
+            return true;
+        } else {
+            return false;
+        }
     }
     
     getDataType(): DataType {
@@ -245,6 +279,12 @@ export class RefInstructionArg extends InstructionArg {
         this.instructionRef = instructionRef;
         this.dataType = dataType;
         this.indexArg = indexArg;
+    }
+    
+    processArgs(processArg: InstructionArgProcessor): void {
+        super.processArgs(processArg);
+        this.instructionRef.processArgs(processArg);
+        this.indexArg.processArgs(processArg);
     }
     
     getDataType(): DataType {

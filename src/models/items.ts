@@ -1,10 +1,12 @@
 
 import {NumberType} from "models/delegates";
-import {Expression, AssemblyLine, VariableDefinition, LabelDefinition, ArgNumber} from "models/objects";
+import {Expression, AssemblyLine, VariableDefinition, LabelDefinition, ArgNumber, InstructionArg} from "models/objects";
 
 export type ExpressionProcessor = ((expression: Expression) => Expression);
 
 export type LineProcessor = ((line: AssemblyLine) => AssemblyLine[]);
+
+export type InstructionArgProcessor = ((arg: InstructionArg) => void);
 
 export type NumberTypeClass = (new (...args: any[]) => NumberType);
 
