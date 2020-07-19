@@ -16,7 +16,7 @@ import {
 
 import {AssemblyError} from "objects/assemblyError";
 import {Identifier, MacroIdentifier} from "objects/identifier";
-import {InstructionRef, PointerInstructionRef, ConstantInstructionArg, RefInstructionArg, nameInstructionRefMap} from "objects/instruction";
+import {InstructionRef, PointerInstructionRef, ResolvedConstantInstructionArg, RefInstructionArg, nameInstructionRefMap} from "objects/instruction";
 import {builtInConstantSet, NumberConstant, StringConstant} from "objects/constant";
 
 import {compressibleIntegerType, instructionDataTypeList, StringType} from "delegates/dataType";
@@ -175,9 +175,7 @@ export abstract class Expression {
         let tempConstant = this.evaluateToConstantOrNull();
         if (tempConstant !== null) {
             tempConstant.compress(instructionDataTypeList);
-            if (tempConstant.getDataType().getArgPrefix() !== null) {
-                return new ConstantInstructionArg(tempConstant);
-            }
+            return new ResolvedConstantInstructionArg(tempConstant);
         }
         let tempIdentifier = this.evaluateToIdentifierOrNull();
         if (tempIdentifier !== null && !tempIdentifier.getIsBuiltIn()) {

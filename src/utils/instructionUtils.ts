@@ -7,7 +7,7 @@ import {compressibleIntegerType, instructionDataTypeList} from "delegates/dataTy
 
 import {AssemblyError} from "objects/assemblyError";
 import {NumberConstant} from "objects/constant";
-import {INSTRUCTION_REF_PREFIX, InstructionRef, ConstantInstructionArg, RefInstructionArg} from "objects/instruction";
+import {INSTRUCTION_REF_PREFIX, InstructionRef, ResolvedConstantInstructionArg, RefInstructionArg} from "objects/instruction";
 
 export interface InstructionUtils extends InstructionUtilsInterface {}
 
@@ -44,7 +44,7 @@ export class InstructionUtils {
         let tempRef = new InstructionRef(refPrefix);
         let tempNumberConstant = new NumberConstant(index, compressibleIntegerType);
         tempNumberConstant.compress(instructionDataTypeList);
-        let tempArg = new ConstantInstructionArg(tempNumberConstant);
+        let tempArg = new ResolvedConstantInstructionArg(tempNumberConstant);
         return new RefInstructionArg(tempRef, dataType, tempArg);
     }
 }

@@ -345,18 +345,23 @@ export interface InstructionArg {
 }
 
 export interface ConstantInstructionArg extends InstructionArg {
+    // Concrete subclasses must implement these methods:
+    getConstant(): Constant;
+}
+
+export interface ResolvedConstantInstructionArg extends ConstantInstructionArg {
     constant: Constant;
+}
+
+export interface IndexInstructionArg extends ConstantInstructionArg {
+    indexDefinition: IndexDefinition;
+    dataType: DataType;
 }
 
 export interface RefInstructionArg extends InstructionArg {
     instructionRef: InstructionRef;
     dataType: DataType;
     indexArg: InstructionArg;
-}
-
-export interface IndexInstructionArg extends InstructionArg {
-    indexDefinition: IndexDefinition;
-    dataType: DataType;
 }
 
 

@@ -5,8 +5,9 @@ import {
     PointerInstructionRef as PointerInstructionRefInterface,
     InstructionArg as InstructionArgInterface,
     ConstantInstructionArg as ConstantInstructionArgInterface,
-    RefInstructionArg as RefInstructionArgInterface,
+    ResolvedConstantInstructionArg as ResolvedConstantInstructionArgInterface,
     IndexInstructionArg as IndexInstructionArgInterface,
+    RefInstructionArg as RefInstructionArgInterface,
     Constant, IndexDefinition
 } from "models/objects";
 import {InstructionType, DataType} from "models/delegates";
@@ -128,7 +129,16 @@ export class InstructionArg {
 
 export interface ConstantInstructionArg extends ConstantInstructionArgInterface {}
 
-export class ConstantInstructionArg extends InstructionArg {
+export abstract class ConstantInstructionArg extends InstructionArg {
+    
+    createBuffer(): Buffer {
+        return instructionUtils.createConstantArgBuffer(this.getConstant());
+    }
+}
+
+export interface ResolvedConstantInstructionArg extends ResolvedConstantInstructionArgInterface {}
+
+export class ResolvedConstantInstructionArg extends ConstantInstructionArg {
     
     constructor(constant: Constant) {
         super();
@@ -147,8 +157,41 @@ export class ConstantInstructionArg extends InstructionArg {
         return instructionUtils.getConstantArgBufferLength(this.getDataType());
     }
     
-    createBuffer(): Buffer {
-        return instructionUtils.createConstantArgBuffer(this.constant);
+    getConstant(): Constant {
+        return this.constant;
+    }
+}
+
+export interface IndexInstructionArg extends IndexInstructionArgInterface {}
+
+export class IndexInstructionArg extends ConstantInstructionArg {
+    
+    constructor(indexDefinition: IndexDefinition) {
+        super();
+        this.indexDefinition = indexDefinition;
+        this.dataType = signedInteger32Type;
+    }
+    
+    getDataType(): DataType {
+        return this.dataType;
+    }
+    
+    setDataType(dataType: DataType): void {
+        this.dataType = dataType;
+    }
+    
+    getBufferLength(): number {
+        return instructionUtils.getConstantArgBufferLength(this.dataType);
+    }
+    
+    getConstant(): Constant {
+        if (!(this.dataType instanceof NumberType)) {
+            throw new AssemblyError("Expected number type.");
+        }
+        return new NumberConstant(
+            this.indexDefinition.index,
+            this.dataType as NumberType
+        );
     }
 }
 
@@ -181,40 +224,6 @@ export class RefInstructionArg extends InstructionArg {
     
     createBuffer(): Buffer {
         return this.instructionRef.createBuffer(this.dataType, this.indexArg);
-    }
-}
-
-export interface IndexInstructionArg extends IndexInstructionArgInterface {}
-
-export class IndexInstructionArg extends InstructionArg {
-    
-    constructor(indexDefinition: IndexDefinition) {
-        super();
-        this.indexDefinition = indexDefinition;
-        this.dataType = signedInteger32Type;
-    }
-    
-    getDataType(): DataType {
-        return this.dataType;
-    }
-    
-    setDataType(dataType: DataType): void {
-        this.dataType = dataType;
-    }
-    
-    getBufferLength(): number {
-        return instructionUtils.getConstantArgBufferLength(this.dataType);
-    }
-    
-    createBuffer(): Buffer {
-        if (!(this.dataType instanceof NumberType)) {
-            throw new AssemblyError("Expected number type.");
-        }
-        let tempConstant = new NumberConstant(
-            this.indexDefinition.index,
-            this.dataType as NumberType
-        );
-        return instructionUtils.createConstantArgBuffer(tempConstant);
     }
 }
 
