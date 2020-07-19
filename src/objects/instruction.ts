@@ -131,6 +131,10 @@ export interface ConstantInstructionArg extends ConstantInstructionArgInterface 
 
 export abstract class ConstantInstructionArg extends InstructionArg {
     
+    getBufferLength(): number {
+        return instructionUtils.getConstantArgBufferLength(this.getDataType());
+    }
+    
     createBuffer(): Buffer {
         return instructionUtils.createConstantArgBuffer(this.getConstant());
     }
@@ -151,10 +155,6 @@ export class ResolvedConstantInstructionArg extends ConstantInstructionArg {
     
     setDataType(dataType: DataType): void {
         this.constant.setDataType(dataType);
-    }
-    
-    getBufferLength(): number {
-        return instructionUtils.getConstantArgBufferLength(this.getDataType());
     }
     
     getConstant(): Constant {
@@ -178,10 +178,6 @@ export class IndexInstructionArg extends ConstantInstructionArg {
     
     setDataType(dataType: DataType): void {
         this.dataType = dataType;
-    }
-    
-    getBufferLength(): number {
-        return instructionUtils.getConstantArgBufferLength(this.dataType);
     }
     
     getConstant(): Constant {
