@@ -61,12 +61,7 @@ export class LineUtils {
                 var tempResult1 = processLine(line);
             } catch(error) {
                 if (error instanceof AssemblyError) {
-                    if (error.lineNumber === null) {
-                        error.lineNumber = line.lineNumber;
-                    }
-                    if (error.filePath === null) {
-                        error.filePath = line.filePath;
-                    }
+                    error.populateLine(line);
                 }
                 throw error;
             }

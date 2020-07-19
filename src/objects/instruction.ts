@@ -9,15 +9,17 @@ import {
     IndexInstructionArg as IndexInstructionArgInterface,
     ExpressionInstructionArg as ExpressionInstructionArgInterface,
     RefInstructionArg as RefInstructionArgInterface,
-    Constant, IndexDefinition, Expression
+    Constant, IndexDefinition, Expression, AssemblyLine
 } from "models/objects";
 import {InstructionArgProcessor} from "models/items";
 import {InstructionType, DataType} from "models/delegates";
 
+import {niceUtils} from "utils/niceUtils";
 import {mathUtils} from "utils/mathUtils";
 import {instructionUtils} from "utils/instructionUtils";
 
 import {NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type} from "delegates/dataType";
+import {instructionTypeMap} from "delegates/instructionType";
 
 import {AssemblyError} from "objects/assemblyError";
 import {SerializableLine} from "objects/serializableLine";
@@ -37,10 +39,19 @@ export interface Instruction extends InstructionInterface {}
 
 export class Instruction extends SerializableLine {
     
-    constructor(instructionType: InstructionType, argList: InstructionArg[]) {
-        super();
-        this.instructionType = instructionType;
-        this.argList = argList;
+    constructor(assemblyLine: AssemblyLine) {
+        super(assemblyLine);
+        if (!(assemblyLine.directiveName in instructionTypeMap)) {
+            throw new AssemblyError("Unrecognized opcode mnemonic.");
+        }
+        this.instructionType = instructionTypeMap[assemblyLine.directiveName];
+        let tempAmount = this.instructionType.argAmount;
+        if (assemblyLine.argList.length !== tempAmount) {
+            throw new AssemblyError(`Expected ${this.instructionType.argAmount} ${niceUtils.pluralize("argument", tempAmount)}.`);
+        }
+        this.argList = assemblyLine.argList.map(expression => {
+            return expression.evaluateToInstructionArg();
+        });
     }
     
     getDisplayString(): string {

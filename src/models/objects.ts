@@ -80,6 +80,8 @@ export interface AssemblyError {
     message: string;
     lineNumber: number;
     filePath: string;
+    
+    populateLine(line: AssemblyLine): void;
 }
 
 export interface AssemblyLine {
@@ -95,8 +97,6 @@ export interface AssemblyLine {
         processExpression: ExpressionProcessor,
         shouldRecurAfterProcess?: boolean
     ): void;
-    assembleInstruction(): Instruction;
-    assembleAppData(): AppData;
 }
 
 export interface Constant {
@@ -309,6 +309,8 @@ export interface AppDataLineList extends LabeledLineList {
 }
 
 export interface SerializableLine extends Displayable {
+    assemblyLine: AssemblyLine;
+    
     getBufferLength(): number;
     createBuffer(): Buffer;
 }

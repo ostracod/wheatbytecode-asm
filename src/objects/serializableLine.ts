@@ -2,7 +2,7 @@
 import {
     SerializableLine as SerializableLineInterface,
     AppData as AppDataInterface,
-    Expression
+    Expression, AssemblyLine
 } from "models/objects";
 import {SignedIntegerType, signedInteger32Type} from "delegates/dataType";
 
@@ -10,8 +10,8 @@ export interface SerializableLine extends SerializableLineInterface {}
 
 export abstract class SerializableLine {
     
-    constructor() {
-        
+    constructor(assemblyLine: AssemblyLine) {
+        this.assemblyLine = assemblyLine;
     }
 }
 
@@ -19,9 +19,9 @@ export interface AppData extends AppDataInterface {}
 
 export class AppData extends SerializableLine {
     
-    constructor(expressionList: Expression[]) {
-        super();
-        this.expressionList = expressionList;
+    constructor(assemblyLine: AssemblyLine) {
+        super(assemblyLine);
+        this.expressionList = assemblyLine.argList;
     }
     
     getDisplayString(): string {

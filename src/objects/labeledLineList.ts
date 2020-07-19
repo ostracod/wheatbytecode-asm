@@ -4,17 +4,17 @@ import {
     LabeledLineList as LabeledLineListInterface,
     InstructionLineList as InstructionLineListInterface,
     AppDataLineList as AppDataLineListInterface,
-    AssemblyLine, Scope, SerializableLine, Instruction
+    AssemblyLine, Scope, SerializableLine
 } from "models/objects";
 
 import {AssemblyError} from "objects/assemblyError";
 import {InstructionLabelDefinition, AppDataLabelDefinition} from "objects/labelDefinition";
 import {IdentifierMap} from "objects/identifier";
+import {Instruction} from "objects/instruction";
+import {AppData} from "objects/serializableLine";
 
 import {niceUtils} from "utils/niceUtils";
 import {lineUtils} from "utils/lineUtils";
-
-import {SignedIntegerType, signedInteger32Type} from "delegates/dataType";
 
 export interface LabeledLineList extends LabeledLineListInterface {}
 
@@ -115,7 +115,16 @@ export class LabeledLineList {
                 break;
             }
         }
-        const bufferList = this.serializableLineList.map(line => line.createBuffer());
+        const bufferList = this.serializableLineList.map(serializableLine => {
+            try {
+                return serializableLine.createBuffer();
+            } catch(error) {
+                if (error instanceof AssemblyError) {
+                    error.populateLine(serializableLine.assemblyLine);
+                }
+                throw error;
+            }
+        });
         return Buffer.concat(bufferList);
     }
 }
@@ -144,7 +153,7 @@ export class InstructionLineList extends LabeledLineList {
     }
     
     assembleSerializableLine(line: AssemblyLine): SerializableLine {
-        return line.assembleInstruction();
+        return new Instruction(line);
     }
 }
 
@@ -172,7 +181,7 @@ export class AppDataLineList extends LabeledLineList {
     }
     
     assembleSerializableLine(line: AssemblyLine): SerializableLine {
-        return line.assembleAppData();
+        return new AppData(line);
     }
 }
 

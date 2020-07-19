@@ -44,12 +44,7 @@ export abstract class Expression {
     
     handleError(error: Error): void {
         if (error instanceof AssemblyError) {
-            if (error.lineNumber === null) {
-                error.lineNumber = this.line.lineNumber;
-            }
-            if (error.filePath === null) {
-                error.filePath = this.line.filePath;
-            }
+            error.populateLine(this.line);
         }
     }
     

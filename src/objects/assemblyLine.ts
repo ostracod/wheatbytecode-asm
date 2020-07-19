@@ -1,16 +1,10 @@
 
 import {ExpressionProcessor} from "models/items";
-import {AssemblyLine as AssemblyLineInterface, Expression, FunctionDefinition} from "models/objects";
+import {AssemblyLine as AssemblyLineInterface, Expression} from "models/objects";
 
 import {niceUtils} from "utils/niceUtils";
 import {lineUtils} from "utils/lineUtils";
 import {expressionUtils} from "utils/expressionUtils";
-
-import {instructionTypeMap} from "delegates/instructionType";
-
-import {AssemblyError} from "objects/assemblyError";
-import {Instruction} from "objects/instruction";
-import {AppData} from "objects/serializableLine";
 
 export interface AssemblyLine extends AssemblyLineInterface {}
 
@@ -71,25 +65,6 @@ export class AssemblyLine {
         if (this.codeBlock !== null) {
             lineUtils.processExpressionsInLines(this.codeBlock, processExpression, shouldRecurAfterProcess);
         }
-    }
-    
-    assembleInstruction(): Instruction {
-        if (!(this.directiveName in instructionTypeMap)) {
-            throw new AssemblyError("Unrecognized opcode mnemonic.");
-        }
-        let tempInstructionType = instructionTypeMap[this.directiveName];
-        let tempAmount = tempInstructionType.argAmount;
-        if (this.argList.length !== tempAmount) {
-            throw new AssemblyError(`Expected ${tempInstructionType.argAmount} ${niceUtils.pluralize("argument", tempAmount)}.`);
-        }
-        let tempArgList = this.argList.map(expression => {
-            return expression.evaluateToInstructionArg();
-        });
-        return new Instruction(tempInstructionType, tempArgList);
-    }
-    
-    assembleAppData(): AppData {
-        return new AppData(this.argList);
     }
 }
 
