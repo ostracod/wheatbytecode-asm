@@ -11,6 +11,7 @@ import {instructionUtils} from "utils/instructionUtils";
 
 import {signedInteger32Type, compressibleIntegerType} from "delegates/dataType";
 
+import {UnresolvedIndexError} from "objects/assemblyError";
 import {INSTRUCTION_REF_PREFIX, IndexInstructionArg} from "objects/instruction";
 import {NumberConstant} from "objects/constant";
 
@@ -26,6 +27,9 @@ export abstract class IndexConverter {
 export class IndexConstantConverter extends IndexConverter {
     
     createConstantOrNull(index): Constant {
+        if (index === null) {
+            throw new UnresolvedIndexError();
+        }
         return new NumberConstant(index, compressibleIntegerType);
     }
     

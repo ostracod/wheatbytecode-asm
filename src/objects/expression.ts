@@ -14,9 +14,9 @@ import {
     IdentifierMap, FunctionDefinition, Constant, InstructionArg, IndexDefinition
 } from "models/objects";
 
-import {AssemblyError} from "objects/assemblyError";
+import {AssemblyError, UnresolvedIndexError} from "objects/assemblyError";
 import {Identifier, MacroIdentifier} from "objects/identifier";
-import {InstructionRef, PointerInstructionRef, ResolvedConstantInstructionArg, RefInstructionArg, nameInstructionRefMap} from "objects/instruction";
+import {InstructionRef, PointerInstructionRef, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, nameInstructionRefMap} from "objects/instruction";
 import {builtInConstantSet, NumberConstant, StringConstant} from "objects/constant";
 
 import {compressibleIntegerType, instructionDataTypeList, StringType} from "delegates/dataType";
@@ -172,10 +172,16 @@ export abstract class Expression {
                 return tempResult;
             }
         }
-        let tempConstant = this.evaluateToConstantOrNull();
-        if (tempConstant !== null) {
-            tempConstant.compress(instructionDataTypeList);
-            return new ResolvedConstantInstructionArg(tempConstant);
+        try {
+            let tempConstant = this.evaluateToConstantOrNull();
+            if (tempConstant !== null) {
+                tempConstant.compress(instructionDataTypeList);
+                return new ResolvedConstantInstructionArg(tempConstant);
+            }
+        } catch(error) {
+            if (error instanceof UnresolvedIndexError) {
+                return new ExpressionInstructionArg(this);
+            }
         }
         let tempIdentifier = this.evaluateToIdentifierOrNull();
         if (tempIdentifier !== null && !tempIdentifier.getIsBuiltIn()) {

@@ -20,4 +20,9 @@ export class AssemblyError {
     }
 }
 
-
+export class UnresolvedIndexError {
+    
+    constructor() {
+        
+    }
+}

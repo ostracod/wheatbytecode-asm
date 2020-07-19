@@ -358,6 +358,13 @@ export interface IndexInstructionArg extends ConstantInstructionArg {
     dataType: DataType;
 }
 
+export interface ExpressionInstructionArg extends ConstantInstructionArg {
+    expression: Expression;
+    dataType: DataType;
+    
+    getDataTypeHelper(dataType: DataType);
+}
+
 export interface RefInstructionArg extends InstructionArg {
     instructionRef: InstructionRef;
     dataType: DataType;

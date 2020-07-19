@@ -7,15 +7,16 @@ import {
     ConstantInstructionArg as ConstantInstructionArgInterface,
     ResolvedConstantInstructionArg as ResolvedConstantInstructionArgInterface,
     IndexInstructionArg as IndexInstructionArgInterface,
+    ExpressionInstructionArg as ExpressionInstructionArgInterface,
     RefInstructionArg as RefInstructionArgInterface,
-    Constant, IndexDefinition
+    Constant, IndexDefinition, Expression
 } from "models/objects";
 import {InstructionType, DataType} from "models/delegates";
 
 import {mathUtils} from "utils/mathUtils";
 import {instructionUtils} from "utils/instructionUtils";
 
-import {NumberType, signedInteger32Type} from "delegates/dataType";
+import {NumberType, SignedIntegerType, signedInteger32Type} from "delegates/dataType";
 
 import {AssemblyError} from "objects/assemblyError";
 import {SerializableLine} from "objects/serializableLine";
@@ -188,6 +189,46 @@ export class IndexInstructionArg extends ConstantInstructionArg {
             this.indexDefinition.index,
             this.dataType as NumberType
         );
+    }
+}
+
+export interface ExpressionInstructionArg extends ExpressionInstructionArgInterface {}
+
+export class ExpressionInstructionArg extends ConstantInstructionArg {
+    
+    constructor(expression: Expression) {
+        super();
+        this.expression = expression;
+        this.dataType = null;
+    }
+    
+    getDataTypeHelper(dataType: DataType) {
+        if (this.dataType !== null) {
+            return this.dataType;
+        }
+        if (dataType instanceof SignedIntegerType && dataType.getIsCompressible()) {
+            return signedInteger32Type;
+        }
+        return dataType;
+    }
+    
+    getDataType(): DataType {
+        const tempDataType = this.expression.getConstantDataType();
+        return this.getDataTypeHelper(tempDataType);
+    }
+    
+    setDataType(dataType: DataType): void {
+        this.dataType = dataType;
+    }
+    
+    getConstant(): Constant {
+        const output = this.expression.evaluateToConstant();
+        const tempDataType1 = output.getDataType();
+        const tempDataType2 = this.getDataTypeHelper(tempDataType1);
+        if (tempDataType1 !== tempDataType2) {
+            output.setDataType(tempDataType2);
+        }
+        return output;
     }
 }
 
