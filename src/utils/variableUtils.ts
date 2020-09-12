@@ -19,12 +19,18 @@ export class VariableUtils {
             return null;
         }
         let tempArgList = line.argList;
-        if (tempArgList.length !== 2) {
-            throw new AssemblyError("Expected 2 arguments.");
+        if (tempArgList.length < 2 || tempArgList.length > 3) {
+            throw new AssemblyError("Expected 2 or 3 arguments.");
         }
         let tempIdentifier = tempArgList[0].evaluateToIdentifier();
         let tempDataType = tempArgList[1].evaluateToDataType();
-        return new variableDefinitionClass(tempIdentifier, tempDataType);
+        let tempArrayLength;
+        if (tempArgList.length === 3) {
+            tempArrayLength = tempArgList[2].evaluateToNumber();
+        } else {
+            tempArrayLength = 1;
+        }
+        return new variableDefinitionClass(tempIdentifier, tempDataType, tempArrayLength);
     }
     
     extractGlobalVariableDefinition(line: AssemblyLine): VariableDefinition {
@@ -57,7 +63,7 @@ export class VariableUtils {
         let nextVariableIndex = 0;
         identifierMap.iterate(variableDefinition => {
             variableDefinition.index = nextVariableIndex;
-            nextVariableIndex += variableDefinition.dataType.byteAmount;
+            nextVariableIndex += variableDefinition.getFrameSize();
         });
         return nextVariableIndex;
     }

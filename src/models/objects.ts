@@ -271,7 +271,9 @@ export interface MacroDefinition extends Displayable {
 
 export interface VariableDefinition extends IndexDefinition {
     dataType: DataType;
+    arrayLength: number;
     
+    getFrameSize(): number;
     getDisplayStringHelper(): string;
 }
 
