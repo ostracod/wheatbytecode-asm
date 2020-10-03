@@ -99,11 +99,11 @@ export class InstructionRef {
         
     }
     
-    getBufferLength(indexArg: InstructionArg): number {
+    getArgBufferLength(indexArg: InstructionArg): number {
         return instructionUtils.getArgBufferLength(indexArg.getBufferLength());
     }
     
-    createBuffer(dataType: DataType, indexArg: InstructionArg): Buffer {
+    createArgBuffer(dataType: DataType, indexArg: InstructionArg): Buffer {
         return instructionUtils.createArgBuffer(
             this.argPrefix,
             dataType,
@@ -125,13 +125,13 @@ export class PointerInstructionRef extends InstructionRef {
         this.pointerArg.processArgs(processArg);
     }
     
-    getBufferLength(indexArg: InstructionArg): number {
+    getArgBufferLength(indexArg: InstructionArg): number {
         return instructionUtils.getArgBufferLength(
             this.pointerArg.getBufferLength() + indexArg.getBufferLength()
         );
     }
     
-    createBuffer(dataType: DataType, indexArg: InstructionArg): Buffer {
+    createArgBuffer(dataType: DataType, indexArg: InstructionArg): Buffer {
         return instructionUtils.createArgBuffer(
             this.argPrefix,
             dataType,
@@ -307,11 +307,11 @@ export class RefInstructionArg extends InstructionArg {
     }
     
     getBufferLength(): number {
-        return 1 + this.instructionRef.getBufferLength(this.indexArg);
+        return this.instructionRef.getArgBufferLength(this.indexArg);
     }
     
     createBuffer(): Buffer {
-        return this.instructionRef.createBuffer(this.dataType, this.indexArg);
+        return this.instructionRef.createArgBuffer(this.dataType, this.indexArg);
     }
 }
 

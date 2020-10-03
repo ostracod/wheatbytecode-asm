@@ -333,8 +333,8 @@ export interface InstructionRef {
     
     // Concrete subclasses may override these methods:
     processArgs(processArg: InstructionArgProcessor): void;
-    getBufferLength(indexArg: InstructionArg): number;
-    createBuffer(dataType: DataType, indexArg: InstructionArg): Buffer;
+    getArgBufferLength(indexArg: InstructionArg): number;
+    createArgBuffer(dataType: DataType, indexArg: InstructionArg): Buffer;
 }
 
 export interface PointerInstructionRef extends InstructionRef {
