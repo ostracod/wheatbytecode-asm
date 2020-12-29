@@ -66,6 +66,7 @@ Built-in identifiers:
 * `null` refers to the null pointer value
 * All of the WheatSystem function IDs with the suffix `_ID` (Ex: `init_ID`, `kill_ID`)
 * All of the error constants (Ex: `typeErr`, `permErr`)
+* Allocation attribute flags `guardedAllocAttr` and `sentryAllocAttr`
 
 ## Directive Syntax
 

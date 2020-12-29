@@ -135,7 +135,10 @@ let tempNumberSet = {
     serialInput_ID: 10,
     setGpioMode_ID: 11,
     readGpio_ID: 12,
-    wrtGpio_ID: 13
+    wrtGpio_ID: 13,
+    
+    guardedAllocAttr: 1,
+    sentryAllocAttr: 2,
 };
 
 for (let key in tempNumberSet) {
