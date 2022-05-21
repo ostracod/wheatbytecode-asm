@@ -1,7 +1,7 @@
 
-import {NiceUtils as NiceUtilsInterface} from "models/utils";
-import {Displayable, IdentifierMap} from "models/objects";
-import {mathUtils} from "utils/mathUtils";
+import {NiceUtils as NiceUtilsInterface} from "../models/utils.js";
+import {Displayable, IdentifierMap} from "../models/objects.js";
+import {mathUtils} from "./mathUtils.js";
 
 export interface NiceUtils extends NiceUtilsInterface {}
 

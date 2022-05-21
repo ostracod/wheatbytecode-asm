@@ -1,22 +1,19 @@
 
 import * as fs from "fs";
-import * as assert from "assert";
-
-import {LineProcessor, ExpressionProcessor} from "models/items";
-import {Assembler as AssemblerInterface, AssemblyLine} from "models/objects";
-
-import {AssemblyError} from "objects/assemblyError";
-import {IdentifierMap} from "objects/identifier";
-import {Scope} from "objects/scope";
-import {MacroDefinition} from "objects/macroDefinition";
-import {AliasDefinition} from "objects/aliasDefinition";
-import {FunctionDefinition, functionTableEntrySize} from "objects/functionDefinition";
-import {AppDataLineList} from "objects/labeledLineList";
-
-import {parseUtils} from "utils/parseUtils";
-import {lineUtils} from "utils/lineUtils";
-import {variableUtils} from "utils/variableUtils";
-import {niceUtils} from "utils/niceUtils";
+import { strict as assert } from "assert";
+import {LineProcessor, ExpressionProcessor} from "../models/items.js";
+import {Assembler as AssemblerInterface, AssemblyLine} from "../models/objects.js";
+import {AssemblyError} from "./assemblyError.js";
+import {IdentifierMap} from "./identifier.js";
+import {Scope} from "./scope.js";
+import {MacroDefinition} from "./macroDefinition.js";
+import {AliasDefinition} from "./aliasDefinition.js";
+import {FunctionDefinition, functionTableEntrySize} from "./functionDefinition.js";
+import {AppDataLineList} from "./labeledLineList.js";
+import {parseUtils} from "../utils/parseUtils.js";
+import {lineUtils} from "../utils/lineUtils.js";
+import {variableUtils} from "../utils/variableUtils.js";
+import {niceUtils} from "../utils/niceUtils.js";
 
 const fileHeaderSize = 12;
 

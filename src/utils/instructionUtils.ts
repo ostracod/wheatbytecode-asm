@@ -1,13 +1,11 @@
 
-import {InstructionUtils as InstructionUtilsInterface} from "models/utils";
-import {DataType} from "models/delegates";
-import {Constant, InstructionArg} from "models/objects";
-
-import {compressibleIntegerType, instructionDataTypeList} from "delegates/dataType";
-
-import {AssemblyError} from "objects/assemblyError";
-import {NumberConstant} from "objects/constant";
-import {INSTRUCTION_REF_PREFIX, InstructionRef, ResolvedConstantInstructionArg, RefInstructionArg} from "objects/instruction";
+import {InstructionUtils as InstructionUtilsInterface} from "../models/utils.js";
+import {DataType} from "../models/delegates.js";
+import {Constant, InstructionArg} from "../models/objects.js";
+import {compressibleIntegerType, instructionDataTypeList} from "../delegates/dataType.js";
+import {AssemblyError} from "../objects/assemblyError.js";
+import {NumberConstant} from "../objects/constant.js";
+import {INSTRUCTION_REF_PREFIX, InstructionRef, ResolvedConstantInstructionArg, RefInstructionArg} from "../objects/instruction.js";
 
 export interface InstructionUtils extends InstructionUtilsInterface {}
 

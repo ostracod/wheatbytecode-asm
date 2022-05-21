@@ -1,20 +1,18 @@
 
-import {LineProcessor, LabelDefinitionClass} from "models/items";
+import {LineProcessor, LabelDefinitionClass} from "../models/items.js";
 import {
     LabeledLineList as LabeledLineListInterface,
     InstructionLineList as InstructionLineListInterface,
     AppDataLineList as AppDataLineListInterface,
     AssemblyLine, Scope, SerializableLine
-} from "models/objects";
-
-import {AssemblyError} from "objects/assemblyError";
-import {InstructionLabelDefinition, AppDataLabelDefinition} from "objects/labelDefinition";
-import {IdentifierMap} from "objects/identifier";
-import {Instruction} from "objects/instruction";
-import {AppData} from "objects/serializableLine";
-
-import {niceUtils} from "utils/niceUtils";
-import {lineUtils} from "utils/lineUtils";
+} from "../models/objects.js";
+import {AssemblyError} from "./assemblyError.js";
+import {InstructionLabelDefinition, AppDataLabelDefinition} from "./labelDefinition.js";
+import {IdentifierMap} from "./identifier.js";
+import {Instruction} from "./instruction.js";
+import {AppData} from "./serializableLine.js";
+import {niceUtils} from "../utils/niceUtils.js";
+import {lineUtils} from "../utils/lineUtils.js";
 
 export interface LabeledLineList extends LabeledLineListInterface {}
 

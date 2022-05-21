@@ -1,8 +1,8 @@
 
-import {MacroDefinition as MacroDefinitionInterface, Identifier, Expression, AssemblyLine} from "models/objects";
-import {AssemblyError} from "objects/assemblyError";
-import {lineUtils} from "utils/lineUtils";
-import {IdentifierMap} from "objects/identifier";
+import {MacroDefinition as MacroDefinitionInterface, Identifier, Expression, AssemblyLine} from "../models/objects.js";
+import {AssemblyError} from "./assemblyError.js";
+import {lineUtils} from "../utils/lineUtils.js";
+import {IdentifierMap} from "./identifier.js";
 
 export interface MacroDefinition extends MacroDefinitionInterface {}
 

@@ -1,12 +1,6 @@
 
-// This code is intended to perform the functionality of rootpath.
-// Put all other code after these few lines.
 import * as pathUtils from "path";
-process.env.NODE_PATH = pathUtils.dirname(__filename);
-require("module")._initPaths();
-export let projectPath = pathUtils.dirname(__dirname);
-
-import {Assembler} from "objects/assembler";
+import {Assembler} from "./objects/assembler.js";
 
 const assemblerClassMap = {
     ".wbasm": Assembler,

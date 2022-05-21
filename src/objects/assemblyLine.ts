@@ -1,10 +1,9 @@
 
-import {ExpressionProcessor} from "models/items";
-import {AssemblyLine as AssemblyLineInterface, Expression} from "models/objects";
-
-import {niceUtils} from "utils/niceUtils";
-import {lineUtils} from "utils/lineUtils";
-import {expressionUtils} from "utils/expressionUtils";
+import {ExpressionProcessor} from "../models/items.js";
+import {AssemblyLine as AssemblyLineInterface, Expression} from "../models/objects.js";
+import {niceUtils} from "../utils/niceUtils.js";
+import {lineUtils} from "../utils/lineUtils.js";
+import {expressionUtils} from "../utils/expressionUtils.js";
 
 export interface AssemblyLine extends AssemblyLineInterface {}
 

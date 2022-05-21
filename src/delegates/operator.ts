@@ -1,5 +1,5 @@
 
-import {MixedNumber} from "models/items";
+import {MixedNumber} from "../models/items.js";
 import {
     UnaryOperator as UnaryOperatorInterface,
     UnaryNumberOperator as UnaryNumberOperatorInterface,
@@ -8,17 +8,14 @@ import {
     BinaryTypeMergeOperator as BinaryTypeMergeOperatorInterface,
     BinaryBitshiftOperator as BinaryBitshiftOperatorInterface,
     Operator, DataType
-} from "models/delegates";
-import {Expression, Constant, InstructionArg, Identifier} from "models/objects";
-
-import {dataTypeUtils} from "utils/dataTypeUtils";
-import {mathUtils} from "utils/mathUtils";
-
-import {compressibleIntegerType, NumberType, IntegerType} from "delegates/dataType";
-
-import {UnaryExpression, MacroIdentifierExpression, BinaryExpression} from "objects/expression";
-import {AssemblyError} from "objects/assemblyError";
-import {NumberConstant, StringConstant} from "objects/constant";
+} from "../models/delegates.js";
+import {Expression, Constant, InstructionArg, Identifier} from "../models/objects.js";
+import {dataTypeUtils} from "../utils/dataTypeUtils.js";
+import {mathUtils} from "../utils/mathUtils.js";
+import {compressibleIntegerType, NumberType, IntegerType} from "./dataType.js";
+import {UnaryExpression, MacroIdentifierExpression, BinaryExpression} from "../objects/expression.js";
+import {AssemblyError} from "../objects/assemblyError.js";
+import {NumberConstant, StringConstant} from "../objects/constant.js";
 
 export let unaryOperatorList = [];
 export let binaryOperatorList = [];

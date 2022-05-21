@@ -3,8 +3,8 @@ import {
     SerializableLine as SerializableLineInterface,
     AppData as AppDataInterface,
     Expression, AssemblyLine
-} from "models/objects";
-import {SignedIntegerType, signedInteger32Type} from "delegates/dataType";
+} from "../models/objects.js";
+import {SignedIntegerType, signedInteger32Type} from "../delegates/dataType.js";
 
 export interface SerializableLine extends SerializableLineInterface {}
 

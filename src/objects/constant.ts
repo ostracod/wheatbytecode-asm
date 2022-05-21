@@ -1,15 +1,13 @@
 
-import {MixedNumber} from "models/items";
+import {MixedNumber} from "../models/items.js";
 import {
     Constant as ConstantInterface,
     NumberConstant as NumberConstantInterface,
     StringConstant as StringConstantInterface
-} from "models/objects";
-import {DataType, IntegerType} from "models/delegates";
-
-import {SignedIntegerType, signedIntegerTypeList, compressibleIntegerType, NumberType, StringType} from "delegates/dataType";
-
-import {AssemblyError} from "objects/assemblyError";
+} from "../models/objects.js";
+import {DataType, IntegerType} from "../models/delegates.js";
+import {SignedIntegerType, signedIntegerTypeList, compressibleIntegerType, NumberType, StringType} from "../delegates/dataType.js";
+import {AssemblyError} from "./assemblyError.js";
 
 export interface Constant extends ConstantInterface {}
 

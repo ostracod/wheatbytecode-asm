@@ -3,22 +3,26 @@
 
 This utility converts assembly code to bytecode application files for WheatSystem.
 
-## Usage
+## Installation and Usage
 
-The assembler requires Node.js 12 and TypeScript 3.6 or higher.
+This application has the following system-wide dependencies:
 
-Clone https://github.com/ostracod/wheatsystem-spec in the parent directory of `wheatbytecode-asm`, then generate `bytecodeInstructions.json`:
+* Node.js version ^16.4
+* TypeScript version ^4.5
+* pnpm version ^6.24
+
+To install this application:
+
+1. Clone [wheatbytecode-asm](https://github.com/ostracod/wheatbytecode-asm) and [wheatsystem-spec](https://github.com/ostracod/wheatsystem-spec) in the same directory.
+1. Move to the wheatsystem-spec directory: `cd wheatsystem-spec`
+1. Generate `bytecodeInstructions.json`: `node ./generate.js`
+1. Move to the wheatbytecode-asm directory: `cd ../wheatbytecode-asm`
+1. Install dependencies of the assembler: `pnpm install`
+1. Compile the assembler: `tsc`
+
+To assemble a file into bytecode:
 
 ```
-# Inside wheatsystem-spec:
-node ./generate.js
-```
-
-Compile and run the assembler:
-
-```
-# Inside wheatbytecode-asm:
-tsc
 node ./dist/assemble.js [-v] (path to assembly file)
 ```
 

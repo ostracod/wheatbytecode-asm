@@ -2,7 +2,7 @@
 import {
     Scope as ScopeInterface,
     IdentifierMap, IndexDefinition, Identifier
-} from "models/objects";
+} from "../models/objects.js";
 
 export interface Scope extends ScopeInterface {}
 

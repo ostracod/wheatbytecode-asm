@@ -4,10 +4,10 @@ import {
     MacroIdentifier as MacroIdentifierInterface,
     IdentifierMap as IdentifierMapInterface,
     IndexDefinition, Expression
-} from "models/objects";
-import {AssemblyError} from "objects/assemblyError";
-import {nameInstructionRefMap} from "objects/instruction";
-import {builtInConstantSet} from "objects/constant";
+} from "../models/objects.js";
+import {AssemblyError} from "./assemblyError.js";
+import {nameInstructionRefMap} from "./instruction.js";
+import {builtInConstantSet} from "./constant.js";
 
 const builtInIdentifierNameSet = {};
 for (let name in nameInstructionRefMap) {

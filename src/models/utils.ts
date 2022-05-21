@@ -1,7 +1,7 @@
 
-import {ExpressionProcessor, LineProcessor, NumberTypeClass, VariableDefinitionClass, ArgNumeric, MixedNumber} from "models/items";
-import {Operator, DataType, NumberType} from "models/delegates";
-import {Expression, AssemblyLine, Identifier, IdentifierMap, Displayable, ArgWord, ArgNumber, ArgString, VariableDefinition, ArgVariableDefinition, InstructionArg, Constant} from "models/objects";
+import {ExpressionProcessor, LineProcessor, NumberTypeClass, VariableDefinitionClass, ArgNumeric, MixedNumber} from "./items.js";
+import {Operator, DataType, NumberType} from "./delegates.js";
+import {Expression, AssemblyLine, Identifier, IdentifierMap, Displayable, ArgWord, ArgNumber, ArgString, VariableDefinition, ArgVariableDefinition, InstructionArg, Constant} from "./objects.js";
 
 export interface DataTypeUtils {
     getDataTypeByName(name: string): DataType;

@@ -10,20 +10,17 @@ import {
     ExpressionInstructionArg as ExpressionInstructionArgInterface,
     RefInstructionArg as RefInstructionArgInterface,
     Constant, IndexDefinition, Expression, AssemblyLine
-} from "models/objects";
-import {InstructionArgProcessor} from "models/items";
-import {InstructionType, DataType} from "models/delegates";
-
-import {niceUtils} from "utils/niceUtils";
-import {mathUtils} from "utils/mathUtils";
-import {instructionUtils} from "utils/instructionUtils";
-
-import {NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type} from "delegates/dataType";
-import {instructionTypeMap} from "delegates/instructionType";
-
-import {AssemblyError} from "objects/assemblyError";
-import {SerializableLine} from "objects/serializableLine";
-import {NumberConstant} from "objects/constant";
+} from "../models/objects.js";
+import {InstructionArgProcessor} from "../models/items.js";
+import {InstructionType, DataType} from "../models/delegates.js";
+import {niceUtils} from "../utils/niceUtils.js";
+import {mathUtils} from "../utils/mathUtils.js";
+import {instructionUtils} from "../utils/instructionUtils.js";
+import {NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type} from "../delegates/dataType.js";
+import {instructionTypeMap} from "../delegates/instructionType.js";
+import {AssemblyError} from "./assemblyError.js";
+import {SerializableLine} from "./serializableLine.js";
+import {NumberConstant} from "./constant.js";
 
 export const INSTRUCTION_REF_PREFIX = {
     constant: 0,

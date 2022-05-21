@@ -1,10 +1,9 @@
 
-import {VariableUtils as VariableUtilsInterface} from "models/utils";
-import {AssemblyLine, VariableDefinition, IdentifierMap} from "models/objects";
-import {VariableDefinitionClass} from "models/items";
-
-import {GlobalVariableDefinition, LocalVariableDefinition, ArgVariableDefinition} from "objects/variableDefinition";
-import {AssemblyError} from "objects/assemblyError";
+import {VariableUtils as VariableUtilsInterface} from "../models/utils.js";
+import {AssemblyLine, VariableDefinition, IdentifierMap} from "../models/objects.js";
+import {VariableDefinitionClass} from "../models/items.js";
+import {GlobalVariableDefinition, LocalVariableDefinition, ArgVariableDefinition} from "../objects/variableDefinition.js";
+import {AssemblyError} from "../objects/assemblyError.js";
 
 export interface VariableUtils extends VariableUtilsInterface {}
 

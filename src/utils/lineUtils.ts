@@ -1,8 +1,8 @@
 
-import {ExpressionProcessor, LineProcessor} from "models/items";
-import {LineUtils as LineUtilsInterface} from "models/utils";
-import {AssemblyLine, IdentifierMap, Expression} from "models/objects";
-import {AssemblyError} from "objects/assemblyError";
+import {ExpressionProcessor, LineProcessor} from "../models/items.js";
+import {LineUtils as LineUtilsInterface} from "../models/utils.js";
+import {AssemblyLine, IdentifierMap, Expression} from "../models/objects.js";
+import {AssemblyError} from "../objects/assemblyError.js";
 
 export interface LineUtils extends LineUtilsInterface {}
 

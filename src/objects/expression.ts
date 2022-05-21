@@ -1,6 +1,6 @@
 
-import {ExpressionProcessor} from "models/items";
-import {UnaryOperator, BinaryOperator, DataType, NumberType} from "models/delegates";
+import {ExpressionProcessor} from "../models/items.js";
+import {UnaryOperator, BinaryOperator, DataType, NumberType} from "../models/delegates.js";
 import {
     Expression as ExpressionInterface,
     ArgTerm as ArgTermInterface,
@@ -12,17 +12,14 @@ import {
     BinaryExpression as BinaryExpressionInterface,
     SubscriptExpression as SubscriptExpressionInterface,
     IdentifierMap, FunctionDefinition, Constant, InstructionArg, IndexDefinition
-} from "models/objects";
-
-import {AssemblyError, UnresolvedIndexError} from "objects/assemblyError";
-import {Identifier, MacroIdentifier} from "objects/identifier";
-import {InstructionRef, PointerInstructionRef, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, nameInstructionRefMap} from "objects/instruction";
-import {builtInConstantSet, NumberConstant, StringConstant} from "objects/constant";
-
-import {compressibleIntegerType, instructionDataTypeList, StringType} from "delegates/dataType";
-import {macroIdentifierOperator} from "delegates/operator";
-
-import {dataTypeUtils} from "utils/dataTypeUtils";
+} from "../models/objects.js";
+import {AssemblyError, UnresolvedIndexError} from "./assemblyError.js";
+import {Identifier, MacroIdentifier} from "./identifier.js";
+import {InstructionRef, PointerInstructionRef, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, nameInstructionRefMap} from "./instruction.js";
+import {builtInConstantSet, NumberConstant, StringConstant} from "./constant.js";
+import {compressibleIntegerType, instructionDataTypeList, StringType} from "../delegates/dataType.js";
+import {macroIdentifierOperator} from "../delegates/operator.js";
+import {dataTypeUtils} from "../utils/dataTypeUtils.js";
 
 export interface Expression extends ExpressionInterface {}
 

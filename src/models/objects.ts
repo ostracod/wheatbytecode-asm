@@ -1,6 +1,6 @@
 
-import {LineProcessor, ExpressionProcessor, InstructionArgProcessor, LabelDefinitionClass, MixedNumber} from "models/items";
-import {UnaryOperator, BinaryOperator, DataType, NumberType, SignedIntegerType, StringType, InstructionType} from "models/delegates";
+import {LineProcessor, ExpressionProcessor, InstructionArgProcessor, LabelDefinitionClass, MixedNumber} from "./items.js";
+import {UnaryOperator, BinaryOperator, DataType, NumberType, SignedIntegerType, StringType, InstructionType} from "./delegates.js";
 
 export interface Displayable {
     // Concrete subclasses must implement these methods:

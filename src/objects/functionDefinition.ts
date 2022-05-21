@@ -1,19 +1,17 @@
 
-import {LineProcessor} from "models/items";
+import {LineProcessor} from "../models/items.js";
 import {
     FunctionImplementation as FunctionImplementationInterface,
     FunctionDefinition as FunctionDefinitionInterface,
     AssemblyLine, Expression, Instruction
-} from "models/objects";
-
-import {niceUtils} from "utils/niceUtils";
-import {variableUtils} from "utils/variableUtils";
-
-import {AssemblyError} from "objects/assemblyError";
-import {IndexDefinition, indexConstantConverter} from "objects/indexDefinition";
-import {Scope} from "objects/scope";
-import {InstructionLineList} from "objects/labeledLineList";
-import {Identifier, IdentifierMap} from "objects/identifier";
+} from "../models/objects.js";
+import {niceUtils} from "../utils/niceUtils.js";
+import {variableUtils} from "../utils/variableUtils.js";
+import {AssemblyError} from "./assemblyError.js";
+import {IndexDefinition, indexConstantConverter} from "./indexDefinition.js";
+import {Scope} from "./scope.js";
+import {InstructionLineList} from "./labeledLineList.js";
+import {Identifier, IdentifierMap} from "./identifier.js";
 
 export const functionTableEntrySize = 21;
 

@@ -1,8 +1,8 @@
 
 import * as fs from "fs";
 import * as pathUtils from "path";
-
-import {InstructionType as InstructionTypeInterface} from "models/delegates";
+import { fileURLToPath } from "url";
+import {InstructionType as InstructionTypeInterface} from "../models/delegates.js";
 
 export interface InstructionType extends InstructionTypeInterface {}
 
@@ -18,8 +18,9 @@ export class InstructionType {
     }
 }
 
+const currentDirectoryPath = pathUtils.dirname(fileURLToPath(import.meta.url));
 const instructionsPath = pathUtils.join(
-    __dirname,
+    currentDirectoryPath,
     "../../../wheatsystem-spec/bytecodeInstructions.json"
 );
 let categoryJsonList = JSON.parse(fs.readFileSync(instructionsPath, "utf8"));

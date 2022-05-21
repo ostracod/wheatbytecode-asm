@@ -1,7 +1,7 @@
 
-import {ExpressionProcessor} from "models/items";
-import {ExpressionUtils as ExpressionUtilsInterface} from "models/utils";
-import {Expression} from "models/objects";
+import {ExpressionProcessor} from "../models/items.js";
+import {ExpressionUtils as ExpressionUtilsInterface} from "../models/utils.js";
+import {Expression} from "../models/objects.js";
 
 export interface ExpressionUtils extends ExpressionUtilsInterface {}
 

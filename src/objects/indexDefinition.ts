@@ -4,16 +4,13 @@ import {
     IndexRefConverter as IndexRefConverterInterface,
     IndexDefinition as IndexDefinitionInterface,
     Identifier, InstructionArg, Constant
-} from "models/objects";
-import {DataType} from "models/delegates";
-
-import {instructionUtils} from "utils/instructionUtils";
-
-import {signedInteger32Type, compressibleIntegerType} from "delegates/dataType";
-
-import {UnresolvedIndexError} from "objects/assemblyError";
-import {INSTRUCTION_REF_PREFIX, IndexInstructionArg} from "objects/instruction";
-import {NumberConstant} from "objects/constant";
+} from "../models/objects.js";
+import {DataType} from "../models/delegates.js";
+import {instructionUtils} from "../utils/instructionUtils.js";
+import {signedInteger32Type, compressibleIntegerType} from "../delegates/dataType.js";
+import {UnresolvedIndexError} from "./assemblyError.js";
+import {INSTRUCTION_REF_PREFIX, IndexInstructionArg} from "./instruction.js";
+import {NumberConstant} from "./constant.js";
 
 export interface IndexConverter extends IndexConverterInterface {}
 

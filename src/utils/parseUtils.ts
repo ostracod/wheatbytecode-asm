@@ -1,18 +1,15 @@
 
 import * as fs from "fs";
-
-import {ArgNumeric} from "models/items";
-import {ParseUtils as ParseUtilsInterface} from "models/utils";
-import {Operator, UnaryOperator, BinaryOperator} from "models/delegates";
-import {Expression} from "models/objects";
-
-import {AssemblyError} from "objects/assemblyError";
-import {AssemblyLine} from "objects/assemblyLine";
-import {SubscriptExpression, ArgWord, ArgNumber, ArgString} from "objects/expression";
-import {NumberConstant} from "objects/constant";
-
-import {unaryOperatorList, binaryOperatorList} from "delegates/operator";
-import {compressibleIntegerType, float64Type, signedIntegerTypeList} from "delegates/dataType";
+import {ArgNumeric} from "../models/items.js";
+import {ParseUtils as ParseUtilsInterface} from "../models/utils.js";
+import {Operator, UnaryOperator, BinaryOperator} from "../models/delegates.js";
+import {Expression} from "../models/objects.js";
+import {AssemblyError} from "../objects/assemblyError.js";
+import {AssemblyLine} from "../objects/assemblyLine.js";
+import {SubscriptExpression, ArgWord, ArgNumber, ArgString} from "../objects/expression.js";
+import {NumberConstant} from "../objects/constant.js";
+import {unaryOperatorList, binaryOperatorList} from "../delegates/operator.js";
+import {compressibleIntegerType, float64Type, signedIntegerTypeList} from "../delegates/dataType.js";
 
 const codeBlockDirectiveNameSet = ["FUNC", "APP_DATA", "MACRO"];
 

@@ -1,13 +1,13 @@
 
-import {MixedNumber} from "models/items";
+import {MixedNumber} from "../models/items.js";
 import {
     DataType as DataTypeInterface,
     NumberType as NumberTypeInterface,
     IntegerType as IntegerTypeInterface,
     SignedIntegerType as SignedIntegerTypeInterface,
     StringType as StringTypeInterface
-} from "models/delegates";
-import {mathUtils} from "utils/mathUtils";
+} from "../models/delegates.js";
+import {mathUtils} from "../utils/mathUtils.js";
 
 export let instructionDataTypeList: SignedIntegerType[] = [];
 export let numberTypeList: NumberType[] = [];
