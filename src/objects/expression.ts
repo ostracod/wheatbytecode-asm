@@ -1,6 +1,6 @@
 
-import {ExpressionProcessor} from "../models/items.js";
-import {UnaryOperator, BinaryOperator, DataType, NumberType} from "../models/delegates.js";
+import { ExpressionProcessor } from "../models/items.js";
+import { UnaryOperator, BinaryOperator, DataType } from "../models/delegates.js";
 import {
     Expression as ExpressionInterface,
     ArgTerm as ArgTermInterface,
@@ -11,15 +11,15 @@ import {
     MacroIdentifierExpression as MacroIdentifierExpressionInterface,
     BinaryExpression as BinaryExpressionInterface,
     SubscriptExpression as SubscriptExpressionInterface,
-    IdentifierMap, FunctionDefinition, Constant, InstructionArg, IndexDefinition
+    IdentifierMap, Constant, InstructionArg, IndexDefinition,
 } from "../models/objects.js";
-import {AssemblyError, UnresolvedIndexError} from "./assemblyError.js";
-import {Identifier, MacroIdentifier} from "./identifier.js";
-import {InstructionRef, PointerInstructionRef, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, nameInstructionRefMap} from "./instruction.js";
-import {builtInConstantSet, NumberConstant, StringConstant} from "./constant.js";
-import {compressibleIntegerType, instructionDataTypeList, StringType} from "../delegates/dataType.js";
-import {macroIdentifierOperator} from "../delegates/operator.js";
-import {dataTypeUtils} from "../utils/dataTypeUtils.js";
+import { AssemblyError, UnresolvedIndexError } from "./assemblyError.js";
+import { Identifier, MacroIdentifier } from "./identifier.js";
+import { InstructionRef, PointerInstructionRef, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, nameInstructionRefMap } from "./instruction.js";
+import { builtInConstantSet, NumberConstant, StringConstant } from "./constant.js";
+import { compressibleIntegerType, instructionDataTypeList } from "../delegates/dataType.js";
+import { macroIdentifierOperator } from "../delegates/operator.js";
+import { dataTypeUtils } from "../utils/dataTypeUtils.js";
 
 export interface Expression extends ExpressionInterface {}
 
@@ -49,9 +49,10 @@ export abstract class Expression {
         if (typeof shouldRecurAfterProcess === "undefined") {
             shouldRecurAfterProcess = false;
         }
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         let output: Expression = this;
         while (true) {
-            let tempResult = output.processExpressionsHelper(processExpression, shouldRecurAfterProcess);
+            const tempResult = output.processExpressionsHelper(processExpression, shouldRecurAfterProcess);
             if (tempResult === null) {
                 return output;
             }
@@ -64,7 +65,7 @@ export abstract class Expression {
     }
     
     evaluateToIdentifierName(): string {
-        let output = this.evaluateToIdentifierNameOrNull();
+        const output = this.evaluateToIdentifierNameOrNull();
         if (output === null) {
             throw this.createError("Expected identifier name.");
         }
@@ -72,7 +73,7 @@ export abstract class Expression {
     }
     
     evaluateToIdentifier(): Identifier {
-        let output = this.evaluateToIdentifierOrNull();
+        const output = this.evaluateToIdentifierOrNull();
         if (output === null) {
             throw this.createError("Expected identifier.");
         }
@@ -80,7 +81,7 @@ export abstract class Expression {
     }
     
     evaluateToIndexDefinitionOrNull(): IndexDefinition {
-        let tempIdentifier = this.evaluateToIdentifierOrNull();
+        const tempIdentifier = this.evaluateToIdentifierOrNull();
         if (tempIdentifier === null) {
             return null;
         }
@@ -88,7 +89,7 @@ export abstract class Expression {
     }
     
     evaluateToConstant(): Constant {
-        let output = this.evaluateToConstantOrNull();
+        const output = this.evaluateToConstantOrNull();
         if (output === null) {
             throw this.createError("Expected constant.");
         }
@@ -100,20 +101,20 @@ export abstract class Expression {
     }
     
     evaluateToNumber(): number {
-        let tempConstant = this.evaluateToConstantOrNull();
+        const tempConstant = this.evaluateToConstantOrNull();
         if (tempConstant === null || !(tempConstant instanceof NumberConstant)) {
             throw this.createError("Expected number constant.");
         }
-        let tempNumberConstant = tempConstant as NumberConstant;
+        const tempNumberConstant = tempConstant as NumberConstant;
         return Number(tempNumberConstant.value);
     }
     
     substituteIdentifiers(identifierExpressionMap: IdentifierMap<Expression>): Expression {
-        let tempIdentifier = this.evaluateToIdentifierOrNull();
+        const tempIdentifier = this.evaluateToIdentifierOrNull();
         if (tempIdentifier === null) {
             return null;
         }
-        let tempExpression = identifierExpressionMap.get(tempIdentifier);
+        const tempExpression = identifierExpressionMap.get(tempIdentifier);
         if (tempExpression === null) {
             return null;
         }
@@ -136,7 +137,7 @@ export abstract class Expression {
     }
     
     evaluateToConstantOrNull(): Constant {
-        let tempDefinition = this.evaluateToIndexDefinitionOrNull();
+        const tempDefinition = this.evaluateToIndexDefinitionOrNull();
         if (tempDefinition !== null) {
             return tempDefinition.createConstantOrNull();
         }
@@ -144,11 +145,11 @@ export abstract class Expression {
     }
     
     evaluateToString(): string {
-        let tempConstant = this.evaluateToConstantOrNull();
+        const tempConstant = this.evaluateToConstantOrNull();
         if (tempConstant === null || !(tempConstant instanceof StringConstant)) {
             throw this.createError("Expected string.");
         }
-        let tempStringConstant = tempConstant as StringConstant;
+        const tempStringConstant = tempConstant as StringConstant;
         return tempStringConstant.value;
     }
     
@@ -157,25 +158,25 @@ export abstract class Expression {
     }
     
     evaluateToInstructionArg(): InstructionArg {
-        let tempDefinition = this.evaluateToIndexDefinitionOrNull();
+        const tempDefinition = this.evaluateToIndexDefinitionOrNull();
         if (tempDefinition !== null) {
-            let tempResult = tempDefinition.createInstructionArgOrNull();
+            const tempResult = tempDefinition.createInstructionArgOrNull();
             if (tempResult !== null) {
                 return tempResult;
             }
         }
         try {
-            let tempConstant = this.evaluateToConstantOrNull();
+            const tempConstant = this.evaluateToConstantOrNull();
             if (tempConstant !== null) {
                 tempConstant.compress(instructionDataTypeList);
                 return new ResolvedConstantInstructionArg(tempConstant);
             }
-        } catch(error) {
+        } catch (error) {
             if (error instanceof UnresolvedIndexError) {
                 return new ExpressionInstructionArg(this);
             }
         }
-        let tempIdentifier = this.evaluateToIdentifierOrNull();
+        const tempIdentifier = this.evaluateToIdentifierOrNull();
         if (tempIdentifier !== null && !tempIdentifier.getIsBuiltIn()) {
             throw this.createError(`Unknown identifier "${tempIdentifier.getDisplayString()}".`);
         } else {
@@ -184,7 +185,7 @@ export abstract class Expression {
     }
     
     evaluateToInstructionRef(): InstructionRef {
-        let tempArg = this.evaluateToInstructionArg();
+        const tempArg = this.evaluateToInstructionArg();
         return new PointerInstructionRef(tempArg);
     }
     
@@ -202,7 +203,7 @@ export interface ArgTerm extends ArgTermInterface {}
 export abstract class ArgTerm extends Expression {
     
     processExpressionsHelper(processExpression: ExpressionProcessor, shouldRecurAfterProcess?: boolean): Expression {
-        let tempResult = processExpression(this);
+        const tempResult = processExpression(this);
         if (tempResult !== null) {
             return tempResult;
         }
@@ -329,7 +330,7 @@ export class UnaryExpression extends Expression {
     }
     
     processExpressionsHelper(processExpression: ExpressionProcessor, shouldRecurAfterProcess?: boolean): Expression {
-        let tempResult = processExpression(this);
+        const tempResult = processExpression(this);
         if (tempResult !== null) {
             return tempResult;
         }
@@ -341,7 +342,7 @@ export class UnaryExpression extends Expression {
         let tempResult;
         try {
             tempResult = this.operator.createConstantOrNull(this.operand);
-        } catch(error) {
+        } catch (error) {
             this.handleError(error);
             throw error;
         }
@@ -355,7 +356,7 @@ export class UnaryExpression extends Expression {
     getConstantDataTypeHelper(): DataType {
         try {
             return this.operator.getConstantDataType(this.operand);
-        } catch(error) {
+        } catch (error) {
             this.handleError(error);
             throw error;
         }
@@ -372,7 +373,7 @@ export class MacroIdentifierExpression extends UnaryExpression {
     }
     
     copy(): Expression {
-        let output = new MacroIdentifierExpression(this.operand.copy());
+        const output = new MacroIdentifierExpression(this.operand.copy());
         output.macroInvocationId = this.macroInvocationId;
         return output;
     }
@@ -388,7 +389,7 @@ export class MacroIdentifierExpression extends UnaryExpression {
         if (!(this.operand instanceof ArgTerm)) {
             return null;
         }
-        let tempName = this.operand.evaluateToIdentifierName();
+        const tempName = this.operand.evaluateToIdentifierName();
         return new MacroIdentifier(tempName, this.macroInvocationId);
     }
     
@@ -423,7 +424,7 @@ export class BinaryExpression extends Expression {
     }
     
     processExpressionsHelper(processExpression: ExpressionProcessor, shouldRecurAfterProcess?: boolean): Expression {
-        let tempResult = processExpression(this);
+        const tempResult = processExpression(this);
         if (tempResult !== null) {
             return tempResult;
         }
@@ -436,7 +437,7 @@ export class BinaryExpression extends Expression {
         let tempResult;
         try {
             tempResult = this.operator.createConstantOrNull(this.operand1, this.operand2);
-        } catch(error) {
+        } catch (error) {
             this.handleError(error);
             throw error;
         }
@@ -450,7 +451,7 @@ export class BinaryExpression extends Expression {
     evaluateToIdentifierOrNull(): Identifier {
         try {
             return this.operator.createIdentifierOrNull(this.operand1, this.operand2);
-        } catch(error) {
+        } catch (error) {
             this.handleError(error);
             throw error;
         }
@@ -460,7 +461,7 @@ export class BinaryExpression extends Expression {
         let tempResult;
         try {
             tempResult = this.operator.createInstructionArgOrNull(this.operand1, this.operand2);
-        } catch(error) {
+        } catch (error) {
             this.handleError(error);
             throw error;
         }
@@ -473,7 +474,7 @@ export class BinaryExpression extends Expression {
     getConstantDataTypeHelper(): DataType {
         try {
             return this.operator.getConstantDataType(this.operand1, this.operand2);
-        } catch(error) {
+        } catch (error) {
             this.handleError(error);
             throw error;
         }
@@ -508,7 +509,7 @@ export class SubscriptExpression extends Expression {
     }
     
     processExpressionsHelper(processExpression: ExpressionProcessor, shouldRecurAfterProcess?: boolean): Expression {
-        let tempResult = processExpression(this);
+        const tempResult = processExpression(this);
         if (tempResult !== null) {
             return tempResult;
         }
@@ -536,7 +537,7 @@ export class SubscriptExpression extends Expression {
     }
     
     getConstantDataTypeHelper(): DataType {
-        return this.dataTypeExpression.evaluateToDataType()
+        return this.dataTypeExpression.evaluateToDataType();
     }
 }
 

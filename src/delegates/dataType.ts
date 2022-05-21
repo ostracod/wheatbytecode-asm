@@ -1,18 +1,18 @@
 
-import {MixedNumber} from "../models/items.js";
+import { MixedNumber } from "../models/items.js";
 import {
     DataType as DataTypeInterface,
     NumberType as NumberTypeInterface,
     IntegerType as IntegerTypeInterface,
     SignedIntegerType as SignedIntegerTypeInterface,
-    StringType as StringTypeInterface
+    StringType as StringTypeInterface,
 } from "../models/delegates.js";
-import {mathUtils} from "../utils/mathUtils.js";
+import { mathUtils } from "../utils/mathUtils.js";
 
-export let instructionDataTypeList: SignedIntegerType[] = [];
-export let numberTypeList: NumberType[] = [];
-export let numberTypeMap: {[name: string]: NumberType} = {};
-export let signedIntegerTypeList: SignedIntegerType[] = [];
+export const instructionDataTypeList: SignedIntegerType[] = [];
+export const numberTypeList: NumberType[] = [];
+export const numberTypeMap: { [name: string]: NumberType } = {};
+export const signedIntegerTypeList: SignedIntegerType[] = [];
 
 export interface DataType extends DataTypeInterface {}
 
@@ -67,7 +67,7 @@ export class IntegerType extends NumberType {
     }
     
     contains(value: MixedNumber): boolean {
-        let tempValue = mathUtils.convertMixedNumberToBigInt(value);
+        const tempValue = mathUtils.convertMixedNumberToBigInt(value);
         return (tempValue >= this.getMinimumNumber() && tempValue <= this.getMaximumNumber());
     }
 }
@@ -87,7 +87,7 @@ export class UnsignedIntegerType extends IntegerType {
     }
     
     convertNumberToBuffer(value: MixedNumber): Buffer {
-        let output = Buffer.alloc(this.byteAmount);
+        const output = Buffer.alloc(this.byteAmount);
         if (this.byteAmount === 8) {
             output.writeBigUInt64LE(mathUtils.convertMixedNumberToBigInt(value), 0);
         } else {
@@ -142,8 +142,7 @@ export class SignedIntegerType extends IntegerType {
     }
     
     convertNumberToBuffer(value: MixedNumber): Buffer {
-        let output = Buffer.alloc(this.byteAmount);
-        let tempAmount;
+        const output = Buffer.alloc(this.byteAmount);
         if (this.byteAmount === 8) {
             output.writeBigInt64LE(mathUtils.convertMixedNumberToBigInt(value), 0);
         } else {
@@ -161,7 +160,7 @@ export class SignedIntegerType extends IntegerType {
     }
     
     restrictNumber(value: MixedNumber): MixedNumber {
-        let tempOffset = 1n << BigInt(this.bitAmount);
+        const tempOffset = 1n << BigInt(this.bitAmount);
         value = mathUtils.convertMixedNumberToBigInt(value) & (tempOffset - 1n);
         if (value > this.getMaximumNumber()) {
             value -= tempOffset;
@@ -215,7 +214,7 @@ export class FloatType extends NumberType {
     }
     
     convertNumberToBuffer(value: MixedNumber): Buffer {
-        let tempNumber = Number(value);
+        const tempNumber = Number(value);
         let output;
         if (this.byteAmount <= 4) {
             output = Buffer.alloc(4);
@@ -267,13 +266,13 @@ export const compressibleIntegerType = new CompressibleIntegerType();
 export const float32Type = new FloatType(4);
 export const float64Type = new FloatType(8);
 
-for (let numberType of numberTypeList) {
+for (const numberType of numberTypeList) {
     if (!numberType.getIsCompressible()) {
         numberTypeMap[numberType.getName()] = numberType;
     }
 }
 
-let integerComparator = ((type1, type2) => (type1.byteAmount - type2.byteAmount));
+const integerComparator = ((type1, type2) => (type1.byteAmount - type2.byteAmount));
 signedIntegerTypeList.sort(integerComparator);
 
 

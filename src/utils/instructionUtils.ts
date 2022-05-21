@@ -1,11 +1,11 @@
 
-import {InstructionUtils as InstructionUtilsInterface} from "../models/utils.js";
-import {DataType} from "../models/delegates.js";
-import {Constant, InstructionArg} from "../models/objects.js";
-import {compressibleIntegerType, instructionDataTypeList} from "../delegates/dataType.js";
-import {AssemblyError} from "../objects/assemblyError.js";
-import {NumberConstant} from "../objects/constant.js";
-import {INSTRUCTION_REF_PREFIX, InstructionRef, ResolvedConstantInstructionArg, RefInstructionArg} from "../objects/instruction.js";
+import { InstructionUtils as InstructionUtilsInterface } from "../models/utils.js";
+import { DataType } from "../models/delegates.js";
+import { Constant, InstructionArg } from "../models/objects.js";
+import { compressibleIntegerType, instructionDataTypeList } from "../delegates/dataType.js";
+import { AssemblyError } from "../objects/assemblyError.js";
+import { NumberConstant } from "../objects/constant.js";
+import { INSTRUCTION_REF_PREFIX, InstructionRef, ResolvedConstantInstructionArg, RefInstructionArg } from "../objects/instruction.js";
 
 export interface InstructionUtils extends InstructionUtilsInterface {}
 
@@ -22,7 +22,7 @@ export class InstructionUtils {
         }
         return Buffer.concat([
             Buffer.from([(refPrefix << 4) + dataTypePrefix]),
-            buffer
+            buffer,
         ]);
     }
     
@@ -39,10 +39,10 @@ export class InstructionUtils {
     }
     
     createInstructionArgWithIndex(refPrefix: number, dataType: DataType, index: number): InstructionArg {
-        let tempRef = new InstructionRef(refPrefix);
-        let tempNumberConstant = new NumberConstant(index, compressibleIntegerType);
+        const tempRef = new InstructionRef(refPrefix);
+        const tempNumberConstant = new NumberConstant(index, compressibleIntegerType);
         tempNumberConstant.compress(instructionDataTypeList);
-        let tempArg = new ResolvedConstantInstructionArg(tempNumberConstant);
+        const tempArg = new ResolvedConstantInstructionArg(tempNumberConstant);
         return new RefInstructionArg(tempRef, dataType, tempArg);
     }
 }

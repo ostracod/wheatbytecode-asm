@@ -1,7 +1,7 @@
 
 import {
     Scope as ScopeInterface,
-    IdentifierMap, IndexDefinition, Identifier
+    IndexDefinition, Identifier,
 } from "../models/objects.js";
 
 export interface Scope extends ScopeInterface {}
@@ -18,8 +18,8 @@ export class Scope {
     }
     
     getIndexDefinitionByIdentifier(identifier: Identifier): IndexDefinition {
-        for (let identifierMap of this.indexDefinitionMapList) {
-            let tempDefinition = identifierMap.get(identifier);
+        for (const identifierMap of this.indexDefinitionMapList) {
+            const tempDefinition = identifierMap.get(identifier);
             if (tempDefinition !== null) {
                 return tempDefinition;
             }

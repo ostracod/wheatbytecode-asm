@@ -1,17 +1,16 @@
 
-import {LineProcessor} from "../models/items.js";
+import { LineProcessor } from "../models/items.js";
 import {
     FunctionImplementation as FunctionImplementationInterface,
     FunctionDefinition as FunctionDefinitionInterface,
-    AssemblyLine, Expression, Instruction
+    AssemblyLine, Expression, Instruction,
 } from "../models/objects.js";
-import {niceUtils} from "../utils/niceUtils.js";
-import {variableUtils} from "../utils/variableUtils.js";
-import {AssemblyError} from "./assemblyError.js";
-import {IndexDefinition, indexConstantConverter} from "./indexDefinition.js";
-import {Scope} from "./scope.js";
-import {InstructionLineList} from "./labeledLineList.js";
-import {Identifier, IdentifierMap} from "./identifier.js";
+import { niceUtils } from "../utils/niceUtils.js";
+import { variableUtils } from "../utils/variableUtils.js";
+import { IndexDefinition, indexConstantConverter } from "./indexDefinition.js";
+import { Scope } from "./scope.js";
+import { InstructionLineList } from "./labeledLineList.js";
+import { Identifier, IdentifierMap } from "./identifier.js";
 
 export const functionTableEntrySize = 21;
 
@@ -27,11 +26,11 @@ export class FunctionImplementation {
     }
     
     getDisplayString(indentationLevel: number): string {
-        let tempTextList = [];
-        let tempIndentation = niceUtils.getIndentation(indentationLevel);
-        let tempIsGuarded = this.functionDefinition.isGuarded;
+        const tempTextList = [];
+        const tempIndentation = niceUtils.getIndentation(indentationLevel);
+        const tempIsGuarded = this.functionDefinition.isGuarded;
         tempTextList.push(`${tempIndentation}Is guarded: ${tempIsGuarded}`);
-        let tempIdExpression = this.functionDefinition.idExpression;
+        const tempIdExpression = this.functionDefinition.idExpression;
         let tempIdText;
         if (this.functionDefinition.idExpression === null) {
             tempIdText = "0";
@@ -76,8 +75,8 @@ export class FunctionImplementation {
     }
     
     extractLocalVariableDefinitions(): void {
-        this.processLines(line => {
-            let tempLocalDefinition = variableUtils.extractLocalVariableDefinition(line);
+        this.processLines((line) => {
+            const tempLocalDefinition = variableUtils.extractLocalVariableDefinition(line);
             if (tempLocalDefinition !== null) {
                 this.localVariableDefinitionMap.setIndexDefinition(tempLocalDefinition);
                 return [];
@@ -97,7 +96,7 @@ export class FunctionImplementation {
     }
     
     assembleInstructions(): Buffer {
-        let tempLineList = this.getLineList();
+        const tempLineList = this.getLineList();
         const output = tempLineList.createBuffer();
         this.instructionList = tempLineList.serializableLineList as Instruction[];
         return output;
@@ -116,7 +115,7 @@ export class FunctionDefinition extends IndexDefinition {
     ) {
         super(identifier, indexConstantConverter);
         this.idExpression = idExpression;
-        this.isGuarded = isGuarded
+        this.isGuarded = isGuarded;
         this.lineList = new InstructionLineList(lineList);
         this.argVariableDefinitionMap = new IdentifierMap();
         this.argFrameSize = null;
@@ -141,8 +140,8 @@ export class FunctionDefinition extends IndexDefinition {
     }
     
     getDisplayString(): string {
-        let tempTitle = `function ${this.identifier.name}`;
-        let tempTextList = [tempTitle + ":"];
+        const tempTitle = `function ${this.identifier.name}`;
+        const tempTextList = [tempTitle + ":"];
         if (this.functionImplementation !== null) {
             tempTextList.push(this.functionImplementation.getDisplayString(1));
         }
@@ -155,8 +154,8 @@ export class FunctionDefinition extends IndexDefinition {
     }
     
     extractArgVariableDefinitions(): void {
-        this.processLines(line => {
-            let tempArgDefinition = variableUtils.extractArgVariableDefinition(line);
+        this.processLines((line) => {
+            const tempArgDefinition = variableUtils.extractArgVariableDefinition(line);
             if (tempArgDefinition !== null) {
                 this.argVariableDefinitionMap.setIndexDefinition(tempArgDefinition);
                 return [];
@@ -179,7 +178,7 @@ export class FunctionDefinition extends IndexDefinition {
         instructionsFilePos: number,
         instructionsSize: number
     ): Buffer {
-        let output = Buffer.alloc(functionTableEntrySize);
+        const output = Buffer.alloc(functionTableEntrySize);
         let tempId;
         if (this.idExpression === null) {
             tempId = 0;

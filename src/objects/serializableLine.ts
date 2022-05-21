@@ -2,9 +2,9 @@
 import {
     SerializableLine as SerializableLineInterface,
     AppData as AppDataInterface,
-    Expression, AssemblyLine
+    AssemblyLine,
 } from "../models/objects.js";
-import {SignedIntegerType, signedInteger32Type} from "../delegates/dataType.js";
+import { SignedIntegerType, signedInteger32Type } from "../delegates/dataType.js";
 
 export interface SerializableLine extends SerializableLineInterface {}
 
@@ -25,15 +25,13 @@ export class AppData extends SerializableLine {
     }
     
     getDisplayString(): string {
-        let tempTextList = this.expressionList.map(expression => {
-            return expression.getDisplayString();
-        });
+        const tempTextList = this.expressionList.map((expression) => expression.getDisplayString());
         return "DATA " + tempTextList.join(", ");
     }
     
     getBufferLength(): number {
         let output = 0;
-        for (let expression of this.expressionList) {
+        for (const expression of this.expressionList) {
             let tempDataType = expression.getConstantDataType();
             if (tempDataType instanceof SignedIntegerType
                     && tempDataType.getIsCompressible()) {
@@ -45,8 +43,8 @@ export class AppData extends SerializableLine {
     }
     
     createBuffer(): Buffer {
-        let tempBufferList = this.expressionList.map(expression => {
-            let tempConstant = expression.evaluateToConstant();
+        const tempBufferList = this.expressionList.map((expression) => {
+            const tempConstant = expression.evaluateToConstant();
             tempConstant.compress([signedInteger32Type]);
             return tempConstant.createBuffer();
         });

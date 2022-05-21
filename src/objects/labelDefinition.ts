@@ -1,6 +1,6 @@
 
-import {LabelDefinition as LabelDefinitionInterface, Identifier, InstructionArg, IndexConverter} from "../models/objects.js";
-import {IndexDefinition, indexConstantConverter, appDataIndexConverter} from "./indexDefinition.js";
+import { LabelDefinition as LabelDefinitionInterface, Identifier, IndexConverter } from "../models/objects.js";
+import { IndexDefinition, indexConstantConverter, appDataIndexConverter } from "./indexDefinition.js";
 
 export interface LabelDefinition extends LabelDefinitionInterface {}
 

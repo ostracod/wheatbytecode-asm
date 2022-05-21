@@ -1,6 +1,6 @@
 
-import {MixedNumber} from "./items.js";
-import {Expression, Constant, NumberConstant, InstructionArg, Identifier} from "./objects.js";
+import { MixedNumber } from "./items.js";
+import { Expression, Constant, NumberConstant, InstructionArg, Identifier } from "./objects.js";
 
 export interface DataType {
     byteAmount: number;

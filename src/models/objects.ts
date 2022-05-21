@@ -1,6 +1,6 @@
 
-import {LineProcessor, ExpressionProcessor, InstructionArgProcessor, LabelDefinitionClass, MixedNumber} from "./items.js";
-import {UnaryOperator, BinaryOperator, DataType, NumberType, SignedIntegerType, StringType, InstructionType} from "./delegates.js";
+import { LineProcessor, ExpressionProcessor, InstructionArgProcessor, LabelDefinitionClass, MixedNumber } from "./items.js";
+import { UnaryOperator, BinaryOperator, DataType, NumberType, SignedIntegerType, StringType, InstructionType } from "./delegates.js";
 
 export interface Displayable {
     // Concrete subclasses must implement these methods:
@@ -38,7 +38,7 @@ export interface Assembler {
     shouldBeVerbose: boolean;
     rootLineList: AssemblyLine[];
     aliasDefinitionMap: IdentifierMap<AliasDefinition>;
-    macroDefinitionMap: {[name: string]: MacroDefinition};
+    macroDefinitionMap: { [name: string]: MacroDefinition };
     nextMacroInvocationId: number;
     functionDefinitionMap: IdentifierMap<FunctionDefinition>;
     nextFunctionDefinitionIndex: number;
@@ -246,7 +246,7 @@ export interface MacroIdentifier extends Identifier {
 }
 
 export interface IdentifierMap<T> {
-    map: {[key: string]: T};
+    map: { [key: string]: T };
     keyList: string[];
     
     get(identifier: Identifier): T;
@@ -288,7 +288,7 @@ export interface LabeledLineList {
     
     populateScope(scope: Scope): void;
     processLines(processLine: LineProcessor): void;
-    getLineBufferIndexMap(): {[lineIndex: number]: number};
+    getLineBufferIndexMap(): { [lineIndex: number]: number };
     getDisplayString(title: string, indentationLevel?: number): string;
     assembleSerializableLines(): void;
     createBuffer(): Buffer;

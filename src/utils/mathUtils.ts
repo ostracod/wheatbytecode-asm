@@ -1,6 +1,6 @@
 
-import {MixedNumber} from "../models/items.js";
-import {MathUtils as MathUtilsInterface} from "../models/utils.js";
+import { MixedNumber } from "../models/items.js";
+import { MathUtils as MathUtilsInterface } from "../models/utils.js";
 
 export interface MathUtils extends MathUtilsInterface {}
 
@@ -22,10 +22,10 @@ export class MathUtils {
     }
     
     convertBufferToHexadecimal(buffer: Buffer): string {
-        let tempTextList = [];
+        const tempTextList = [];
         let index = 0;
         while (index < buffer.length) {
-            let tempValue = buffer[index];
+            const tempValue = buffer[index];
             tempTextList.push(mathUtils.convertNumberToHexadecimal(tempValue, 2));
             index += 1;
         }

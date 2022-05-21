@@ -1,6 +1,6 @@
 
-import {NumberType} from "./delegates.js";
-import {Expression, AssemblyLine, VariableDefinition, LabelDefinition, ArgNumber, InstructionArg} from "./objects.js";
+import { NumberType } from "./delegates.js";
+import { Expression, AssemblyLine, VariableDefinition, LabelDefinition, ArgNumber, InstructionArg } from "./objects.js";
 
 export type ExpressionProcessor = ((expression: Expression) => Expression);
 

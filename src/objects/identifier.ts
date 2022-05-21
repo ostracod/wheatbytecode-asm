@@ -3,17 +3,17 @@ import {
     Identifier as IdentifierInterface,
     MacroIdentifier as MacroIdentifierInterface,
     IdentifierMap as IdentifierMapInterface,
-    IndexDefinition, Expression
+    IndexDefinition,
 } from "../models/objects.js";
-import {AssemblyError} from "./assemblyError.js";
-import {nameInstructionRefMap} from "./instruction.js";
-import {builtInConstantSet} from "./constant.js";
+import { AssemblyError } from "./assemblyError.js";
+import { nameInstructionRefMap } from "./instruction.js";
+import { builtInConstantSet } from "./constant.js";
 
 const builtInIdentifierNameSet = {};
-for (let name in nameInstructionRefMap) {
+for (const name in nameInstructionRefMap) {
     builtInIdentifierNameSet[name] = true;
 }
-for (let name in builtInConstantSet) {
+for (const name in builtInConstantSet) {
     builtInIdentifierNameSet[name] = true;
 }
 
@@ -66,6 +66,7 @@ export class MacroIdentifier extends Identifier {
 
 export interface IdentifierMap<T> extends IdentifierMapInterface<T> {}
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class IdentifierMap<T> {
     
     constructor() {
@@ -75,7 +76,7 @@ export class IdentifierMap<T> {
     }
     
     get(identifier: Identifier): any {
-        let tempKey = identifier.getMapKey();
+        const tempKey = identifier.getMapKey();
         if (tempKey in this.map) {
             return this.map[tempKey];
         } else {
@@ -84,7 +85,7 @@ export class IdentifierMap<T> {
     }
     
     set(identifier: Identifier, value: any): void {
-        let tempKey = identifier.getMapKey();
+        const tempKey = identifier.getMapKey();
         if (tempKey in this.map) {
             throw new AssemblyError("Duplicate identifier.");
         }
@@ -97,14 +98,14 @@ export class IdentifierMap<T> {
     }
     
     iterate(handle: (value: any) => void): void {
-        for (let key of this.keyList) {
+        for (const key of this.keyList) {
             handle(this.map[key]);
         }
     }
     
     getValueList(): any[] {
-        let output = [];
-        this.iterate(value => {
+        const output = [];
+        this.iterate((value) => {
             output.push(value);
         });
         return output;

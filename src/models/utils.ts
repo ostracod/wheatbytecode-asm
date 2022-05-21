@@ -1,7 +1,7 @@
 
-import {ExpressionProcessor, LineProcessor, NumberTypeClass, VariableDefinitionClass, ArgNumeric, MixedNumber} from "./items.js";
-import {Operator, DataType, NumberType} from "./delegates.js";
-import {Expression, AssemblyLine, Identifier, IdentifierMap, Displayable, ArgWord, ArgNumber, ArgString, VariableDefinition, ArgVariableDefinition, InstructionArg, Constant} from "./objects.js";
+import { ExpressionProcessor, LineProcessor, NumberTypeClass, VariableDefinitionClass, ArgNumeric, MixedNumber } from "./items.js";
+import { Operator, DataType, NumberType } from "./delegates.js";
+import { Expression, AssemblyLine, IdentifierMap, Displayable, ArgWord, ArgNumber, ArgString, VariableDefinition, ArgVariableDefinition, InstructionArg, Constant } from "./objects.js";
 
 export interface DataTypeUtils {
     getDataTypeByName(name: string): DataType;
@@ -54,7 +54,7 @@ export interface NiceUtils {
     ): string;
     getBufferDisplayString(title: string, buffer: Buffer): string;
     joinTextList(textList: string[]): string;
-    getReverseMap(map: {[key: string]: any}): {[key: string]: any};
+    getReverseMap(map: { [key: string]: any }): { [key: string]: any };
     pluralize(word: string, amount: number): string;
 }
 

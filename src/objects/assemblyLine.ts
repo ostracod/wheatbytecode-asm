@@ -1,9 +1,9 @@
 
-import {ExpressionProcessor} from "../models/items.js";
-import {AssemblyLine as AssemblyLineInterface, Expression} from "../models/objects.js";
-import {niceUtils} from "../utils/niceUtils.js";
-import {lineUtils} from "../utils/lineUtils.js";
-import {expressionUtils} from "../utils/expressionUtils.js";
+import { ExpressionProcessor } from "../models/items.js";
+import { AssemblyLine as AssemblyLineInterface, Expression } from "../models/objects.js";
+import { niceUtils } from "../utils/niceUtils.js";
+import { lineUtils } from "../utils/lineUtils.js";
+import { expressionUtils } from "../utils/expressionUtils.js";
 
 export interface AssemblyLine extends AssemblyLineInterface {}
 
@@ -16,8 +16,8 @@ export class AssemblyLine {
         this.filePath = null;
         // List of AssemblyLine or null.
         this.codeBlock = null;
-        for (let arg of this.argList) {
-            arg.processExpressions(expression => {
+        for (const arg of this.argList) {
+            arg.processExpressions((expression) => {
                 expression.line = this;
                 return null;
             });
@@ -25,8 +25,8 @@ export class AssemblyLine {
     }
     
     copy(): AssemblyLine {
-        let tempArgList = expressionUtils.copyExpressions(this.argList);
-        let output = new AssemblyLine(this.directiveName, tempArgList);
+        const tempArgList = expressionUtils.copyExpressions(this.argList);
+        const output = new AssemblyLine(this.directiveName, tempArgList);
         output.lineNumber = this.lineNumber;
         output.filePath = this.filePath;
         if (this.codeBlock === null) {
@@ -41,14 +41,14 @@ export class AssemblyLine {
         if (typeof indentationLevel === "undefined") {
             indentationLevel = 0;
         }
-        let tempIndentation = niceUtils.getIndentation(indentationLevel);
-        let tempTextList = this.argList.map(arg => arg.getDisplayString());
-        let tempLineText = tempIndentation + this.directiveName + " " + tempTextList.join(", ");
+        const tempIndentation = niceUtils.getIndentation(indentationLevel);
+        const tempTextList = this.argList.map((arg) => arg.getDisplayString());
+        const tempLineText = tempIndentation + this.directiveName + " " + tempTextList.join(", ");
         if (this.codeBlock === null) {
             return tempLineText;
         } else {
-            let tempLineTextList = [tempLineText];
-            for (let line of this.codeBlock) {
+            const tempLineTextList = [tempLineText];
+            for (const line of this.codeBlock) {
                 tempLineTextList.push(line.getDisplayString(indentationLevel + 1));
             }
             tempLineTextList.push("END");

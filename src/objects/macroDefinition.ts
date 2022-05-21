@@ -1,8 +1,8 @@
 
-import {MacroDefinition as MacroDefinitionInterface, Identifier, Expression, AssemblyLine} from "../models/objects.js";
-import {AssemblyError} from "./assemblyError.js";
-import {lineUtils} from "../utils/lineUtils.js";
-import {IdentifierMap} from "./identifier.js";
+import { MacroDefinition as MacroDefinitionInterface, Identifier, Expression, AssemblyLine } from "../models/objects.js";
+import { AssemblyError } from "./assemblyError.js";
+import { lineUtils } from "../utils/lineUtils.js";
+import { IdentifierMap } from "./identifier.js";
 
 export interface MacroDefinition extends MacroDefinitionInterface {}
 
@@ -18,23 +18,21 @@ export class MacroDefinition {
         if (argList.length !== this.argIdentifierList.length) {
             throw new AssemblyError("Wrong number of macro arguments.");
         }
-        let identifierExpressionMap = new IdentifierMap() as IdentifierMap<Expression>;
+        const identifierExpressionMap = new IdentifierMap() as IdentifierMap<Expression>;
         for (let index = 0; index < this.argIdentifierList.length; index++) {
-            let tempIdentifier = this.argIdentifierList[index];
-            let tempExpression = argList[index];
+            const tempIdentifier = this.argIdentifierList[index];
+            const tempExpression = argList[index];
             identifierExpressionMap.set(tempIdentifier, tempExpression);
         }
-        let output = lineUtils.copyLines(this.lineList);
+        const output = lineUtils.copyLines(this.lineList);
         lineUtils.substituteIdentifiersInLines(output, identifierExpressionMap);
         lineUtils.populateMacroInvocationIdInLines(output, macroInvocationId);
         return output;
     }
     
     getDisplayString(): string {
-        let tempTextList = [];
-        let tempIdentifierTextList = this.argIdentifierList.map(identifier => {
-            return identifier.getDisplayString();
-        });
+        const tempTextList = [];
+        const tempIdentifierTextList = this.argIdentifierList.map((identifier) => identifier.getDisplayString());
         let tempText = this.name;
         if (tempIdentifierTextList.length > 0) {
             tempText += " " + tempIdentifierTextList.join(", ");

@@ -1,9 +1,9 @@
 
-import {NumberTypeClass} from "../models/items.js";
-import {DataTypeUtils as DataTypeUtilsInterface} from "../models/utils.js";
-import {DataType, NumberType} from "../models/delegates.js";
-import {numberTypeList, numberTypeMap} from "../delegates/dataType.js";
-import {AssemblyError} from "../objects/assemblyError.js";
+import { NumberTypeClass } from "../models/items.js";
+import { DataTypeUtils as DataTypeUtilsInterface } from "../models/utils.js";
+import { DataType, NumberType } from "../models/delegates.js";
+import { numberTypeList, numberTypeMap } from "../delegates/dataType.js";
+import { AssemblyError } from "../objects/assemblyError.js";
 
 export interface DataTypeUtils extends DataTypeUtilsInterface {}
 
@@ -17,7 +17,7 @@ export class DataTypeUtils {
     }
     
     getNumberType(numberTypeClass: NumberTypeClass, byteAmount: number): NumberType {
-        for (let numberType of numberTypeList) {
+        for (const numberType of numberTypeList) {
             if (numberType.constructor === numberTypeClass
                     && numberType.byteAmount === byteAmount) {
                 return numberType;

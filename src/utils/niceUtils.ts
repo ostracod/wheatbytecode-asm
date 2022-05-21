@@ -1,7 +1,7 @@
 
-import {NiceUtils as NiceUtilsInterface} from "../models/utils.js";
-import {Displayable, IdentifierMap} from "../models/objects.js";
-import {mathUtils} from "./mathUtils.js";
+import { NiceUtils as NiceUtilsInterface } from "../models/utils.js";
+import { Displayable, IdentifierMap } from "../models/objects.js";
+import { mathUtils } from "./mathUtils.js";
 
 export interface NiceUtils extends NiceUtilsInterface {}
 
@@ -21,15 +21,15 @@ export class NiceUtils {
         indentationLevel?: number
     ): string {
         if (typeof indentationLevel === "undefined") {
-            indentationLevel = 0
+            indentationLevel = 0;
         }
         if (textList.length <= 0) {
             return "";
         }
-        let tempIndentation1 = niceUtils.getIndentation(indentationLevel);
-        let tempIndentation2 = niceUtils.getIndentation(indentationLevel + 1);
-        let tempTextList = [tempIndentation1 + title + ":"];
-        for (let text of textList) {
+        const tempIndentation1 = niceUtils.getIndentation(indentationLevel);
+        const tempIndentation2 = niceUtils.getIndentation(indentationLevel + 1);
+        const tempTextList = [tempIndentation1 + title + ":"];
+        for (const text of textList) {
             tempTextList.push(tempIndentation2 + text);
         }
         return tempTextList.join("\n");
@@ -42,7 +42,7 @@ export class NiceUtils {
     ): string {
         return niceUtils.getTextListDisplayString(
             title,
-            displayableList.map(displayable => displayable.getDisplayString()),
+            displayableList.map((displayable) => displayable.getDisplayString()),
             indentationLevel
         );
     }
@@ -60,16 +60,16 @@ export class NiceUtils {
     }
     
     getBufferDisplayString(title: string, buffer: Buffer): string {
-        let tempTextList = [title + ":"];
-        let tempIndentation = niceUtils.getIndentation(1);
+        const tempTextList = [title + ":"];
+        const tempIndentation = niceUtils.getIndentation(1);
         let startIndex = 0;
         while (startIndex < buffer.length) {
             let endIndex = startIndex + 12;
             if (endIndex >= buffer.length) {
                 endIndex = buffer.length;
             }
-            let tempBuffer = buffer.slice(startIndex, endIndex);
-            let tempText = mathUtils.convertBufferToHexadecimal(tempBuffer);
+            const tempBuffer = buffer.slice(startIndex, endIndex);
+            const tempText = mathUtils.convertBufferToHexadecimal(tempBuffer);
             tempTextList.push(tempIndentation + tempText);
             startIndex = endIndex;
         }
@@ -78,8 +78,8 @@ export class NiceUtils {
     
     // Excludes empty strings.
     joinTextList(textList: string[]): string {
-        let tempTextList = [];
-        for (let text of textList) {
+        const tempTextList = [];
+        for (const text of textList) {
             if (text.length > 0) {
                 tempTextList.push(text);
             }
@@ -87,10 +87,10 @@ export class NiceUtils {
         return tempTextList.join("\n");
     }
     
-    getReverseMap(map: {[key: string]: any}): {[key: string]: any} {
-        let output = {};
-        for (let key in map) {
-            let tempValue = map[key];
+    getReverseMap(map: { [key: string]: any }): { [key: string]: any } {
+        const output = {};
+        for (const key in map) {
+            const tempValue = map[key];
             output[tempValue] = key;
         }
         return output;

@@ -9,18 +9,18 @@ import {
     IndexInstructionArg as IndexInstructionArgInterface,
     ExpressionInstructionArg as ExpressionInstructionArgInterface,
     RefInstructionArg as RefInstructionArgInterface,
-    Constant, IndexDefinition, Expression, AssemblyLine
+    Constant, IndexDefinition, Expression, AssemblyLine,
 } from "../models/objects.js";
-import {InstructionArgProcessor} from "../models/items.js";
-import {InstructionType, DataType} from "../models/delegates.js";
-import {niceUtils} from "../utils/niceUtils.js";
-import {mathUtils} from "../utils/mathUtils.js";
-import {instructionUtils} from "../utils/instructionUtils.js";
-import {NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type} from "../delegates/dataType.js";
-import {instructionTypeMap} from "../delegates/instructionType.js";
-import {AssemblyError} from "./assemblyError.js";
-import {SerializableLine} from "./serializableLine.js";
-import {NumberConstant} from "./constant.js";
+import { InstructionArgProcessor } from "../models/items.js";
+import { DataType } from "../models/delegates.js";
+import { niceUtils } from "../utils/niceUtils.js";
+import { mathUtils } from "../utils/mathUtils.js";
+import { instructionUtils } from "../utils/instructionUtils.js";
+import { NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type } from "../delegates/dataType.js";
+import { instructionTypeMap } from "../delegates/instructionType.js";
+import { AssemblyError } from "./assemblyError.js";
+import { SerializableLine } from "./serializableLine.js";
+import { NumberConstant } from "./constant.js";
 
 export const INSTRUCTION_REF_PREFIX = {
     constant: 0,
@@ -29,7 +29,7 @@ export const INSTRUCTION_REF_PREFIX = {
     prevArgFrame: 3,
     nextArgFrame: 4,
     appData: 5,
-    heapAlloc: 6
+    heapAlloc: 6,
 };
 
 export interface Instruction extends InstructionInterface {}
@@ -42,19 +42,17 @@ export class Instruction extends SerializableLine {
             throw new AssemblyError("Unrecognized opcode mnemonic.");
         }
         this.instructionType = instructionTypeMap[assemblyLine.directiveName];
-        let tempAmount = this.instructionType.argAmount;
+        const tempAmount = this.instructionType.argAmount;
         if (assemblyLine.argList.length !== tempAmount) {
             throw new AssemblyError(`Expected ${this.instructionType.argAmount} ${niceUtils.pluralize("argument", tempAmount)}.`);
         }
-        this.argList = assemblyLine.argList.map(expression => {
-            return expression.evaluateToInstructionArg();
-        });
+        this.argList = assemblyLine.argList.map((expression) => expression.evaluateToInstructionArg());
     }
     
     getDisplayString(): string {
         let output = mathUtils.convertNumberToHexadecimal(this.instructionType.opcode, 2);
         if (this.argList.length > 0) {
-            let tempTextList = this.argList.map(arg => arg.getDisplayString());
+            const tempTextList = this.argList.map((arg) => arg.getDisplayString());
             output += " " + tempTextList.join(", ");
         }
         return output;
@@ -69,9 +67,9 @@ export class Instruction extends SerializableLine {
     }
     
     createBuffer(): Buffer {
-        let tempBuffer = Buffer.from([this.instructionType.opcode]);
-        let tempBufferList = [tempBuffer].concat(
-            this.argList.map(arg => arg.createBuffer())
+        const tempBuffer = Buffer.from([this.instructionType.opcode]);
+        const tempBufferList = [tempBuffer].concat(
+            this.argList.map((arg) => arg.createBuffer())
         );
         return Buffer.concat(tempBufferList);
     }
@@ -147,7 +145,7 @@ export class InstructionArg {
     }
     
     getDisplayString(): string {
-        let tempBuffer = this.createBuffer();
+        const tempBuffer = this.createBuffer();
         return `{${mathUtils.convertBufferToHexadecimal(tempBuffer)}}`;
     }
     
@@ -317,7 +315,7 @@ export const nameInstructionRefMap = {
     localFrame: new InstructionRef(INSTRUCTION_REF_PREFIX.localFrame),
     prevArgFrame: new InstructionRef(INSTRUCTION_REF_PREFIX.prevArgFrame),
     nextArgFrame: new InstructionRef(INSTRUCTION_REF_PREFIX.nextArgFrame),
-    appData: new InstructionRef(INSTRUCTION_REF_PREFIX.appData)
+    appData: new InstructionRef(INSTRUCTION_REF_PREFIX.appData),
 };
 
 

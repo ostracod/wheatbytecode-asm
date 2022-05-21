@@ -2,11 +2,11 @@
 import * as fs from "fs";
 import * as pathUtils from "path";
 import { fileURLToPath } from "url";
-import {InstructionType as InstructionTypeInterface} from "../models/delegates.js";
+import { InstructionType as InstructionTypeInterface } from "../models/delegates.js";
 
 export interface InstructionType extends InstructionTypeInterface {}
 
-export let instructionTypeMap: {[name: string]: InstructionType} = {};
+export const instructionTypeMap: { [name: string]: InstructionType } = {};
 
 export class InstructionType {
     
@@ -23,10 +23,10 @@ const instructionsPath = pathUtils.join(
     currentDirectoryPath,
     "../../../wheatsystem-spec/bytecodeInstructions.json"
 );
-let categoryJsonList = JSON.parse(fs.readFileSync(instructionsPath, "utf8"));
+const categoryJsonList = JSON.parse(fs.readFileSync(instructionsPath, "utf8"));
 
-for (let categoryJson of categoryJsonList) {
-    for (let instructionJson of categoryJson.instructionList) {
+for (const categoryJson of categoryJsonList) {
+    for (const instructionJson of categoryJson.instructionList) {
         new InstructionType(
             instructionJson.name,
             instructionJson.opcode,

@@ -1,5 +1,5 @@
 
-import {MixedNumber} from "../models/items.js";
+import { MixedNumber } from "../models/items.js";
 import {
     UnaryOperator as UnaryOperatorInterface,
     UnaryNumberOperator as UnaryNumberOperatorInterface,
@@ -7,18 +7,18 @@ import {
     BinaryNumberOperator as BinaryNumberOperatorInterface,
     BinaryTypeMergeOperator as BinaryTypeMergeOperatorInterface,
     BinaryBitshiftOperator as BinaryBitshiftOperatorInterface,
-    Operator, DataType
+    DataType,
 } from "../models/delegates.js";
-import {Expression, Constant, InstructionArg, Identifier} from "../models/objects.js";
-import {dataTypeUtils} from "../utils/dataTypeUtils.js";
-import {mathUtils} from "../utils/mathUtils.js";
-import {compressibleIntegerType, NumberType, IntegerType} from "./dataType.js";
-import {UnaryExpression, MacroIdentifierExpression, BinaryExpression} from "../objects/expression.js";
-import {AssemblyError} from "../objects/assemblyError.js";
-import {NumberConstant, StringConstant} from "../objects/constant.js";
+import { Expression, Constant, InstructionArg, Identifier } from "../models/objects.js";
+import { dataTypeUtils } from "../utils/dataTypeUtils.js";
+import { mathUtils } from "../utils/mathUtils.js";
+import { compressibleIntegerType, NumberType, IntegerType } from "./dataType.js";
+import { UnaryExpression, MacroIdentifierExpression, BinaryExpression } from "../objects/expression.js";
+import { AssemblyError } from "../objects/assemblyError.js";
+import { NumberConstant, StringConstant } from "../objects/constant.js";
 
-export let unaryOperatorList = [];
-export let binaryOperatorList = [];
+export const unaryOperatorList = [];
+export const binaryOperatorList = [];
 
 export interface UnaryOperator extends UnaryOperatorInterface {}
 
@@ -47,15 +47,15 @@ export interface UnaryNumberOperator extends UnaryNumberOperatorInterface {}
 export class UnaryNumberOperator extends UnaryOperator {
     
     createConstantOrNull(operand: Expression): Constant {
-        let tempConstant = operand.evaluateToConstantOrNull();
+        const tempConstant = operand.evaluateToConstantOrNull();
         if (tempConstant === null) {
             return null;
         }
         if (!(tempConstant instanceof NumberConstant)) {
             throw new AssemblyError("Expected numeric value.");
         }
-        let tempNumberConstant = tempConstant.copy() as NumberConstant;
-        let tempNumberType = this.getConstantDataType(operand) as NumberType;
+        const tempNumberConstant = tempConstant.copy() as NumberConstant;
+        const tempNumberType = this.getConstantDataType(operand) as NumberType;
         let tempValue: MixedNumber;
         if (tempNumberType instanceof IntegerType) {
             tempValue = this.calculateInteger(
@@ -124,8 +124,8 @@ export class IndexOperator extends UnaryOperator {
     }
     
     createConstantOrNull(operand: Expression): Constant {
-        let tempIdentifier = operand.evaluateToIdentifier();
-        let tempDefinition = operand.scope.getIndexDefinitionByIdentifier(
+        const tempIdentifier = operand.evaluateToIdentifier();
+        const tempDefinition = operand.scope.getIndexDefinitionByIdentifier(
             tempIdentifier
         );
         if (tempDefinition === null) {
@@ -173,18 +173,18 @@ export class TypeCoercionOperator extends BinaryOperator {
     }
     
     createConstantOrNull(operand1: Expression, operand2: Expression): Constant {
-        let tempConstant = operand1.evaluateToConstantOrNull();
+        const tempConstant = operand1.evaluateToConstantOrNull();
         if (tempConstant === null) {
             return null;
         }
-        let tempDataType = operand2.evaluateToDataType();
+        const tempDataType = operand2.evaluateToDataType();
         tempConstant.setDataType(tempDataType);
         return tempConstant;
     }
     
     createInstructionArgOrNull(operand1: Expression, operand2: Expression): InstructionArg {
-        let tempArg = operand1.evaluateToInstructionArg();
-        let tempDataType = operand2.evaluateToDataType();
+        const tempArg = operand1.evaluateToInstructionArg();
+        const tempDataType = operand2.evaluateToDataType();
         tempArg.setDataType(tempDataType);
         return tempArg;
     }
@@ -195,8 +195,8 @@ export interface BinaryNumberOperator extends BinaryNumberOperatorInterface {}
 export abstract class BinaryNumberOperator extends BinaryOperator {
     
     createConstantOrNull(operand1: Expression, operand2: Expression): Constant {
-        let tempConstant1 = operand1.evaluateToConstantOrNull();
-        let tempConstant2 = operand2.evaluateToConstantOrNull();
+        const tempConstant1 = operand1.evaluateToConstantOrNull();
+        const tempConstant2 = operand2.evaluateToConstantOrNull();
         if (tempConstant1 === null || tempConstant2 === null) {
             return null;
         }
@@ -204,14 +204,14 @@ export abstract class BinaryNumberOperator extends BinaryOperator {
                 && tempConstant2 instanceof NumberConstant)) {
             throw new AssemblyError("Expected numeric value.");
         }
-        let tempNumberConstant1 = tempConstant1.copy() as NumberConstant;
-        let tempNumberConstant2 = tempConstant2.copy() as NumberConstant;
+        const tempNumberConstant1 = tempConstant1.copy() as NumberConstant;
+        const tempNumberConstant2 = tempConstant2.copy() as NumberConstant;
         return this.createConstantOrNullHelper(tempNumberConstant1, tempNumberConstant2);
     }
     
     getConstantDataType(operand1: Expression, operand2: Expression): DataType {
-        let tempDataType1 = operand1.getConstantDataType();
-        let tempDataType2 = operand2.getConstantDataType();
+        const tempDataType1 = operand1.getConstantDataType();
+        const tempDataType2 = operand2.getConstantDataType();
         if (!(tempDataType1 instanceof NumberType && tempDataType1 instanceof NumberType)) {
             throw new AssemblyError("Expected numeric value.");
         }
@@ -231,7 +231,7 @@ export class BinaryTypeMergeOperator extends BinaryNumberOperator {
     }
     
     createConstantOrNullHelper(numberConstant1: NumberConstant, numberConstant2: NumberConstant): NumberConstant {
-        let tempNumberType = this.getConstantDataTypeHelper(
+        const tempNumberType = this.getConstantDataTypeHelper(
             numberConstant1.numberType,
             numberConstant2.numberType
         );
@@ -268,13 +268,13 @@ export class AdditionOperator extends BinaryTypeMergeOperator {
     }
     
     createConstantOrNull(operand1: Expression, operand2: Expression): Constant {
-        let tempConstant1 = operand1.evaluateToConstantOrNull();
-        let tempConstant2 = operand2.evaluateToConstantOrNull();
+        const tempConstant1 = operand1.evaluateToConstantOrNull();
+        const tempConstant2 = operand2.evaluateToConstantOrNull();
         if (tempConstant1 !== null && tempConstant2 !== null
                 && tempConstant1 instanceof StringConstant
                 && tempConstant2 instanceof StringConstant) {
-            let tempStringConstant1 = tempConstant1 as StringConstant;
-            let tempStringConstant2 = tempConstant2 as StringConstant;
+            const tempStringConstant1 = tempConstant1 as StringConstant;
+            const tempStringConstant2 = tempConstant2 as StringConstant;
             return new StringConstant(tempStringConstant1.value + tempStringConstant2.value);
         } else {
             return super.createConstantOrNull(operand1, operand2);
@@ -395,11 +395,11 @@ export class BinaryBitshiftOperator extends BinaryNumberOperator {
     }
     
     createConstantOrNullHelper(numberConstant1: NumberConstant, numberConstant2: NumberConstant): NumberConstant {
-        let tempNumberType = this.getConstantDataTypeHelper(
+        const tempNumberType = this.getConstantDataTypeHelper(
             numberConstant1.numberType,
             numberConstant2.numberType
         );
-        let tempValue = this.calculateInteger(
+        const tempValue = this.calculateInteger(
             mathUtils.convertMixedNumberToBigInt(numberConstant1.value),
             mathUtils.convertMixedNumberToBigInt(numberConstant2.value)
         );

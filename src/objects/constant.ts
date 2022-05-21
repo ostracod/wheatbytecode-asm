@@ -1,13 +1,14 @@
+/* eslint-disable camelcase */
 
-import {MixedNumber} from "../models/items.js";
+import { MixedNumber } from "../models/items.js";
 import {
     Constant as ConstantInterface,
     NumberConstant as NumberConstantInterface,
-    StringConstant as StringConstantInterface
+    StringConstant as StringConstantInterface,
 } from "../models/objects.js";
-import {DataType, IntegerType} from "../models/delegates.js";
-import {SignedIntegerType, signedIntegerTypeList, compressibleIntegerType, NumberType, StringType} from "../delegates/dataType.js";
-import {AssemblyError} from "./assemblyError.js";
+import { DataType } from "../models/delegates.js";
+import { SignedIntegerType, compressibleIntegerType, NumberType, StringType } from "../delegates/dataType.js";
+import { AssemblyError } from "./assemblyError.js";
 
 export interface Constant extends ConstantInterface {}
 
@@ -59,7 +60,7 @@ export class NumberConstant extends Constant {
                 && this.numberType.getIsCompressible())) {
             return;
         }
-        for (let signedIntegerType of signedIntegerTypeList) {
+        for (const signedIntegerType of signedIntegerTypeList) {
             if (signedIntegerType.contains(this.value)) {
                 this.numberType = signedIntegerType;
                 return;
@@ -102,7 +103,7 @@ export const builtInConstantSet = {
     
 };
 
-let tempNumberSet = {
+const tempNumberSet = {
     
     null: 0,
     
@@ -139,8 +140,8 @@ let tempNumberSet = {
     sentryAllocAttr: 2,
 };
 
-for (let key in tempNumberSet) {
-    let tempNumber = tempNumberSet[key];
+for (const key in tempNumberSet) {
+    const tempNumber = tempNumberSet[key];
     builtInConstantSet[key] = new NumberConstant(tempNumber, compressibleIntegerType);
 }
 

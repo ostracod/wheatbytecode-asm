@@ -1,5 +1,5 @@
 
-import {AssemblyError as AssemblyErrorInterface, AssemblyLine} from "../models/objects.js";
+import { AssemblyError as AssemblyErrorInterface, AssemblyLine } from "../models/objects.js";
 
 export interface AssemblyError extends AssemblyErrorInterface {}
 

@@ -1,5 +1,5 @@
 
-import {AliasDefinition as AliasDefinitionInterface, Identifier, Expression} from "../models/objects.js";
+import { AliasDefinition as AliasDefinitionInterface, Identifier, Expression } from "../models/objects.js";
 
 export interface AliasDefinition extends AliasDefinitionInterface {}
 

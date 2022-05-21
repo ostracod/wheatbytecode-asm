@@ -1,8 +1,8 @@
 
-import {DataType} from "../models/delegates.js";
-import {VariableDefinition as VariableDefinitionInterface, ArgVariableDefinition as ArgVariableDefinitionInterface, Identifier} from "../models/objects.js";
-import {IndexRefConverter, IndexDefinition} from "./indexDefinition.js";
-import {INSTRUCTION_REF_PREFIX} from "./instruction.js";
+import { DataType } from "../models/delegates.js";
+import { VariableDefinition as VariableDefinitionInterface, ArgVariableDefinition as ArgVariableDefinitionInterface, Identifier } from "../models/objects.js";
+import { IndexRefConverter, IndexDefinition } from "./indexDefinition.js";
+import { INSTRUCTION_REF_PREFIX } from "./instruction.js";
 
 export interface VariableDefinition extends VariableDefinitionInterface {}
 

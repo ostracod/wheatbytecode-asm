@@ -1,14 +1,14 @@
 
-import {ExpressionProcessor} from "../models/items.js";
-import {ExpressionUtils as ExpressionUtilsInterface} from "../models/utils.js";
-import {Expression} from "../models/objects.js";
+import { ExpressionProcessor } from "../models/items.js";
+import { ExpressionUtils as ExpressionUtilsInterface } from "../models/utils.js";
+import { Expression } from "../models/objects.js";
 
 export interface ExpressionUtils extends ExpressionUtilsInterface {}
 
 export class ExpressionUtils {
     
     copyExpressions(expressionList: Expression[]): Expression[] {
-        return expressionList.map(expression => expression.copy());
+        return expressionList.map((expression) => expression.copy());
     }
     
     // processExpression accepts an expression, and returns
@@ -37,6 +37,6 @@ export class ExpressionUtils {
     }
 }
 
-export var expressionUtils = new ExpressionUtils();
+export const expressionUtils = new ExpressionUtils();
 
 

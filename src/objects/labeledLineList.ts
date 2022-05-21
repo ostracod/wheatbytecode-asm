@@ -1,18 +1,18 @@
 
-import {LineProcessor, LabelDefinitionClass} from "../models/items.js";
+import { LineProcessor, LabelDefinitionClass } from "../models/items.js";
 import {
     LabeledLineList as LabeledLineListInterface,
     InstructionLineList as InstructionLineListInterface,
     AppDataLineList as AppDataLineListInterface,
-    AssemblyLine, Scope, SerializableLine
+    AssemblyLine, Scope, SerializableLine,
 } from "../models/objects.js";
-import {AssemblyError} from "./assemblyError.js";
-import {InstructionLabelDefinition, AppDataLabelDefinition} from "./labelDefinition.js";
-import {IdentifierMap} from "./identifier.js";
-import {Instruction} from "./instruction.js";
-import {AppData} from "./serializableLine.js";
-import {niceUtils} from "../utils/niceUtils.js";
-import {lineUtils} from "../utils/lineUtils.js";
+import { AssemblyError } from "./assemblyError.js";
+import { InstructionLabelDefinition, AppDataLabelDefinition } from "./labelDefinition.js";
+import { IdentifierMap } from "./identifier.js";
+import { Instruction } from "./instruction.js";
+import { AppData } from "./serializableLine.js";
+import { niceUtils } from "../utils/niceUtils.js";
+import { lineUtils } from "../utils/lineUtils.js";
 
 export interface LabeledLineList extends LabeledLineListInterface {}
 
@@ -25,24 +25,24 @@ export class LabeledLineList {
     }
     
     populateScope(scope: Scope) {
-        lineUtils.processExpressionsInLines(this.lineList, expression => {
+        lineUtils.processExpressionsInLines(this.lineList, (expression) => {
             expression.scope = scope;
             return null;
         });
     }
     
     processLines(processLine: LineProcessor): void {
-        let tempResult = lineUtils.processLines(this.lineList, processLine);
+        const tempResult = lineUtils.processLines(this.lineList, processLine);
         this.lineList = tempResult.lineList;
     }
     
-    getLineBufferIndexMap(): {[lineIndex: number]: number} {
-        let output = {};
+    getLineBufferIndexMap(): { [lineIndex: number]: number } {
+        const output = {};
         let bufferIndex = 0;
         let lineIndex = 0;
         output[lineIndex] = bufferIndex;
         while (lineIndex < this.serializableLineList.length) {
-            let tempLine = this.serializableLineList[lineIndex];
+            const tempLine = this.serializableLineList[lineIndex];
             bufferIndex += tempLine.getBufferLength();
             lineIndex += 1;
             output[lineIndex] = bufferIndex;
@@ -51,17 +51,17 @@ export class LabeledLineList {
     }
     
     extractLabelDefinitions(): void {
-        let tempLabelDefinitionClass = this.getLabelDefinitionClass();
+        const tempLabelDefinitionClass = this.getLabelDefinitionClass();
         this.labelDefinitionMap = new IdentifierMap();
         let index = 0;
-        this.processLines(line => {
-            let tempArgList = line.argList;
+        this.processLines((line) => {
+            const tempArgList = line.argList;
             if (line.directiveName === "LBL") {
                 if (tempArgList.length !== 1) {
                     throw new AssemblyError("Expected 1 argument.");
                 }
-                let tempIdentifier = tempArgList[0].evaluateToIdentifier();
-                let tempDefinition = new tempLabelDefinitionClass(tempIdentifier, index);
+                const tempIdentifier = tempArgList[0].evaluateToIdentifier();
+                const tempDefinition = new tempLabelDefinitionClass(tempIdentifier, index);
                 this.labelDefinitionMap.setIndexDefinition(tempDefinition);
                 return [];
             }
@@ -72,8 +72,8 @@ export class LabeledLineList {
     
     // Returns whether we should repeat this function again.
     populateLabelDefinitionIndexes(): boolean {
-        let lineBufferIndexMap = this.getLineBufferIndexMap();
-        this.labelDefinitionMap.iterate(labelDefinition => {
+        const lineBufferIndexMap = this.getLineBufferIndexMap();
+        this.labelDefinitionMap.iterate((labelDefinition) => {
             labelDefinition.index = lineBufferIndexMap[labelDefinition.lineIndex];
         });
         return false;
@@ -81,13 +81,13 @@ export class LabeledLineList {
     
     getDisplayString(title: string, indentationLevel?: number): string {
         if (typeof indentationLevel === "undefined") {
-            indentationLevel = 0
+            indentationLevel = 0;
         }
         if (this.lineList.length <= 0) {
             return "";
         }
-        let tempIndentation = niceUtils.getIndentation(indentationLevel);
-        let tempTextList = [tempIndentation + title + ":"];
+        const tempIndentation = niceUtils.getIndentation(indentationLevel);
+        const tempTextList = [tempIndentation + title + ":"];
         tempTextList.push(lineUtils.getLineListDisplayString(this.lineList, indentationLevel + 1));
         tempTextList.push(niceUtils.getIdentifierMapDisplayString(
             title + " labels",
@@ -99,7 +99,7 @@ export class LabeledLineList {
     
     assembleSerializableLines(): void {
         this.serializableLineList = [];
-        this.processLines(line => {
+        this.processLines((line) => {
             this.serializableLineList.push(this.assembleSerializableLine(line));
             return null;
         });
@@ -113,10 +113,10 @@ export class LabeledLineList {
                 break;
             }
         }
-        const bufferList = this.serializableLineList.map(serializableLine => {
+        const bufferList = this.serializableLineList.map((serializableLine) => {
             try {
                 return serializableLine.createBuffer();
-            } catch(error) {
+            } catch (error) {
                 if (error instanceof AssemblyError) {
                     error.populateLine(serializableLine.assemblyLine);
                 }
@@ -139,8 +139,8 @@ export class InstructionLineList extends LabeledLineList {
         super.populateLabelDefinitionIndexes();
         let output = false;
         for (const serializableLine of this.serializableLineList) {
-            let tempInstruction = serializableLine as Instruction;
-            tempInstruction.processArgs(arg => {
+            const tempInstruction = serializableLine as Instruction;
+            tempInstruction.processArgs((arg) => {
                 const tempResult = arg.compress();
                 if (tempResult) {
                     output = true;
@@ -166,7 +166,7 @@ export class AppDataLineList extends LabeledLineList {
     
     extractLabelDefinitions(): void {
         super.extractLabelDefinitions();
-        this.processLines(line => {
+        this.processLines((line) => {
             if (line.directiveName !== "DATA") {
                 throw new AssemblyError("Expected DATA directive.");
             }
