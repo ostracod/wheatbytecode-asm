@@ -17,7 +17,13 @@
         "arrow-spacing": 1,
         "brace-style": 1,
         "camelcase": 1,
-        "comma-dangle": ["warn", "always-multiline"],
+        "comma-dangle": ["warn", {
+            "arrays": "always-multiline",
+            "objects": "always-multiline",
+            "imports": "always-multiline",
+            "exports": "always-multiline",
+            "functions": "always-multiline"
+        }],
         "comma-spacing": 1,
         "comma-style": 1,
         "eqeqeq": 2,

@@ -1,9 +1,6 @@
 
 import { ExpressionProcessor } from "../models/items.js";
-import { ExpressionUtils as ExpressionUtilsInterface } from "../models/utils.js";
-import { Expression } from "../models/objects.js";
-
-export interface ExpressionUtils extends ExpressionUtilsInterface {}
+import { Expression } from "../objects/expression.js";
 
 export class ExpressionUtils {
     
@@ -21,7 +18,7 @@ export class ExpressionUtils {
     processExpressions(
         expressionList: Expression[],
         processExpression: ExpressionProcessor,
-        shouldRecurAfterProcess?: boolean
+        shouldRecurAfterProcess?: boolean,
     ): void {
         if (typeof shouldRecurAfterProcess === "undefined") {
             shouldRecurAfterProcess = false;
@@ -30,7 +27,7 @@ export class ExpressionUtils {
             let tempExpression = expressionList[index];
             tempExpression = tempExpression.processExpressions(
                 processExpression,
-                shouldRecurAfterProcess
+                shouldRecurAfterProcess,
             );
             expressionList[index] = tempExpression;
         }

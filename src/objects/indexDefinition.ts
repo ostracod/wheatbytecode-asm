@@ -1,24 +1,21 @@
 
-import {
-    IndexConverter as IndexConverterInterface,
-    IndexRefConverter as IndexRefConverterInterface,
-    IndexDefinition as IndexDefinitionInterface,
-    Identifier, InstructionArg, Constant,
-} from "../models/objects.js";
-import { DataType } from "../models/delegates.js";
+import { Displayable } from "../models/objects.js";
 import { instructionUtils } from "../utils/instructionUtils.js";
-import { signedInteger32Type, compressibleIntegerType } from "../delegates/dataType.js";
+import { signedInteger32Type, compressibleIntegerType, DataType } from "../delegates/dataType.js";
 import { UnresolvedIndexError } from "./assemblyError.js";
-import { INSTRUCTION_REF_PREFIX, IndexInstructionArg } from "./instruction.js";
-import { NumberConstant } from "./constant.js";
-
-export interface IndexConverter extends IndexConverterInterface {}
+import { Identifier } from "./identifier.js";
+import { Constant, NumberConstant } from "./constant.js";
+import { INSTRUCTION_REF_PREFIX, InstructionArg, IndexInstructionArg } from "./instruction.js";
 
 export abstract class IndexConverter {
     
     constructor() {
         
     }
+    
+    abstract createConstantOrNull(index: number): Constant;
+    
+    abstract createInstructionArgOrNull(indexDefinition: IndexDefinition): InstructionArg;
 }
 
 export class IndexConstantConverter extends IndexConverter {
@@ -39,9 +36,9 @@ export class IndexConstantConverter extends IndexConverter {
     }
 }
 
-export interface IndexRefConverter extends IndexRefConverterInterface {}
-
 export class IndexRefConverter extends IndexConverter {
+    instructionRefPrefix: number;
+    dataType: DataType;
     
     constructor(instructionRefPrefix: number, dataType: DataType) {
         super();
@@ -57,20 +54,23 @@ export class IndexRefConverter extends IndexConverter {
         return instructionUtils.createInstructionArgWithIndex(
             this.instructionRefPrefix,
             this.dataType,
-            indexDefinition.index
+            indexDefinition.index,
         );
     }
 }
 
-export interface IndexDefinition extends IndexDefinitionInterface {}
-
-export abstract class IndexDefinition {
+export abstract class IndexDefinition implements Displayable {
+    identifier: Identifier;
+    index: number;
+    indexConverter: IndexConverter;
     
     constructor(identifier: Identifier, indexConverter: IndexConverter) {
         this.identifier = identifier;
         this.index = null;
         this.indexConverter = indexConverter;
     }
+    
+    abstract getDisplayString(): string;
     
     createConstantOrNull(): Constant {
         return this.indexConverter.createConstantOrNull(this.index);
@@ -84,7 +84,7 @@ export abstract class IndexDefinition {
 export const indexConstantConverter = new IndexConstantConverter();
 export const appDataIndexConverter = new IndexRefConverter(
     INSTRUCTION_REF_PREFIX.appData,
-    signedInteger32Type
+    signedInteger32Type,
 );
 
 

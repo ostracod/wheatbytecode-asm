@@ -1,13 +1,8 @@
 
-import { InstructionUtils as InstructionUtilsInterface } from "../models/utils.js";
-import { DataType } from "../models/delegates.js";
-import { Constant, InstructionArg } from "../models/objects.js";
-import { compressibleIntegerType, instructionDataTypeList } from "../delegates/dataType.js";
+import { compressibleIntegerType, instructionDataTypeList, DataType } from "../delegates/dataType.js";
 import { AssemblyError } from "../objects/assemblyError.js";
-import { NumberConstant } from "../objects/constant.js";
-import { INSTRUCTION_REF_PREFIX, InstructionRef, ResolvedConstantInstructionArg, RefInstructionArg } from "../objects/instruction.js";
-
-export interface InstructionUtils extends InstructionUtilsInterface {}
+import { Constant, NumberConstant } from "../objects/constant.js";
+import { INSTRUCTION_REF_PREFIX, InstructionRef, InstructionArg, ResolvedConstantInstructionArg, RefInstructionArg } from "../objects/instruction.js";
 
 export class InstructionUtils {
     
@@ -34,7 +29,7 @@ export class InstructionUtils {
         return instructionUtils.createArgBuffer(
             INSTRUCTION_REF_PREFIX.constant,
             constant.getDataType(),
-            constant.createBuffer()
+            constant.createBuffer(),
         );
     }
     

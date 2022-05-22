@@ -1,9 +1,10 @@
 
-import { AssemblyError as AssemblyErrorInterface, AssemblyLine } from "../models/objects.js";
-
-export interface AssemblyError extends AssemblyErrorInterface {}
+import { AssemblyLine } from "./assemblyLine.js";
 
 export class AssemblyError {
+    message: string;
+    lineNumber: number;
+    filePath: string;
     
     constructor(message: string, lineNumber?: number, filePath?: string) {
         this.message = message;

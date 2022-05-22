@@ -1,19 +1,14 @@
 
 import * as fs from "fs";
 import { ArgNumeric } from "../models/items.js";
-import { ParseUtils as ParseUtilsInterface } from "../models/utils.js";
-import { Operator, UnaryOperator, BinaryOperator } from "../models/delegates.js";
-import { Expression } from "../models/objects.js";
 import { AssemblyError } from "../objects/assemblyError.js";
 import { AssemblyLine } from "../objects/assemblyLine.js";
-import { SubscriptExpression, ArgWord, ArgNumber, ArgString } from "../objects/expression.js";
+import { Expression, SubscriptExpression, ArgWord, ArgNumber, ArgString } from "../objects/expression.js";
 import { NumberConstant } from "../objects/constant.js";
-import { unaryOperatorList, binaryOperatorList } from "../delegates/operator.js";
+import { unaryOperatorList, binaryOperatorList, Operator, UnaryOperator, BinaryOperator } from "../delegates/operator.js";
 import { compressibleIntegerType, float64Type, signedIntegerTypeList } from "../delegates/dataType.js";
 
 const codeBlockDirectiveNameSet = ["FUNC", "APP_DATA", "MACRO"];
-
-export interface ParseUtils extends ParseUtilsInterface {}
 
 export class ParseUtils {
     
@@ -79,7 +74,7 @@ export class ParseUtils {
     parseArgOperator(
         text: string,
         index: number,
-        operatorList: Operator[]
+        operatorList: Operator[],
     ): {operator: Operator, index: number} {
         for (const operator of operatorList) {
             const tempOperatorText = operator.text;
@@ -140,12 +135,12 @@ export class ParseUtils {
         if (tempComponentList.length === 1) {
             if (tempText.length > 2 && tempText.substring(0, 2) === "0x") {
                 tempArgNumeric = parseUtils.parseHexadecimalArgNumber(
-                    tempText.substring(2, tempText.length)
+                    tempText.substring(2, tempText.length),
                 );
             } else {
                 const tempConstant = new NumberConstant(
                     parseInt(tempComponentList[0], 10),
-                    compressibleIntegerType
+                    compressibleIntegerType,
                 );
                 tempArgNumeric = new ArgNumber(tempConstant);
             }
@@ -198,7 +193,7 @@ export class ParseUtils {
     parseArgExpression(
         text: string,
         index: number,
-        precedence: number
+        precedence: number,
     ): {expression: Expression, index: number} {
         index = parseUtils.skipWhitespace(text, index);
         if (index >= text.length) {
@@ -283,7 +278,7 @@ export class ParseUtils {
                 outputExpression = new SubscriptExpression(
                     outputExpression,
                     tempIndexExpression,
-                    tempDataTypeExpression
+                    tempDataTypeExpression,
                 );
                 continue;
             }
@@ -302,7 +297,7 @@ export class ParseUtils {
             const tempExpression = tempExpressionResult.expression;
             outputExpression = tempBinaryOperator.createExpression(
                 outputExpression,
-                tempExpression
+                tempExpression,
             );
             index = tempExpressionResult.index;
         }

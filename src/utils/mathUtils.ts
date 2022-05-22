@@ -1,8 +1,5 @@
 
 import { MixedNumber } from "../models/items.js";
-import { MathUtils as MathUtilsInterface } from "../models/utils.js";
-
-export interface MathUtils extends MathUtilsInterface {}
 
 export class MathUtils {
     

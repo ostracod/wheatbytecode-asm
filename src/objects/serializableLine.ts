@@ -1,23 +1,25 @@
 
-import {
-    SerializableLine as SerializableLineInterface,
-    AppData as AppDataInterface,
-    AssemblyLine,
-} from "../models/objects.js";
+import { Displayable } from "../models/objects.js";
 import { SignedIntegerType, signedInteger32Type } from "../delegates/dataType.js";
+import { AssemblyLine } from "./assemblyLine.js";
+import { Expression } from "./expression.js";
 
-export interface SerializableLine extends SerializableLineInterface {}
-
-export abstract class SerializableLine {
+export abstract class SerializableLine implements Displayable {
+    assemblyLine: AssemblyLine;
     
     constructor(assemblyLine: AssemblyLine) {
         this.assemblyLine = assemblyLine;
     }
+    
+    abstract getDisplayString(): string;
+    
+    abstract getBufferLength(): number;
+    
+    abstract createBuffer(): Buffer;
 }
 
-export interface AppData extends AppDataInterface {}
-
 export class AppData extends SerializableLine {
+    expressionList: Expression[];
     
     constructor(assemblyLine: AssemblyLine) {
         super(assemblyLine);

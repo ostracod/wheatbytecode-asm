@@ -1,10 +1,9 @@
 
-import { LabelDefinition as LabelDefinitionInterface, Identifier, IndexConverter } from "../models/objects.js";
-import { IndexDefinition, indexConstantConverter, appDataIndexConverter } from "./indexDefinition.js";
-
-export interface LabelDefinition extends LabelDefinitionInterface {}
+import { Identifier } from "./identifier.js";
+import { IndexConverter, IndexDefinition, indexConstantConverter, appDataIndexConverter } from "./indexDefinition.js";
 
 export abstract class LabelDefinition extends IndexDefinition {
+    lineIndex: number;
     
     constructor(identifier: Identifier, indexConverter: IndexConverter, lineIndex: number) {
         super(identifier, indexConverter);

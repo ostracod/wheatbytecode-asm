@@ -1,22 +1,24 @@
 
 import { LineProcessor } from "../models/items.js";
-import {
-    FunctionImplementation as FunctionImplementationInterface,
-    FunctionDefinition as FunctionDefinitionInterface,
-    AssemblyLine, Expression, Instruction,
-} from "../models/objects.js";
+import { Displayable } from "../models/objects.js";
 import { niceUtils } from "../utils/niceUtils.js";
 import { variableUtils } from "../utils/variableUtils.js";
-import { IndexDefinition, indexConstantConverter } from "./indexDefinition.js";
-import { Scope } from "./scope.js";
-import { InstructionLineList } from "./labeledLineList.js";
+import { AssemblyLine } from "./assemblyLine.js";
 import { Identifier, IdentifierMap } from "./identifier.js";
+import { Expression } from "./expression.js";
+import { IndexDefinition, indexConstantConverter } from "./indexDefinition.js";
+import { VariableDefinition, ArgVariableDefinition } from "./variableDefinition.js";
+import { Scope } from "./scope.js";
+import { Instruction } from "./instruction.js";
+import { InstructionLineList } from "./labeledLineList.js";
 
 export const functionTableEntrySize = 21;
 
-export interface FunctionImplementation extends FunctionImplementationInterface {}
-
-export class FunctionImplementation {
+export class FunctionImplementation implements Displayable {
+    functionDefinition: FunctionDefinition;
+    localVariableDefinitionMap: IdentifierMap<VariableDefinition>;
+    localFrameSize: number;
+    instructionList: Instruction[];
     
     constructor(functionDefinition: FunctionDefinition) {
         this.functionDefinition = functionDefinition;
@@ -25,7 +27,7 @@ export class FunctionImplementation {
         this.instructionList = null;
     }
     
-    getDisplayString(indentationLevel: number): string {
+    getDisplayString(indentationLevel = 0): string {
         const tempTextList = [];
         const tempIndentation = niceUtils.getIndentation(indentationLevel);
         const tempIsGuarded = this.functionDefinition.isGuarded;
@@ -40,19 +42,19 @@ export class FunctionImplementation {
         tempTextList.push(`${tempIndentation}Function ID: ${tempIdText}`);
         tempTextList.push(this.getLineList().getDisplayString(
             "Instruction body",
-            indentationLevel
+            indentationLevel,
         ));
         if (this.instructionList !== null) {
             tempTextList.push(niceUtils.getDisplayableListDisplayString(
                 "Assembled instructions",
                 this.instructionList,
-                indentationLevel
+                indentationLevel,
             ));
         }
         tempTextList.push(niceUtils.getIdentifierMapDisplayString(
             "Local variables",
             this.localVariableDefinitionMap,
-            indentationLevel
+            indentationLevel,
         ));
         return niceUtils.joinTextList(tempTextList);
     }
@@ -84,14 +86,14 @@ export class FunctionImplementation {
             return null;
         });
         this.localFrameSize = variableUtils.populateVariableDefinitionIndexes(
-            this.localVariableDefinitionMap
+            this.localVariableDefinitionMap,
         );
     }
     
     populateScopeDefinitions(): void {
         this.getScope().indexDefinitionMapList.push(
             this.localVariableDefinitionMap,
-            this.getLineList().labelDefinitionMap
+            this.getLineList().labelDefinitionMap,
         );
     }
     
@@ -103,15 +105,20 @@ export class FunctionImplementation {
     }
 }
 
-export interface FunctionDefinition extends FunctionDefinitionInterface {}
-
 export class FunctionDefinition extends IndexDefinition {
+    idExpression: Expression;
+    isGuarded: boolean;
+    lineList: InstructionLineList;
+    argVariableDefinitionMap: IdentifierMap<ArgVariableDefinition>;
+    argFrameSize: number;
+    scope: Scope;
+    functionImplementation: FunctionImplementation;
     
     constructor(
         identifier: Identifier,
         idExpression: Expression,
         isGuarded: boolean,
-        lineList: AssemblyLine[]
+        lineList: AssemblyLine[],
     ) {
         super(identifier, indexConstantConverter);
         this.idExpression = idExpression;
@@ -148,7 +155,7 @@ export class FunctionDefinition extends IndexDefinition {
         tempTextList.push(niceUtils.getIdentifierMapDisplayString(
             "Argument variables",
             this.argVariableDefinitionMap,
-            1
+            1,
         ));
         return niceUtils.joinTextList(tempTextList);
     }
@@ -163,7 +170,7 @@ export class FunctionDefinition extends IndexDefinition {
             return null;
         });
         this.argFrameSize = variableUtils.populateVariableDefinitionIndexes(
-            this.argVariableDefinitionMap
+            this.argVariableDefinitionMap,
         );
     }
     
@@ -176,7 +183,7 @@ export class FunctionDefinition extends IndexDefinition {
     
     createTableEntryBuffer(
         instructionsFilePos: number,
-        instructionsSize: number
+        instructionsSize: number,
     ): Buffer {
         const output = Buffer.alloc(functionTableEntrySize);
         let tempId;

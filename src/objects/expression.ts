@@ -1,29 +1,21 @@
 
 import { ExpressionProcessor } from "../models/items.js";
-import { UnaryOperator, BinaryOperator, DataType } from "../models/delegates.js";
-import {
-    Expression as ExpressionInterface,
-    ArgTerm as ArgTermInterface,
-    ArgWord as ArgWordInterface,
-    ArgNumber as ArgNumberInterface,
-    ArgString as ArgStringInterface,
-    UnaryExpression as UnaryExpressionInterface,
-    MacroIdentifierExpression as MacroIdentifierExpressionInterface,
-    BinaryExpression as BinaryExpressionInterface,
-    SubscriptExpression as SubscriptExpressionInterface,
-    IdentifierMap, Constant, InstructionArg, IndexDefinition,
-} from "../models/objects.js";
-import { AssemblyError, UnresolvedIndexError } from "./assemblyError.js";
-import { Identifier, MacroIdentifier } from "./identifier.js";
-import { InstructionRef, PointerInstructionRef, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, nameInstructionRefMap } from "./instruction.js";
-import { builtInConstantSet, NumberConstant, StringConstant } from "./constant.js";
-import { compressibleIntegerType, instructionDataTypeList } from "../delegates/dataType.js";
-import { macroIdentifierOperator } from "../delegates/operator.js";
+import { Displayable } from "../models/objects.js";
 import { dataTypeUtils } from "../utils/dataTypeUtils.js";
+import { compressibleIntegerType, instructionDataTypeList, DataType } from "../delegates/dataType.js";
+import { macroIdentifierOperator, UnaryOperator, BinaryOperator } from "../delegates/operator.js";
+import { AssemblyError, UnresolvedIndexError } from "./assemblyError.js";
+import { AssemblyLine } from "./assemblyLine.js";
+import { Identifier, MacroIdentifier, IdentifierMap } from "./identifier.js";
+import { IndexDefinition } from "./indexDefinition.js";
+import { InstructionRef, PointerInstructionRef, InstructionArg, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, nameInstructionRefMap } from "./instruction.js";
+import { builtInConstantSet, Constant, NumberConstant, StringConstant } from "./constant.js";
+import { Scope } from "./scope.js";
 
-export interface Expression extends ExpressionInterface {}
-
-export abstract class Expression {
+export abstract class Expression implements Displayable {
+    line: AssemblyLine;
+    scope: Scope;
+    constantDataType: DataType;
     
     constructor() {
         this.line = null;
@@ -34,6 +26,15 @@ export abstract class Expression {
         // and retrieve this value.
         this.constantDataType = null;
     }
+    
+    abstract copy(): Expression;
+    
+    abstract getDisplayString(): string;
+    
+    abstract processExpressionsHelper(
+        processExpression: ExpressionProcessor,
+        shouldRecurAfterProcess?: boolean,
+    ): Expression;
     
     createError(message: string): AssemblyError {
         throw new AssemblyError(message, this.line.lineNumber, this.line.filePath);
@@ -198,8 +199,6 @@ export abstract class Expression {
     }
 }
 
-export interface ArgTerm extends ArgTermInterface {}
-
 export abstract class ArgTerm extends Expression {
     
     processExpressionsHelper(processExpression: ExpressionProcessor, shouldRecurAfterProcess?: boolean): Expression {
@@ -211,9 +210,8 @@ export abstract class ArgTerm extends Expression {
     }
 }
 
-export interface ArgWord extends ArgWordInterface {}
-
 export class ArgWord extends ArgTerm {
+    text: string;
     
     constructor(text: string) {
         super();
@@ -259,9 +257,8 @@ export class ArgWord extends ArgTerm {
     }
 }
 
-export interface ArgNumber extends ArgNumberInterface {}
-
 export class ArgNumber extends ArgTerm {
+    constant: NumberConstant;
     
     constructor(constant: NumberConstant) {
         super();
@@ -285,9 +282,8 @@ export class ArgNumber extends ArgTerm {
     }
 }
 
-export interface ArgString extends ArgStringInterface {}
-
 export class ArgString extends ArgTerm {
+    constant: StringConstant;
     
     constructor(value: string) {
         super();
@@ -311,9 +307,9 @@ export class ArgString extends ArgTerm {
     }
 }
 
-export interface UnaryExpression extends UnaryExpressionInterface {}
-
 export class UnaryExpression extends Expression {
+    operator: UnaryOperator;
+    operand: Expression;
     
     constructor(operator: UnaryOperator, operand: Expression) {
         super();
@@ -363,9 +359,8 @@ export class UnaryExpression extends Expression {
     }
 }
 
-export interface MacroIdentifierExpression extends MacroIdentifierExpressionInterface {}
-
 export class MacroIdentifierExpression extends UnaryExpression {
+    macroInvocationId: number;
     
     constructor(operand: Expression) {
         super(macroIdentifierOperator, operand);
@@ -400,9 +395,10 @@ export class MacroIdentifierExpression extends UnaryExpression {
     }
 }
 
-export interface BinaryExpression extends BinaryExpressionInterface {}
-
 export class BinaryExpression extends Expression {
+    operator: BinaryOperator;
+    operand1: Expression;
+    operand2: Expression;
     
     constructor(operator: BinaryOperator, operand1: Expression, operand2: Expression) {
         super();
@@ -415,7 +411,7 @@ export class BinaryExpression extends Expression {
         return new BinaryExpression(
             this.operator,
             this.operand1.copy(),
-            this.operand2.copy()
+            this.operand2.copy(),
         );
     }
     
@@ -481,14 +477,15 @@ export class BinaryExpression extends Expression {
     }
 }
 
-export interface SubscriptExpression extends SubscriptExpressionInterface {}
-
 export class SubscriptExpression extends Expression {
+    sequenceExpression: Expression;
+    indexExpression: Expression;
+    dataTypeExpression: Expression;
     
     constructor(
         sequenceExpression: Expression,
         indexExpression: Expression,
-        dataTypeExpression: Expression
+        dataTypeExpression: Expression,
     ) {
         super();
         this.sequenceExpression = sequenceExpression;
@@ -500,7 +497,7 @@ export class SubscriptExpression extends Expression {
         return new SubscriptExpression(
             this.sequenceExpression.copy(),
             this.indexExpression.copy(),
-            this.dataTypeExpression.copy()
+            this.dataTypeExpression.copy(),
         );
     }
     
@@ -515,15 +512,15 @@ export class SubscriptExpression extends Expression {
         }
         this.sequenceExpression = this.sequenceExpression.processExpressions(
             processExpression,
-            shouldRecurAfterProcess
+            shouldRecurAfterProcess,
         );
         this.indexExpression = this.indexExpression.processExpressions(
             processExpression,
-            shouldRecurAfterProcess
+            shouldRecurAfterProcess,
         );
         this.dataTypeExpression = this.dataTypeExpression.processExpressions(
             processExpression,
-            shouldRecurAfterProcess
+            shouldRecurAfterProcess,
         );
         return null;
     }
@@ -532,7 +529,7 @@ export class SubscriptExpression extends Expression {
         return new RefInstructionArg(
             this.sequenceExpression.evaluateToInstructionRef(),
             this.dataTypeExpression.evaluateToDataType(),
-            this.indexExpression.evaluateToInstructionArg()
+            this.indexExpression.evaluateToInstructionArg(),
         );
     }
     

@@ -1,9 +1,11 @@
 
-import { AliasDefinition as AliasDefinitionInterface, Identifier, Expression } from "../models/objects.js";
+import { Displayable } from "../models/objects.js";
+import { Identifier } from "./identifier.js";
+import { Expression } from "./expression.js";
 
-export interface AliasDefinition extends AliasDefinitionInterface {}
-
-export class AliasDefinition {
+export class AliasDefinition implements Displayable {
+    identifier: Identifier;
+    expression: Expression;
     
     constructor(identifier: Identifier, expression: Expression) {
         this.identifier = identifier;

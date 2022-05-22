@@ -1,18 +1,16 @@
 
-import { VariableUtils as VariableUtilsInterface } from "../models/utils.js";
-import { AssemblyLine, VariableDefinition, IdentifierMap } from "../models/objects.js";
 import { VariableDefinitionClass } from "../models/items.js";
-import { GlobalVariableDefinition, LocalVariableDefinition, ArgVariableDefinition } from "../objects/variableDefinition.js";
+import { VariableDefinition, GlobalVariableDefinition, LocalVariableDefinition, ArgVariableDefinition } from "../objects/variableDefinition.js";
 import { AssemblyError } from "../objects/assemblyError.js";
-
-export interface VariableUtils extends VariableUtilsInterface {}
+import { AssemblyLine } from "../objects/assemblyLine.js";
+import { IdentifierMap } from "../objects/identifier.js";
 
 export class VariableUtils {
     
     extractVariableDefinitionHelper(
         line: AssemblyLine,
         directiveName: string,
-        variableDefinitionClass: VariableDefinitionClass
+        variableDefinitionClass: VariableDefinitionClass,
     ): VariableDefinition {
         if (line.directiveName !== directiveName) {
             return null;
@@ -36,7 +34,7 @@ export class VariableUtils {
         return variableUtils.extractVariableDefinitionHelper(
             line,
             "VAR",
-            GlobalVariableDefinition
+            GlobalVariableDefinition,
         );
     }
     
@@ -44,7 +42,7 @@ export class VariableUtils {
         return variableUtils.extractVariableDefinitionHelper(
             line,
             "VAR",
-            LocalVariableDefinition
+            LocalVariableDefinition,
         );
     }
     
@@ -52,12 +50,12 @@ export class VariableUtils {
         return variableUtils.extractVariableDefinitionHelper(
             line,
             "ARG",
-            ArgVariableDefinition
+            ArgVariableDefinition,
         );
     }
     
     populateVariableDefinitionIndexes(
-        identifierMap: IdentifierMap<VariableDefinition>
+        identifierMap: IdentifierMap<VariableDefinition>,
     ): number {
         let nextVariableIndex = 0;
         identifierMap.iterate((variableDefinition) => {

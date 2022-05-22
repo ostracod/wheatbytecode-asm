@@ -1,12 +1,5 @@
 
 import { MixedNumber } from "../models/items.js";
-import {
-    DataType as DataTypeInterface,
-    NumberType as NumberTypeInterface,
-    IntegerType as IntegerTypeInterface,
-    SignedIntegerType as SignedIntegerTypeInterface,
-    StringType as StringTypeInterface,
-} from "../models/delegates.js";
 import { mathUtils } from "../utils/mathUtils.js";
 
 export const instructionDataTypeList: SignedIntegerType[] = [];
@@ -14,14 +7,16 @@ export const numberTypeList: NumberType[] = [];
 export const numberTypeMap: { [name: string]: NumberType } = {};
 export const signedIntegerTypeList: SignedIntegerType[] = [];
 
-export interface DataType extends DataTypeInterface {}
-
 export abstract class DataType {
+    byteAmount: number;
+    bitAmount: number;
     
     constructor(byteAmount: number) {
         this.byteAmount = byteAmount;
         this.bitAmount = this.byteAmount * 8;
     }
+    
+    abstract getName(): string;
     
     getArgPrefix(): number {
         return null;
@@ -32,14 +27,20 @@ export abstract class DataType {
     }
 }
 
-export interface NumberType extends NumberTypeInterface {}
-
 export abstract class NumberType extends DataType {
     
     constructor(byteAmount: number) {
         super(byteAmount);
         numberTypeList.push(this);
     }
+    
+    abstract getNamePrefix(): string;
+    
+    abstract getClassMergePriority(): number;
+    
+    abstract getByteAmountMergePriority(): number;
+    
+    abstract convertNumberToBuffer(value: MixedNumber): Buffer;
     
     getName(): string {
         return this.getNamePrefix() + this.bitAmount;
@@ -54,13 +55,15 @@ export abstract class NumberType extends DataType {
     }
 }
 
-export interface IntegerType extends IntegerTypeInterface {}
-
-export class IntegerType extends NumberType {
+export abstract class IntegerType extends NumberType {
     
     constructor(byteAmount: number) {
         super(byteAmount);
     }
+    
+    abstract getMinimumNumber(): bigint;
+    
+    abstract getMaximumNumber(): bigint;
     
     getByteAmountMergePriority(): number {
         return 1;
@@ -116,9 +119,8 @@ export class UnsignedIntegerType extends IntegerType {
     }
 }
 
-export interface SignedIntegerType extends SignedIntegerTypeInterface {}
-
 export class SignedIntegerType extends IntegerType {
+    argPrefix: number;
     
     constructor(argPrefix: number, byteAmount: number) {
         super(byteAmount);
@@ -233,8 +235,6 @@ export class FloatType extends NumberType {
         return (dataType instanceof FloatType);
     }
 }
-
-export interface StringType extends StringTypeInterface {}
 
 export class StringType extends DataType {
     

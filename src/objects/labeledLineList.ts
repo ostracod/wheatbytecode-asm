@@ -1,28 +1,29 @@
 
 import { LineProcessor, LabelDefinitionClass } from "../models/items.js";
-import {
-    LabeledLineList as LabeledLineListInterface,
-    InstructionLineList as InstructionLineListInterface,
-    AppDataLineList as AppDataLineListInterface,
-    AssemblyLine, Scope, SerializableLine,
-} from "../models/objects.js";
-import { AssemblyError } from "./assemblyError.js";
-import { InstructionLabelDefinition, AppDataLabelDefinition } from "./labelDefinition.js";
-import { IdentifierMap } from "./identifier.js";
-import { Instruction } from "./instruction.js";
-import { AppData } from "./serializableLine.js";
 import { niceUtils } from "../utils/niceUtils.js";
 import { lineUtils } from "../utils/lineUtils.js";
+import { AssemblyError } from "./assemblyError.js";
+import { AssemblyLine } from "./assemblyLine.js";
+import { IdentifierMap } from "./identifier.js";
+import { Scope } from "./scope.js";
+import { SerializableLine, AppData } from "./serializableLine.js";
+import { LabelDefinition, InstructionLabelDefinition, AppDataLabelDefinition } from "./labelDefinition.js";
+import { Instruction } from "./instruction.js";
 
-export interface LabeledLineList extends LabeledLineListInterface {}
-
-export class LabeledLineList {
+export abstract class LabeledLineList {
+    lineList: AssemblyLine[];
+    serializableLineList: SerializableLine[];
+    labelDefinitionMap: IdentifierMap<LabelDefinition>;
     
     constructor(lineList: AssemblyLine[]) {
         this.lineList = lineList;
         this.serializableLineList = null;
         this.labelDefinitionMap = null;
     }
+    
+    abstract getLabelDefinitionClass(): LabelDefinitionClass;
+    
+    abstract assembleSerializableLine(line: AssemblyLine): SerializableLine;
     
     populateScope(scope: Scope) {
         lineUtils.processExpressionsInLines(this.lineList, (expression) => {
@@ -92,7 +93,7 @@ export class LabeledLineList {
         tempTextList.push(niceUtils.getIdentifierMapDisplayString(
             title + " labels",
             this.labelDefinitionMap,
-            indentationLevel
+            indentationLevel,
         ));
         return niceUtils.joinTextList(tempTextList);
     }
@@ -127,8 +128,6 @@ export class LabeledLineList {
     }
 }
 
-export interface InstructionLineList extends InstructionLineListInterface {}
-
 export class InstructionLineList extends LabeledLineList {
     
     getLabelDefinitionClass(): LabelDefinitionClass {
@@ -154,8 +153,6 @@ export class InstructionLineList extends LabeledLineList {
         return new Instruction(line);
     }
 }
-
-export interface AppDataLineList extends AppDataLineListInterface {}
 
 export class AppDataLineList extends LabeledLineList {
     

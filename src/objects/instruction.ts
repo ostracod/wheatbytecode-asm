@@ -1,26 +1,17 @@
 
-import {
-    Instruction as InstructionInterface,
-    InstructionRef as InstructionRefInterface,
-    PointerInstructionRef as PointerInstructionRefInterface,
-    InstructionArg as InstructionArgInterface,
-    ConstantInstructionArg as ConstantInstructionArgInterface,
-    ResolvedConstantInstructionArg as ResolvedConstantInstructionArgInterface,
-    IndexInstructionArg as IndexInstructionArgInterface,
-    ExpressionInstructionArg as ExpressionInstructionArgInterface,
-    RefInstructionArg as RefInstructionArgInterface,
-    Constant, IndexDefinition, Expression, AssemblyLine,
-} from "../models/objects.js";
 import { InstructionArgProcessor } from "../models/items.js";
-import { DataType } from "../models/delegates.js";
+import { Displayable } from "../models/objects.js";
 import { niceUtils } from "../utils/niceUtils.js";
 import { mathUtils } from "../utils/mathUtils.js";
 import { instructionUtils } from "../utils/instructionUtils.js";
-import { NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type } from "../delegates/dataType.js";
-import { instructionTypeMap } from "../delegates/instructionType.js";
+import { DataType, NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type } from "../delegates/dataType.js";
+import { instructionTypeMap, InstructionType } from "../delegates/instructionType.js";
 import { AssemblyError } from "./assemblyError.js";
+import { AssemblyLine } from "./assemblyLine.js";
+import { Constant, NumberConstant } from "./constant.js";
+import { IndexDefinition } from "./indexDefinition.js";
+import { Expression } from "./expression.js";
 import { SerializableLine } from "./serializableLine.js";
-import { NumberConstant } from "./constant.js";
 
 export const INSTRUCTION_REF_PREFIX = {
     constant: 0,
@@ -32,9 +23,9 @@ export const INSTRUCTION_REF_PREFIX = {
     heapAlloc: 6,
 };
 
-export interface Instruction extends InstructionInterface {}
-
 export class Instruction extends SerializableLine {
+    instructionType: InstructionType;
+    argList: InstructionArg[];
     
     constructor(assemblyLine: AssemblyLine) {
         super(assemblyLine);
@@ -69,7 +60,7 @@ export class Instruction extends SerializableLine {
     createBuffer(): Buffer {
         const tempBuffer = Buffer.from([this.instructionType.opcode]);
         const tempBufferList = [tempBuffer].concat(
-            this.argList.map((arg) => arg.createBuffer())
+            this.argList.map((arg) => arg.createBuffer()),
         );
         return Buffer.concat(tempBufferList);
     }
@@ -81,9 +72,8 @@ export class Instruction extends SerializableLine {
     }
 }
 
-export interface InstructionRef extends InstructionRefInterface {}
-
 export class InstructionRef {
+    argPrefix: number;
     
     constructor(argPrefix: number) {
         this.argPrefix = argPrefix;
@@ -102,14 +92,13 @@ export class InstructionRef {
         return instructionUtils.createArgBuffer(
             this.argPrefix,
             dataType,
-            indexArg.createBuffer()
+            indexArg.createBuffer(),
         );
     }
 }
 
-export interface PointerInstructionRef extends PointerInstructionRefInterface {}
-
 export class PointerInstructionRef extends InstructionRef {
+    pointerArg: InstructionArg;
     
     constructor(pointerArg: InstructionArg) {
         super(INSTRUCTION_REF_PREFIX.heapAlloc);
@@ -122,7 +111,7 @@ export class PointerInstructionRef extends InstructionRef {
     
     getArgBufferLength(indexArg: InstructionArg): number {
         return instructionUtils.getArgBufferLength(
-            this.pointerArg.getBufferLength() + indexArg.getBufferLength()
+            this.pointerArg.getBufferLength() + indexArg.getBufferLength(),
         );
     }
     
@@ -130,19 +119,25 @@ export class PointerInstructionRef extends InstructionRef {
         return instructionUtils.createArgBuffer(
             this.argPrefix,
             dataType,
-            Buffer.concat([this.pointerArg.createBuffer(), indexArg.createBuffer()])
+            Buffer.concat([this.pointerArg.createBuffer(), indexArg.createBuffer()]),
         );
     }
 }
 
-export interface InstructionArg extends InstructionArgInterface {}
-
-export class InstructionArg {
+export abstract class InstructionArg implements Displayable {
     
     constructor() {
         // Do nothing.
         
     }
+    
+    abstract getDataType(): DataType;
+    
+    abstract setDataType(dataType: DataType): void;
+    
+    abstract getBufferLength(): number;
+    
+    abstract createBuffer(): Buffer;
     
     getDisplayString(): string {
         const tempBuffer = this.createBuffer();
@@ -158,9 +153,9 @@ export class InstructionArg {
     }
 }
 
-export interface ConstantInstructionArg extends ConstantInstructionArgInterface {}
-
 export abstract class ConstantInstructionArg extends InstructionArg {
+    
+    abstract getConstant(): Constant;
     
     getBufferLength(): number {
         return instructionUtils.getConstantArgBufferLength(this.getDataType());
@@ -171,9 +166,8 @@ export abstract class ConstantInstructionArg extends InstructionArg {
     }
 }
 
-export interface ResolvedConstantInstructionArg extends ResolvedConstantInstructionArgInterface {}
-
 export class ResolvedConstantInstructionArg extends ConstantInstructionArg {
+    constant: Constant;
     
     constructor(constant: Constant) {
         super();
@@ -193,9 +187,9 @@ export class ResolvedConstantInstructionArg extends ConstantInstructionArg {
     }
 }
 
-export interface IndexInstructionArg extends IndexInstructionArgInterface {}
-
 export class IndexInstructionArg extends ConstantInstructionArg {
+    indexDefinition: IndexDefinition;
+    dataType: DataType;
     
     constructor(indexDefinition: IndexDefinition) {
         super();
@@ -227,14 +221,14 @@ export class IndexInstructionArg extends ConstantInstructionArg {
         }
         return new NumberConstant(
             this.indexDefinition.index,
-            this.dataType as NumberType
+            this.dataType as NumberType,
         );
     }
 }
 
-export interface ExpressionInstructionArg extends ExpressionInstructionArgInterface {}
-
 export class ExpressionInstructionArg extends ConstantInstructionArg {
+    expression: Expression;
+    dataType: DataType;
     
     constructor(expression: Expression) {
         super();
@@ -272,14 +266,15 @@ export class ExpressionInstructionArg extends ConstantInstructionArg {
     }
 }
 
-export interface RefInstructionArg extends RefInstructionArgInterface {}
-
 export class RefInstructionArg extends InstructionArg {
+    instructionRef: InstructionRef;
+    dataType: DataType;
+    indexArg: InstructionArg;
     
     constructor(
         instructionRef: InstructionRef,
         dataType: DataType,
-        indexArg: InstructionArg
+        indexArg: InstructionArg,
     ) {
         super();
         this.instructionRef = instructionRef;

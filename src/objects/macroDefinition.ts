@@ -1,12 +1,15 @@
 
-import { MacroDefinition as MacroDefinitionInterface, Identifier, Expression, AssemblyLine } from "../models/objects.js";
-import { AssemblyError } from "./assemblyError.js";
+import { Displayable } from "../models/objects.js";
 import { lineUtils } from "../utils/lineUtils.js";
-import { IdentifierMap } from "./identifier.js";
+import { AssemblyError } from "./assemblyError.js";
+import { AssemblyLine } from "./assemblyLine.js";
+import { Identifier, IdentifierMap } from "./identifier.js";
+import { Expression } from "./expression.js";
 
-export interface MacroDefinition extends MacroDefinitionInterface {}
-
-export class MacroDefinition {
+export class MacroDefinition implements Displayable {
+    name: string;
+    argIdentifierList: Identifier[];
+    lineList: AssemblyLine[];
     
     constructor(name: string, argIdentifierList: Identifier[], lineList: AssemblyLine[]) {
         this.name = name;

@@ -1,12 +1,10 @@
 
-import {
-    Scope as ScopeInterface,
-    IndexDefinition, Identifier,
-} from "../models/objects.js";
-
-export interface Scope extends ScopeInterface {}
+import { Identifier, IdentifierMap } from "./identifier.js";
+import { IndexDefinition } from "./indexDefinition.js";
 
 export class Scope {
+    indexDefinitionMapList: IdentifierMap<IndexDefinition>[];
+    parentScope: Scope;
     
     constructor(parentScope?: Scope) {
         this.indexDefinitionMapList = [];

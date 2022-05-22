@@ -1,11 +1,7 @@
 
 import { NumberTypeClass } from "../models/items.js";
-import { DataTypeUtils as DataTypeUtilsInterface } from "../models/utils.js";
-import { DataType, NumberType } from "../models/delegates.js";
-import { numberTypeList, numberTypeMap } from "../delegates/dataType.js";
+import { numberTypeList, numberTypeMap, DataType, NumberType } from "../delegates/dataType.js";
 import { AssemblyError } from "../objects/assemblyError.js";
-
-export interface DataTypeUtils extends DataTypeUtilsInterface {}
 
 export class DataTypeUtils {
     

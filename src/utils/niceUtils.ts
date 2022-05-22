@@ -1,9 +1,7 @@
 
-import { NiceUtils as NiceUtilsInterface } from "../models/utils.js";
-import { Displayable, IdentifierMap } from "../models/objects.js";
+import { Displayable } from "../models/objects.js";
 import { mathUtils } from "./mathUtils.js";
-
-export interface NiceUtils extends NiceUtilsInterface {}
+import { IdentifierMap } from "../objects/identifier.js";
 
 export class NiceUtils {
     
@@ -18,7 +16,7 @@ export class NiceUtils {
     getTextListDisplayString(
         title: string,
         textList: string[],
-        indentationLevel?: number
+        indentationLevel?: number,
     ): string {
         if (typeof indentationLevel === "undefined") {
             indentationLevel = 0;
@@ -38,24 +36,24 @@ export class NiceUtils {
     getDisplayableListDisplayString(
         title: string,
         displayableList: Displayable[],
-        indentationLevel?: number
+        indentationLevel?: number,
     ): string {
         return niceUtils.getTextListDisplayString(
             title,
             displayableList.map((displayable) => displayable.getDisplayString()),
-            indentationLevel
+            indentationLevel,
         );
     }
     
     getIdentifierMapDisplayString(
         title: string,
         identifierMap: IdentifierMap<Displayable>,
-        indentationLevel?: number
+        indentationLevel?: number,
     ): string {
         return niceUtils.getDisplayableListDisplayString(
             title,
             identifierMap.getValueList(),
-            indentationLevel
+            indentationLevel,
         );
     }
     

@@ -1,23 +1,23 @@
 /* eslint-disable camelcase */
 
 import { MixedNumber } from "../models/items.js";
-import {
-    Constant as ConstantInterface,
-    NumberConstant as NumberConstantInterface,
-    StringConstant as StringConstantInterface,
-} from "../models/objects.js";
-import { DataType } from "../models/delegates.js";
-import { SignedIntegerType, compressibleIntegerType, NumberType, StringType } from "../delegates/dataType.js";
+import { DataType, SignedIntegerType, compressibleIntegerType, NumberType, StringType } from "../delegates/dataType.js";
 import { AssemblyError } from "./assemblyError.js";
 
-export interface Constant extends ConstantInterface {}
-
-export class Constant {
+export abstract class Constant {
     
     constructor() {
         // Do nothing.
         
     }
+    
+    abstract getDataType(): DataType;
+    
+    abstract setDataType(dataType: DataType): void;
+    
+    abstract copy(): Constant;
+    
+    abstract createBuffer(): Buffer;
     
     compress(signedIntegerTypeList: SignedIntegerType[]): void {
         // Do nothing.
@@ -25,9 +25,9 @@ export class Constant {
     }
 }
 
-export interface NumberConstant extends NumberConstantInterface {}
-
 export class NumberConstant extends Constant {
+    value: MixedNumber;
+    numberType: NumberType;
     
     constructor(value: MixedNumber, numberType: NumberType) {
         super();
@@ -70,9 +70,9 @@ export class NumberConstant extends Constant {
     }
 }
 
-export interface StringConstant extends StringConstantInterface {}
-
 export class StringConstant extends Constant {
+    value: string;
+    stringType: StringType;
     
     constructor(value: string) {
         super();
@@ -99,9 +99,7 @@ export class StringConstant extends Constant {
     }
 }
 
-export const builtInConstantSet = {
-    
-};
+export const builtInConstantSet = {};
 
 const tempNumberSet = {
     

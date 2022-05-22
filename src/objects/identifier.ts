@@ -1,13 +1,9 @@
 
-import {
-    Identifier as IdentifierInterface,
-    MacroIdentifier as MacroIdentifierInterface,
-    IdentifierMap as IdentifierMapInterface,
-    IndexDefinition,
-} from "../models/objects.js";
+import { Displayable } from "../models/objects.js";
 import { AssemblyError } from "./assemblyError.js";
-import { nameInstructionRefMap } from "./instruction.js";
 import { builtInConstantSet } from "./constant.js";
+import { IndexDefinition } from "./indexDefinition.js";
+import { nameInstructionRefMap } from "./instruction.js";
 
 const builtInIdentifierNameSet = {};
 for (const name in nameInstructionRefMap) {
@@ -17,9 +13,8 @@ for (const name in builtInConstantSet) {
     builtInIdentifierNameSet[name] = true;
 }
 
-export interface Identifier extends IdentifierInterface {}
-
-export class Identifier {
+export class Identifier implements Displayable {
+    name: string;
     
     constructor(name: string) {
         // TODO: Make sure that name contains valid characters.
@@ -43,9 +38,9 @@ export class Identifier {
     }
 }
 
-export interface MacroIdentifier extends MacroIdentifierInterface {}
-
 export class MacroIdentifier extends Identifier {
+    macroInvocationId: number;
+    
     constructor(name: string, macroInvocationId: number) {
         super(name);
         this.macroInvocationId = macroInvocationId;
@@ -64,10 +59,9 @@ export class MacroIdentifier extends Identifier {
     }
 }
 
-export interface IdentifierMap<T> extends IdentifierMapInterface<T> {}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class IdentifierMap<T> {
+    map: { [key: string]: T };
+    keyList: string[];
     
     constructor() {
         this.map = {};

@@ -1,10 +1,9 @@
 
 import { ExpressionProcessor, LineProcessor } from "../models/items.js";
-import { LineUtils as LineUtilsInterface } from "../models/utils.js";
-import { AssemblyLine, IdentifierMap, Expression } from "../models/objects.js";
 import { AssemblyError } from "../objects/assemblyError.js";
-
-export interface LineUtils extends LineUtilsInterface {}
+import { AssemblyLine } from "../objects/assemblyLine.js";
+import { IdentifierMap } from "../objects/identifier.js";
+import { Expression } from "../objects/expression.js";
 
 export class LineUtils {
     
@@ -15,7 +14,7 @@ export class LineUtils {
     processExpressionsInLines(
         lineList: AssemblyLine[],
         processExpression: ExpressionProcessor,
-        shouldRecurAfterProcess?: boolean
+        shouldRecurAfterProcess?: boolean,
     ): void {
         for (const line of lineList) {
             line.processExpressions(processExpression, shouldRecurAfterProcess);
@@ -47,7 +46,7 @@ export class LineUtils {
     processLines(
         lineList: AssemblyLine[],
         processLine: LineProcessor,
-        shouldProcessCodeBlocks?: boolean
+        shouldProcessCodeBlocks?: boolean,
     ): {lineList: AssemblyLine[], processCount: number} {
         if (typeof shouldProcessCodeBlocks === "undefined") {
             shouldProcessCodeBlocks = false;
@@ -81,7 +80,7 @@ export class LineUtils {
                 const tempResult2 = lineUtils.processLines(
                     line.codeBlock,
                     processLine,
-                    shouldProcessCodeBlocks
+                    shouldProcessCodeBlocks,
                 );
                 line.codeBlock = tempResult2.lineList;
                 processCount += tempResult2.processCount;

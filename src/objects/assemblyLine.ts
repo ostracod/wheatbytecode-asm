@@ -1,13 +1,16 @@
 
 import { ExpressionProcessor } from "../models/items.js";
-import { AssemblyLine as AssemblyLineInterface, Expression } from "../models/objects.js";
 import { niceUtils } from "../utils/niceUtils.js";
 import { lineUtils } from "../utils/lineUtils.js";
 import { expressionUtils } from "../utils/expressionUtils.js";
-
-export interface AssemblyLine extends AssemblyLineInterface {}
+import { Expression } from "./expression.js";
 
 export class AssemblyLine {
+    directiveName: string;
+    argList: Expression[];
+    lineNumber: number;
+    codeBlock: AssemblyLine[];
+    filePath: string;
     
     constructor(directiveName: string, argList: Expression[]) {
         this.directiveName = directiveName;
@@ -58,7 +61,7 @@ export class AssemblyLine {
     
     processExpressions(
         processExpression: ExpressionProcessor,
-        shouldRecurAfterProcess?: boolean
+        shouldRecurAfterProcess?: boolean,
     ): void {
         expressionUtils.processExpressions(this.argList, processExpression, shouldRecurAfterProcess);
         if (this.codeBlock !== null) {

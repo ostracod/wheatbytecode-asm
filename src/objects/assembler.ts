@@ -2,12 +2,14 @@
 import * as fs from "fs";
 import { strict as assert } from "assert";
 import { LineProcessor, ExpressionProcessor } from "../models/items.js";
-import { Assembler as AssemblerInterface, AssemblyLine } from "../models/objects.js";
+import { Displayable } from "../models/objects.js";
 import { AssemblyError } from "./assemblyError.js";
+import { AssemblyLine } from "./assemblyLine.js";
 import { IdentifierMap } from "./identifier.js";
 import { Scope } from "./scope.js";
 import { MacroDefinition } from "./macroDefinition.js";
 import { AliasDefinition } from "./aliasDefinition.js";
+import { VariableDefinition } from "./variableDefinition.js";
 import { FunctionDefinition, functionTableEntrySize } from "./functionDefinition.js";
 import { AppDataLineList } from "./labeledLineList.js";
 import { parseUtils } from "../utils/parseUtils.js";
@@ -17,9 +19,23 @@ import { niceUtils } from "../utils/niceUtils.js";
 
 const fileHeaderSize = 12;
 
-export interface Assembler extends AssemblerInterface {}
-
-export class Assembler {
+export class Assembler implements Displayable {
+    shouldBeVerbose: boolean;
+    rootLineList: AssemblyLine[];
+    aliasDefinitionMap: IdentifierMap<AliasDefinition>;
+    macroDefinitionMap: { [name: string]: MacroDefinition };
+    nextMacroInvocationId: number;
+    functionDefinitionMap: IdentifierMap<FunctionDefinition>;
+    nextFunctionDefinitionIndex: number;
+    scope: Scope;
+    globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
+    globalFrameSize: number;
+    appDataLineList: AppDataLineList;
+    headerBuffer: Buffer;
+    functionTableBuffer: Buffer;
+    instructionsBuffer: Buffer;
+    appDataBuffer: Buffer;
+    fileBuffer: Buffer;
     
     constructor(shouldBeVerbose: boolean) {
         this.shouldBeVerbose = shouldBeVerbose;
@@ -66,19 +82,19 @@ export class Assembler {
         tempTextList.push("\n= = = FILE BUFFERS = = =\n");
         tempTextList.push(niceUtils.getBufferDisplayString(
             "Header",
-            this.headerBuffer
+            this.headerBuffer,
         ));
         tempTextList.push(niceUtils.getBufferDisplayString(
             "Function table",
-            this.functionTableBuffer
+            this.functionTableBuffer,
         ));
         tempTextList.push(niceUtils.getBufferDisplayString(
             "Instructions",
-            this.instructionsBuffer
+            this.instructionsBuffer,
         ));
         tempTextList.push(niceUtils.getBufferDisplayString(
             "App data",
-            this.appDataBuffer
+            this.appDataBuffer,
         ));
         return tempTextList.join("\n");
     }
@@ -90,7 +106,7 @@ export class Assembler {
     
     processExpressionsInLines(
         processExpression: ExpressionProcessor,
-        shouldRecurAfterProcess?: boolean
+        shouldRecurAfterProcess?: boolean,
     ): void {
         lineUtils.processExpressionsInLines(this.rootLineList, processExpression, shouldRecurAfterProcess);
     }
@@ -112,7 +128,7 @@ export class Assembler {
                 const tempDefinition = new MacroDefinition(
                     tempName,
                     tempIdentifierList,
-                    line.codeBlock
+                    line.codeBlock,
                 );
                 this.macroDefinitionMap[tempName] = tempDefinition;
                 return [];
@@ -286,7 +302,7 @@ export class Assembler {
                     tempIdentifier,
                     tempIdExpression,
                     tempIsGuarded,
-                    line.codeBlock
+                    line.codeBlock,
                 );
                 this.addFunctionDefinition(tempDefinition);
                 return [];
@@ -323,7 +339,7 @@ export class Assembler {
             return null;
         });
         this.globalFrameSize = variableUtils.populateVariableDefinitionIndexes(
-            this.globalVariableDefinitionMap
+            this.globalVariableDefinitionMap,
         );
     }
     
@@ -344,7 +360,7 @@ export class Assembler {
             throw new AssemblyError(
                 "Unknown directive.",
                 tempLine.lineNumber,
-                tempLine.filePath
+                tempLine.filePath,
             );
         }
         
@@ -373,7 +389,7 @@ export class Assembler {
             const tempInstructionsBuffer = definition.createInstructionsBuffer();
             const tempEntryBuffer = definition.createTableEntryBuffer(
                 instructionsFilePos,
-                tempInstructionsBuffer.length
+                tempInstructionsBuffer.length,
             );
             instructionsFilePos += tempInstructionsBuffer.length;
             functionTableBufferList.push(tempEntryBuffer);

@@ -1,18 +1,18 @@
 
-import { DataType } from "../models/delegates.js";
-import { VariableDefinition as VariableDefinitionInterface, ArgVariableDefinition as ArgVariableDefinitionInterface, Identifier } from "../models/objects.js";
+import { DataType } from "../delegates/dataType.js";
+import { Identifier } from "./identifier.js";
 import { IndexRefConverter, IndexDefinition } from "./indexDefinition.js";
 import { INSTRUCTION_REF_PREFIX } from "./instruction.js";
 
-export interface VariableDefinition extends VariableDefinitionInterface {}
-
 export class VariableDefinition extends IndexDefinition {
+    dataType: DataType;
+    arrayLength: number;
     
     constructor(
         identifier: Identifier,
         dataType: DataType,
         arrayLength: number,
-        instructionRefPrefix: number
+        instructionRefPrefix: number,
     ) {
         super(identifier, new IndexRefConverter(instructionRefPrefix, dataType));
         this.dataType = dataType;
@@ -49,8 +49,6 @@ export class LocalVariableDefinition extends VariableDefinition {
         super(identifier, dataType, frameLength, INSTRUCTION_REF_PREFIX.localFrame);
     }
 }
-
-export interface ArgVariableDefinition extends ArgVariableDefinitionInterface {}
 
 export class ArgVariableDefinition extends VariableDefinition {
     
