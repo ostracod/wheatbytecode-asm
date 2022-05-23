@@ -1,5 +1,5 @@
 
-import { AssemblyLine } from "./assemblyLine.js";
+import { AssemblyLine } from "./lines/assemblyLine.js";
 
 export class AssemblyError {
     message: string;

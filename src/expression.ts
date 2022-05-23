@@ -1,16 +1,15 @@
 
-import { ExpressionProcessor } from "../models/items.js";
-import { Displayable } from "../models/objects.js";
-import { dataTypeUtils } from "../utils/dataTypeUtils.js";
-import { compressibleIntegerType, instructionDataTypeList, DataType } from "../delegates/dataType.js";
-import { macroIdentifierOperator, UnaryOperator, BinaryOperator } from "../delegates/operator.js";
+import { ExpressionProcessor, Displayable } from "./types.js";
+import * as dataTypeUtils from "./utils/dataTypeUtils.js";
+import { compressibleIntegerType, instructionDataTypeList, DataType } from "./delegates/dataType.js";
+import { macroIdentifierOperator, UnaryOperator, BinaryOperator } from "./delegates/operator.js";
 import { AssemblyError, UnresolvedIndexError } from "./assemblyError.js";
-import { AssemblyLine } from "./assemblyLine.js";
 import { Identifier, MacroIdentifier, IdentifierMap } from "./identifier.js";
-import { IndexDefinition } from "./indexDefinition.js";
 import { InstructionRef, PointerInstructionRef, InstructionArg, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, nameInstructionRefMap } from "./instruction.js";
 import { builtInConstantSet, Constant, NumberConstant, StringConstant } from "./constant.js";
 import { Scope } from "./scope.js";
+import { AssemblyLine } from "./lines/assemblyLine.js";
+import { IndexDefinition } from "./definitions/indexDefinition.js";
 
 export abstract class Expression implements Displayable {
     line: AssemblyLine;

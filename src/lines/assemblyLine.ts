@@ -1,9 +1,9 @@
 
-import { ExpressionProcessor } from "../models/items.js";
-import { niceUtils } from "../utils/niceUtils.js";
-import { lineUtils } from "../utils/lineUtils.js";
-import { expressionUtils } from "../utils/expressionUtils.js";
-import { Expression } from "./expression.js";
+import { ExpressionProcessor } from "../types.js";
+import * as niceUtils from "../utils/niceUtils.js";
+import * as lineUtils from "../utils/lineUtils.js";
+import * as expressionUtils from "../utils/expressionUtils.js";
+import { Expression } from "../expression.js";
 
 export class AssemblyLine {
     directiveName: string;

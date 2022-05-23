@@ -1,13 +1,13 @@
 
-import { MixedNumber } from "../models/items.js";
-import { dataTypeUtils } from "../utils/dataTypeUtils.js";
-import { mathUtils } from "../utils/mathUtils.js";
-import { compressibleIntegerType, DataType, NumberType, IntegerType } from "./dataType.js";
-import { AssemblyError } from "../objects/assemblyError.js";
-import { Identifier } from "../objects/identifier.js";
-import { Constant, NumberConstant, StringConstant } from "../objects/constant.js";
-import { Expression, UnaryExpression, MacroIdentifierExpression, BinaryExpression } from "../objects/expression.js";
-import { InstructionArg } from "../objects/instruction.js";
+import { MixedNumber } from "../types.js";
+import * as dataTypeUtils from "../utils/dataTypeUtils.js";
+import * as mathUtils from "../utils/mathUtils.js";
+import { compressibleIntegerType, DataType, NumberType, IntegerType } from "../delegates/dataType.js";
+import { AssemblyError } from "../assemblyError.js";
+import { Identifier } from "../identifier.js";
+import { Constant, NumberConstant, StringConstant } from "../constant.js";
+import { Expression, UnaryExpression, MacroIdentifierExpression, BinaryExpression } from "../expression.js";
+import { InstructionArg } from "../instruction.js";
 
 export const unaryOperatorList = [];
 export const binaryOperatorList = [];

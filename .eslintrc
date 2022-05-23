@@ -60,7 +60,7 @@
             { "skipBlankLines": true }
         ],
         "no-whitespace-before-property": 1,
-        "object-curly-spacing": ["warn", "always"],
+        "object-curly-spacing": "off",
         "object-shorthand": 1,
         "one-var": ["warn", "never"],
         "prefer-arrow-callback": 1,
@@ -86,6 +86,7 @@
         "@typescript-eslint/no-explicit-any": 0,
         "@typescript-eslint/no-empty-function": 0,
         "@typescript-eslint/no-empty-interface": 0,
+        "@typescript-eslint/object-curly-spacing": ["warn", "always"],
         "@typescript-eslint/no-unused-vars": [
             "warn",
             {

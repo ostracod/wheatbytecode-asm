@@ -1,14 +1,14 @@
 
-import { LineProcessor, LabelDefinitionClass } from "../models/items.js";
-import { niceUtils } from "../utils/niceUtils.js";
-import { lineUtils } from "../utils/lineUtils.js";
-import { AssemblyError } from "./assemblyError.js";
+import { LineProcessor, LabelDefinitionClass } from "../types.js";
+import * as niceUtils from "../utils/niceUtils.js";
+import * as lineUtils from "../utils/lineUtils.js";
+import { AssemblyError } from "../assemblyError.js";
+import { IdentifierMap } from "../identifier.js";
+import { Scope } from "../scope.js";
+import { Instruction } from "../instruction.js";
+import { LabelDefinition, InstructionLabelDefinition, AppDataLabelDefinition } from "../definitions/labelDefinition.js";
 import { AssemblyLine } from "./assemblyLine.js";
-import { IdentifierMap } from "./identifier.js";
-import { Scope } from "./scope.js";
 import { SerializableLine, AppData } from "./serializableLine.js";
-import { LabelDefinition, InstructionLabelDefinition, AppDataLabelDefinition } from "./labelDefinition.js";
-import { Instruction } from "./instruction.js";
 
 export abstract class LabeledLineList {
     lineList: AssemblyLine[];

@@ -1,5 +1,5 @@
 
-import { Identifier } from "./identifier.js";
+import { Identifier } from "../identifier.js";
 import { IndexConverter, IndexDefinition, indexConstantConverter, appDataIndexConverter } from "./indexDefinition.js";
 
 export abstract class LabelDefinition extends IndexDefinition {

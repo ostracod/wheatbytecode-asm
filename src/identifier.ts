@@ -1,9 +1,9 @@
 
-import { Displayable } from "../models/objects.js";
+import { Displayable } from "./types.js";
 import { AssemblyError } from "./assemblyError.js";
 import { builtInConstantSet } from "./constant.js";
-import { IndexDefinition } from "./indexDefinition.js";
 import { nameInstructionRefMap } from "./instruction.js";
+import { IndexDefinition } from "./definitions/indexDefinition.js";
 
 const builtInIdentifierNameSet = {};
 for (const name in nameInstructionRefMap) {

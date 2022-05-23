@@ -1,8 +1,8 @@
 
 import { DataType } from "../delegates/dataType.js";
-import { Identifier } from "./identifier.js";
+import { Identifier } from "../identifier.js";
+import { INSTRUCTION_REF_PREFIX } from "../instruction.js";
 import { IndexRefConverter, IndexDefinition } from "./indexDefinition.js";
-import { INSTRUCTION_REF_PREFIX } from "./instruction.js";
 
 export class VariableDefinition extends IndexDefinition {
     dataType: DataType;

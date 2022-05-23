@@ -1,6 +1,6 @@
 
 import { Identifier, IdentifierMap } from "./identifier.js";
-import { IndexDefinition } from "./indexDefinition.js";
+import { IndexDefinition } from "./definitions/indexDefinition.js";
 
 export class Scope {
     indexDefinitionMapList: IdentifierMap<IndexDefinition>[];

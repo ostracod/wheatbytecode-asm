@@ -1,17 +1,16 @@
 
-import { InstructionArgProcessor } from "../models/items.js";
-import { Displayable } from "../models/objects.js";
-import { niceUtils } from "../utils/niceUtils.js";
-import { mathUtils } from "../utils/mathUtils.js";
-import { instructionUtils } from "../utils/instructionUtils.js";
-import { DataType, NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type } from "../delegates/dataType.js";
-import { instructionTypeMap, InstructionType } from "../delegates/instructionType.js";
+import { InstructionArgProcessor, Displayable } from "./types.js";
+import * as niceUtils from "./utils/niceUtils.js";
+import * as mathUtils from "./utils/mathUtils.js";
+import * as instructionUtils from "./utils/instructionUtils.js";
+import { DataType, NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type } from "./delegates/dataType.js";
+import { instructionTypeMap, InstructionType } from "./delegates/instructionType.js";
 import { AssemblyError } from "./assemblyError.js";
-import { AssemblyLine } from "./assemblyLine.js";
 import { Constant, NumberConstant } from "./constant.js";
-import { IndexDefinition } from "./indexDefinition.js";
 import { Expression } from "./expression.js";
-import { SerializableLine } from "./serializableLine.js";
+import { AssemblyLine } from "./lines/assemblyLine.js";
+import { SerializableLine } from "./lines/serializableLine.js";
+import { IndexDefinition } from "./definitions/indexDefinition.js";
 
 export const INSTRUCTION_REF_PREFIX = {
     constant: 0,

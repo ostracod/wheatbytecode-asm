@@ -1,21 +1,20 @@
 
 import * as fs from "fs";
 import { strict as assert } from "assert";
-import { LineProcessor, ExpressionProcessor } from "../models/items.js";
-import { Displayable } from "../models/objects.js";
+import { LineProcessor, ExpressionProcessor, Displayable } from "./types.js";
+import * as parseUtils from "./utils/parseUtils.js";
+import * as lineUtils from "./utils/lineUtils.js";
+import * as variableUtils from "./utils/variableUtils.js";
+import * as niceUtils from "./utils/niceUtils.js";
 import { AssemblyError } from "./assemblyError.js";
-import { AssemblyLine } from "./assemblyLine.js";
 import { IdentifierMap } from "./identifier.js";
 import { Scope } from "./scope.js";
-import { MacroDefinition } from "./macroDefinition.js";
-import { AliasDefinition } from "./aliasDefinition.js";
-import { VariableDefinition } from "./variableDefinition.js";
-import { FunctionDefinition, functionTableEntrySize } from "./functionDefinition.js";
-import { AppDataLineList } from "./labeledLineList.js";
-import { parseUtils } from "../utils/parseUtils.js";
-import { lineUtils } from "../utils/lineUtils.js";
-import { variableUtils } from "../utils/variableUtils.js";
-import { niceUtils } from "../utils/niceUtils.js";
+import { AssemblyLine } from "./lines/assemblyLine.js";
+import { AppDataLineList } from "./lines/labeledLineList.js";
+import { MacroDefinition } from "./definitions/macroDefinition.js";
+import { AliasDefinition } from "./definitions/aliasDefinition.js";
+import { VariableDefinition } from "./definitions/variableDefinition.js";
+import { FunctionDefinition, functionTableEntrySize } from "./definitions/functionDefinition.js";
 
 const fileHeaderSize = 12;
 
@@ -144,7 +143,7 @@ export class Assembler implements Displayable {
         return output;
     }
     
-    expandMacroInvocations(lineList: AssemblyLine[]): {lineList: AssemblyLine[], expandCount: number} {
+    expandMacroInvocations(lineList: AssemblyLine[]): { lineList: AssemblyLine[], expandCount: number } {
         const tempResult = lineUtils.processLines(lineList, (line) => {
             const tempDirectiveName = line.directiveName;
             if (tempDirectiveName in this.macroDefinitionMap) {
@@ -192,7 +191,7 @@ export class Assembler implements Displayable {
         }, true);
     }
     
-    processIncludeDirectives(lineList: AssemblyLine[]): {lineList: AssemblyLine[], includeCount: number} {
+    processIncludeDirectives(lineList: AssemblyLine[]): { lineList: AssemblyLine[], includeCount: number } {
         const tempResult = lineUtils.processLines(lineList, (line) => {
             const tempArgList = line.argList;
             if (line.directiveName === "INCLUDE") {

@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 
-import { MixedNumber } from "../models/items.js";
-import { DataType, SignedIntegerType, compressibleIntegerType, NumberType, StringType } from "../delegates/dataType.js";
+import { MixedNumber } from "./types.js";
+import { DataType, SignedIntegerType, compressibleIntegerType, NumberType, StringType } from "./delegates/dataType.js";
 import { AssemblyError } from "./assemblyError.js";
 
 export abstract class Constant {

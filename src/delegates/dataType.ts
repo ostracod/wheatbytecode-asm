@@ -1,6 +1,6 @@
 
-import { MixedNumber } from "../models/items.js";
-import { mathUtils } from "../utils/mathUtils.js";
+import { MixedNumber } from "../types.js";
+import * as mathUtils from "../utils/mathUtils.js";
 
 export const instructionDataTypeList: SignedIntegerType[] = [];
 export const numberTypeList: NumberType[] = [];

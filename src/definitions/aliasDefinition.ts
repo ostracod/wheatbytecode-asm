@@ -1,7 +1,7 @@
 
-import { Displayable } from "../models/objects.js";
-import { Identifier } from "./identifier.js";
-import { Expression } from "./expression.js";
+import { Displayable } from "../types.js";
+import { Identifier } from "../identifier.js";
+import { Expression } from "../expression.js";
 
 export class AliasDefinition implements Displayable {
     identifier: Identifier;

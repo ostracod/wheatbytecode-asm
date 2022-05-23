@@ -1,10 +1,10 @@
 
-import { NumberType } from "../delegates/dataType.js";
-import { AssemblyLine } from "../objects/assemblyLine.js";
-import { Expression, ArgNumber } from "../objects/expression.js";
-import { VariableDefinition } from "../objects/variableDefinition.js";
-import { LabelDefinition } from "../objects/labelDefinition.js";
-import { InstructionArg } from "../objects/instruction.js";
+import { NumberType } from "./delegates/dataType.js";
+import { Expression, ArgNumber } from "./expression.js";
+import { InstructionArg } from "./instruction.js";
+import { AssemblyLine } from "./lines/assemblyLine.js";
+import { VariableDefinition } from "./definitions/variableDefinition.js";
+import { LabelDefinition } from "./definitions/labelDefinition.js";
 
 export type ExpressionProcessor = ((expression: Expression) => Expression);
 
@@ -22,5 +22,9 @@ export type LabelDefinitionClass = (new (...args: any[]) => LabelDefinition);
 export type ArgNumeric = ArgNumber;
 
 export type MixedNumber = (number | bigint);
+
+export interface Displayable {
+    getDisplayString(): string;
+}
 
 

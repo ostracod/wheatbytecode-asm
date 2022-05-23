@@ -1,10 +1,10 @@
 
-import { Displayable } from "../models/objects.js";
-import { lineUtils } from "../utils/lineUtils.js";
-import { AssemblyError } from "./assemblyError.js";
-import { AssemblyLine } from "./assemblyLine.js";
-import { Identifier, IdentifierMap } from "./identifier.js";
-import { Expression } from "./expression.js";
+import { Displayable } from "../types.js";
+import * as lineUtils from "../utils/lineUtils.js";
+import { AssemblyError } from "../assemblyError.js";
+import { Identifier, IdentifierMap } from "../identifier.js";
+import { Expression } from "../expression.js";
+import { AssemblyLine } from "../lines/assemblyLine.js";
 
 export class MacroDefinition implements Displayable {
     name: string;

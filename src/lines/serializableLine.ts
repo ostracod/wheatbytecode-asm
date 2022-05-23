@@ -1,8 +1,8 @@
 
-import { Displayable } from "../models/objects.js";
+import { Displayable } from "../types.js";
+import { Expression } from "../expression.js";
 import { SignedIntegerType, signedInteger32Type } from "../delegates/dataType.js";
 import { AssemblyLine } from "./assemblyLine.js";
-import { Expression } from "./expression.js";
 
 export abstract class SerializableLine implements Displayable {
     assemblyLine: AssemblyLine;

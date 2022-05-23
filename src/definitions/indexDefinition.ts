@@ -1,11 +1,11 @@
 
-import { Displayable } from "../models/objects.js";
-import { instructionUtils } from "../utils/instructionUtils.js";
+import { Displayable } from "../types.js";
+import * as instructionUtils from "../utils/instructionUtils.js";
 import { signedInteger32Type, compressibleIntegerType, DataType } from "../delegates/dataType.js";
-import { UnresolvedIndexError } from "./assemblyError.js";
-import { Identifier } from "./identifier.js";
-import { Constant, NumberConstant } from "./constant.js";
-import { INSTRUCTION_REF_PREFIX, InstructionArg, IndexInstructionArg } from "./instruction.js";
+import { UnresolvedIndexError } from "../assemblyError.js";
+import { Identifier } from "../identifier.js";
+import { Constant, NumberConstant } from "../constant.js";
+import { INSTRUCTION_REF_PREFIX, InstructionArg, IndexInstructionArg } from "../instruction.js";
 
 export abstract class IndexConverter {
     

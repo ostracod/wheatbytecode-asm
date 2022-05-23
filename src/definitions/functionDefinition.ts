@@ -1,16 +1,15 @@
 
-import { LineProcessor } from "../models/items.js";
-import { Displayable } from "../models/objects.js";
-import { niceUtils } from "../utils/niceUtils.js";
-import { variableUtils } from "../utils/variableUtils.js";
-import { AssemblyLine } from "./assemblyLine.js";
-import { Identifier, IdentifierMap } from "./identifier.js";
-import { Expression } from "./expression.js";
+import { LineProcessor, Displayable } from "../types.js";
+import * as niceUtils from "../utils/niceUtils.js";
+import * as variableUtils from "../utils/variableUtils.js";
+import { Identifier, IdentifierMap } from "../identifier.js";
+import { Expression } from "../expression.js";
+import { Scope } from "../scope.js";
+import { Instruction } from "../instruction.js";
+import { AssemblyLine } from "../lines/assemblyLine.js";
+import { InstructionLineList } from "../lines/labeledLineList.js";
 import { IndexDefinition, indexConstantConverter } from "./indexDefinition.js";
 import { VariableDefinition, ArgVariableDefinition } from "./variableDefinition.js";
-import { Scope } from "./scope.js";
-import { Instruction } from "./instruction.js";
-import { InstructionLineList } from "./labeledLineList.js";
 
 export const functionTableEntrySize = 21;
 

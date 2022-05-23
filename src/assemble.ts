@@ -1,6 +1,6 @@
 
 import * as pathUtils from "path";
-import { Assembler } from "./objects/assembler.js";
+import { Assembler } from "./assembler.js";
 
 const assemblerClassMap = { ".wbasm": Assembler };
 
