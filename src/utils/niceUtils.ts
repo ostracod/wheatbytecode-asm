@@ -111,6 +111,6 @@ export const getDictionaryWithDefaults = <T extends {}>(
         }
     }
     return output;
-}
+};
 
 

@@ -1,11 +1,9 @@
 
-import * as pathUtils from "path";
+import * as assemblyUtils from "./utils/assemblyUtils.js";
 import { Assembler } from "./assembler.js";
 
-const assemblyFileExtension = ".wbasm";
-
 const printPermittedFileExtension = (): void => {
-    console.log(`Assembly files must end in the extension "${assemblyFileExtension}".`);
+    console.log(`Assembly files must end in the extension "${assemblyUtils.assemblyFileExtension}".`);
 };
 
 const printUsageAndExit = (): void => {
@@ -25,13 +23,8 @@ if (process.argv.length !== 3 && process.argv.length !== 4) {
 }
 
 const sourcePath = process.argv[process.argv.length - 1];
-const fileName = pathUtils.basename(sourcePath);
-const tempIndex = fileName.lastIndexOf(".");
-if (tempIndex < 0) {
-    printExtensionErrorAndExit();
-}
-const fileExtension = fileName.substring(tempIndex, fileName.length);
-if (fileExtension !== assemblyFileExtension) {
+const destinationPath = assemblyUtils.stripAssemblyExtension(sourcePath);
+if (destinationPath === null) {
     printExtensionErrorAndExit();
 }
 
@@ -44,7 +37,6 @@ if (process.argv.length === 4) {
     }
 }
 
-const destinationPath = sourcePath.substring(0, sourcePath.length - fileExtension.length);
 const assembler = new Assembler({
     shouldBeVerbose,
     shouldPrintLog: true,

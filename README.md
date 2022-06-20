@@ -5,7 +5,9 @@ This utility converts assembly code to bytecode application files for WheatSyste
 
 This repository may also be used as a Node.js module, and exports the following members:
 
-* TODO: Define exported members.
+* `Assembler`: Provides methods to assemble a file.
+* `AssemblyError`: Thrown when `Assembler` encounters a problem.
+* `assemblyUtils`: Provides functions to help assemble files.
 
 ## Installation and Usage
 
@@ -18,7 +20,7 @@ This application has the following system-wide dependencies:
 To install this application:
 
 1. Install dependencies of the assembler: `pnpm install`
-1. Compile the assembler: `tsc`
+1. Compile the assembler: `npm run build`
 
 To assemble a file into bytecode:
 
@@ -32,6 +34,12 @@ To assemble the example file `hello.wbasm` included in this repository:
 
 ```
 node ./dist/assemble.js -v ./hello.wbasm
+```
+
+To use this repository as a dependency, add the following line to `dependencies` in your `package.json` file, replacing `(version)` with the desired version number:
+
+```
+"wheatbytecode-asm": "github:ostracod/wheatbytecode-asm#semver:^(version)"
 ```
 
 ## Instruction Syntax

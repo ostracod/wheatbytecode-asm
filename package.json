@@ -2,9 +2,12 @@
     "name": "wheatbytecode-asm",
     "version": "1.0.0",
     "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
-        "lint": "eslint . --ext .ts",
-        "build": "tsc"
+        "lint": "eslint ./src --ext .ts",
+        "build": "tsc",
+        "postinstall": "npm run build"
     },
     "dependencies": {
         "wheatsystem-spec": "github:ostracod/wheatsystem-spec#master"

@@ -8,7 +8,7 @@ specifiers:
   wheatsystem-spec: github:ostracod/wheatsystem-spec#master
 
 dependencies:
-  wheatsystem-spec: github.com/ostracod/wheatsystem-spec/5fcef5dd471de048cd051b4b2fbf797057037d6a
+  wheatsystem-spec: github.com/ostracod/wheatsystem-spec/55213397d410f0355f9bb7fa7d31ec0e8dd69a2e
 
 devDependencies:
   '@typescript-eslint/eslint-plugin': 5.25.0_jorowkvdqu6pwramweg5le7ncu
@@ -881,8 +881,8 @@ packages:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: true
 
-  github.com/ostracod/wheatsystem-spec/5fcef5dd471de048cd051b4b2fbf797057037d6a:
-    resolution: {tarball: https://codeload.github.com/ostracod/wheatsystem-spec/tar.gz/5fcef5dd471de048cd051b4b2fbf797057037d6a}
+  github.com/ostracod/wheatsystem-spec/55213397d410f0355f9bb7fa7d31ec0e8dd69a2e:
+    resolution: {tarball: https://codeload.github.com/ostracod/wheatsystem-spec/tar.gz/55213397d410f0355f9bb7fa7d31ec0e8dd69a2e}
     name: wheatsystem-spec
     version: 1.0.0
     requiresBuild: true
