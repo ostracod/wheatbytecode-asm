@@ -27,4 +27,9 @@ export interface Displayable {
     getDisplayString(): string;
 }
 
+export interface AssemblerOptions {
+    shouldBeVerbose?: boolean;
+    shouldPrintLog?: boolean;
+}
+
 

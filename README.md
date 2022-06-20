@@ -3,6 +3,10 @@
 
 This utility converts assembly code to bytecode application files for WheatSystem.
 
+This repository may also be used as a Node.js module, and exports the following members:
+
+* TODO: Define exported members.
+
 ## Installation and Usage
 
 This application has the following system-wide dependencies:

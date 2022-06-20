@@ -96,4 +96,21 @@ export const pluralize = (word: string, amount: number): string => (
     (amount === 1) ? word : word + "s"
 );
 
+export const getDictionaryWithDefaults = <T extends {}>(
+    dictionary: T,
+    defaultValues: T,
+): T => {
+    const output = {} as T;
+    for (const key in dictionary) {
+        output[key] = dictionary[key];
+    }
+    for (const key in defaultValues) {
+        const defaultValue = defaultValues[key];
+        if (typeof output[key] === "undefined" && typeof defaultValue !== "undefined") {
+            output[key] = defaultValue;
+        }
+    }
+    return output;
+}
+
 

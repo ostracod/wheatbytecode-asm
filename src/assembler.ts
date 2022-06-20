@@ -1,7 +1,7 @@
 
 import * as fs from "fs";
 import { strict as assert } from "assert";
-import { LineProcessor, ExpressionProcessor, Displayable } from "./types.js";
+import { LineProcessor, ExpressionProcessor, Displayable, AssemblerOptions } from "./types.js";
 import * as parseUtils from "./utils/parseUtils.js";
 import * as lineUtils from "./utils/lineUtils.js";
 import * as variableUtils from "./utils/variableUtils.js";
@@ -19,7 +19,8 @@ import { FunctionDefinition, functionTableEntrySize } from "./definitions/functi
 const fileHeaderSize = 12;
 
 export class Assembler implements Displayable {
-    shouldBeVerbose: boolean;
+    options: AssemblerOptions;
+    logMessages: string[];
     rootLineList: AssemblyLine[];
     aliasDefinitionMap: IdentifierMap<AliasDefinition>;
     macroDefinitionMap: { [name: string]: MacroDefinition };
@@ -36,8 +37,12 @@ export class Assembler implements Displayable {
     appDataBuffer: Buffer;
     fileBuffer: Buffer;
     
-    constructor(shouldBeVerbose: boolean) {
-        this.shouldBeVerbose = shouldBeVerbose;
+    constructor(options: AssemblerOptions) {
+        this.options = niceUtils.getDictionaryWithDefaults(options, {
+            shouldBeVerbose: false,
+            shouldPrintLog: false,
+        });
+        this.logMessages = [];
         this.rootLineList = [];
         this.aliasDefinitionMap = new IdentifierMap();
         this.macroDefinitionMap = {};
@@ -53,6 +58,13 @@ export class Assembler implements Displayable {
         this.instructionsBuffer = null;
         this.appDataBuffer = null;
         this.fileBuffer = null;
+    }
+    
+    log(message: string): void {
+        if (this.options.shouldPrintLog) {
+            console.log(message);
+        }
+        this.logMessages.push(message);
     }
     
     getDisplayString(): string {
@@ -413,7 +425,7 @@ export class Assembler implements Displayable {
     
     assembleCodeFile(sourcePath: string, destinationPath: string): void {
         
-        console.log(`Assembling "${sourcePath}"...`);
+        this.log(`Assembling "${sourcePath}"...`);
         
         try {
             this.rootLineList = this.loadAndParseAssemblyFile(sourcePath);
@@ -425,9 +437,9 @@ export class Assembler implements Displayable {
         } catch (error) {
             if (error instanceof AssemblyError) {
                 if (error.lineNumber === null || error.filePath === null) {
-                    console.log("Error: " + error.message);
+                    this.log("Error: " + error.message);
                 } else {
-                    console.log(`Error in "${error.filePath}" on line ${error.lineNumber}: ${error.message}`);
+                    this.log(`Error in "${error.filePath}" on line ${error.lineNumber}: ${error.message}`);
                 }
                 return;
             } else {
@@ -435,13 +447,13 @@ export class Assembler implements Displayable {
             }
         }
         
-        if (this.shouldBeVerbose) {
-            console.log(this.getDisplayString());
+        if (this.options.shouldBeVerbose) {
+            this.log(this.getDisplayString());
         }
         
         fs.writeFileSync(destinationPath, this.fileBuffer);
-        console.log("Finished assembling.");
-        console.log(`Destination path: "${destinationPath}"`);
+        this.log("Finished assembling.");
+        this.log(`Destination path: "${destinationPath}"`);
     }
 }
 
