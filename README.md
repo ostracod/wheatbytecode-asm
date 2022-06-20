@@ -5,6 +5,7 @@ This utility converts assembly code to bytecode application files for WheatSyste
 
 This repository may also be used as a Node.js module, and exports the following members:
 
+* `types`: Provides TypeScript types and interfaces used by this module.
 * `Assembler`: Provides methods to assemble a file.
 * `AssemblyError`: Thrown when `Assembler` encounters a problem.
 * `assemblyUtils`: Provides functions to help assemble files.
