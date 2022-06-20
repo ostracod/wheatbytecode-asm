@@ -1,7 +1,5 @@
 
-import * as fs from "fs";
-import * as pathUtils from "path";
-import { fileURLToPath } from "url";
+import { specUtils } from "wheatsystem-spec";
 
 export const instructionTypeMap: { [name: string]: InstructionType } = {};
 
@@ -18,19 +16,15 @@ export class InstructionType {
     }
 }
 
-const currentDirectoryPath = pathUtils.dirname(fileURLToPath(import.meta.url));
-const instructionsPath = pathUtils.join(
-    currentDirectoryPath,
-    "../../../wheatsystem-spec/bytecodeInstructions.json",
-);
-const categoryJsonList = JSON.parse(fs.readFileSync(instructionsPath, "utf8"));
+const instructionsText = specUtils.readInstructionsText();
+const categories = specUtils.parseInstructions(instructionsText);
 
-for (const categoryJson of categoryJsonList) {
-    for (const instructionJson of categoryJson.instructionList) {
+for (const category of categories) {
+    for (const instruction of category.instructions) {
         new InstructionType(
-            instructionJson.name,
-            instructionJson.opcode,
-            instructionJson.argumentList.length,
+            instruction.name,
+            instruction.opcode,
+            instruction.arguments.length,
         );
     }
 }

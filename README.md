@@ -13,10 +13,6 @@ This application has the following system-wide dependencies:
 
 To install this application:
 
-1. Clone [wheatbytecode-asm](https://github.com/ostracod/wheatbytecode-asm) and [wheatsystem-spec](https://github.com/ostracod/wheatsystem-spec) in the same directory.
-1. Move to the wheatsystem-spec directory: `cd wheatsystem-spec`
-1. Generate `bytecodeInstructions.json`: `node ./generate.js`
-1. Move to the wheatbytecode-asm directory: `cd ../wheatbytecode-asm`
 1. Install dependencies of the assembler: `pnpm install`
 1. Compile the assembler: `tsc`
 
