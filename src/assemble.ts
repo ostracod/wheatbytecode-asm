@@ -49,6 +49,8 @@ const assembler = new Assembler({
     shouldBeVerbose,
     shouldPrintLog: true,
 });
-assembler.assembleCodeFile(sourcePath, destinationPath);
+assembler.catchAssemblyError(() => {
+    assembler.assembleCodeFile(sourcePath, destinationPath);
+});
 
 

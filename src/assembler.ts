@@ -210,8 +210,9 @@ export class Assembler implements Displayable {
                 if (tempArgList.length !== 1) {
                     throw new AssemblyError("Expected 1 argument.");
                 }
-                const tempPath = tempArgList[0].evaluateToString();
-                return this.loadAndParseAssemblyFile(tempPath);
+                const path = tempArgList[0].evaluateToString();
+                const lineTextList = parseUtils.loadAssemblyFileContent(path);
+                return this.parseAndExpandAssemblyLines(lineTextList, path);
             }
             return null;
         });
@@ -221,37 +222,36 @@ export class Assembler implements Displayable {
         };
     }
     
-    loadAndParseAssemblyFile(path: string): AssemblyLine[] {
-        const tempLineTextList = parseUtils.loadAssemblyFileContent(path);
-        let tempLineList;
+    parseAndExpandAssemblyLines(lineTextList: string[], path: string = null): AssemblyLine[] {
+        let lines: AssemblyLine[];
         try {
-            tempLineList = parseUtils.parseAssemblyLines(tempLineTextList);
-            for (const line of tempLineList) {
+            lines = parseUtils.parseAssemblyLines(lineTextList);
+            for (const line of lines) {
                 line.filePath = path;
             }
-            tempLineList = parseUtils.collapseCodeBlocks(tempLineList);
+            lines = parseUtils.collapseCodeBlocks(lines);
         } catch (error) {
             if (error instanceof AssemblyError) {
                 error.filePath = path;
             }
             throw error;
         }
-        tempLineList = this.extractMacroDefinitions(tempLineList);
+        lines = this.extractMacroDefinitions(lines);
         // We do all of this in a loop because included files may define
         // macros, and macros may define INCLUDE directives.
         while (true) {
-            const tempResult1 = this.expandMacroInvocations(tempLineList);
-            tempLineList = tempResult1.lineList;
+            const tempResult1 = this.expandMacroInvocations(lines);
+            lines = tempResult1.lineList;
             const tempExpandCount = tempResult1.expandCount;
-            tempLineList = this.extractAliasDefinitions(tempLineList);
-            const tempResult2 = this.processIncludeDirectives(tempLineList);
-            tempLineList = tempResult2.lineList;
+            lines = this.extractAliasDefinitions(lines);
+            const tempResult2 = this.processIncludeDirectives(lines);
+            lines = tempResult2.lineList;
             const tempIncludeCount = tempResult2.includeCount;
             if (tempExpandCount <= 0 && tempIncludeCount <= 0) {
                 break;
             }
         }
-        return tempLineList;
+        return lines;
     }
     
     populateScopeInRootLines(): void {
@@ -423,37 +423,43 @@ export class Assembler implements Displayable {
         ]);
     }
     
+    assembleHelper(lineTextList: string[], sourcePath: string = null) {
+        this.rootLineList = this.parseAndExpandAssemblyLines(lineTextList, sourcePath);
+        this.expandAliasInvocations();
+        this.populateScopeInRootLines();
+        this.extractDefinitions();
+        this.populateScopeDefinitions();
+        this.generateFileBuffer();
+        if (this.options.shouldBeVerbose) {
+            this.log(this.getDisplayString());
+        }
+        this.log("Finished assembling.");
+    }
+    
+    assembleCodeLines(lineTextList: string[]): Buffer {
+        this.log("Assembling code lines...");
+        this.assembleHelper(lineTextList);
+        return this.fileBuffer;
+    }
+    
     assembleCodeFile(sourcePath: string, destinationPath: string): void {
-        
         this.log(`Assembling "${sourcePath}"...`);
-        
+        const lineTextList = parseUtils.loadAssemblyFileContent(sourcePath);
+        this.assembleHelper(lineTextList, sourcePath);
+        fs.writeFileSync(destinationPath, this.fileBuffer);
+        this.log(`Destination path: "${destinationPath}"`);
+    }
+    
+    catchAssemblyError(operation: () => void): void {
         try {
-            this.rootLineList = this.loadAndParseAssemblyFile(sourcePath);
-            this.expandAliasInvocations();
-            this.populateScopeInRootLines();
-            this.extractDefinitions();
-            this.populateScopeDefinitions();
-            this.generateFileBuffer();
+            operation();
         } catch (error) {
             if (error instanceof AssemblyError) {
-                if (error.lineNumber === null || error.filePath === null) {
-                    this.log("Error: " + error.message);
-                } else {
-                    this.log(`Error in "${error.filePath}" on line ${error.lineNumber}: ${error.message}`);
-                }
-                return;
+                this.log(error.getDisplayString());
             } else {
                 throw error;
             }
         }
-        
-        if (this.options.shouldBeVerbose) {
-            this.log(this.getDisplayString());
-        }
-        
-        fs.writeFileSync(destinationPath, this.fileBuffer);
-        this.log("Finished assembling.");
-        this.log(`Destination path: "${destinationPath}"`);
     }
 }
 
