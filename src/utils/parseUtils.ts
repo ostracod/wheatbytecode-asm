@@ -7,6 +7,7 @@ import { AssemblyError } from "../assemblyError.js";
 import { Expression, SubscriptExpression, ArgWord, ArgNumber, ArgString } from "../expression.js";
 import { NumberConstant } from "../constant.js";
 import { AssemblyLine } from "../lines/assemblyLine.js";
+import * as assemblyUtils from "./assemblyUtils.js";
 
 const codeBlockDirectiveNameSet = ["FUNC", "APP_DATA", "MACRO"];
 
@@ -358,6 +359,7 @@ export const parseLineText = (text: string): AssemblyLine => {
 };
 
 export const loadAssemblyFileContent = (path: string): string[] => {
+    assemblyUtils.verifyAssemblyExtension(path);
     if (!fs.existsSync(path)) {
         throw new AssemblyError(`Missing source file "${path}".`);
     }

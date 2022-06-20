@@ -1,7 +1,14 @@
 
 import * as pathUtils from "path";
+import { AssemblyError } from "../assemblyError.js";
 
 export const assemblyFileExtension = ".wbasm";
+
+export const verifyAssemblyExtension = (filePath: string): void => {
+    if (!filePath.endsWith(assemblyFileExtension)) {
+        throw new AssemblyError(`Assembly file paths must end in the extension "${assemblyFileExtension}."`);
+    }
+};
 
 export const stripAssemblyExtension = (filePath: string): string => {
     const fileName = pathUtils.basename(filePath);

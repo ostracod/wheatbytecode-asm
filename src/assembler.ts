@@ -1,5 +1,6 @@
 
 import * as fs from "fs";
+import * as pathUtils from "path";
 import { strict as assert } from "assert";
 import { LineProcessor, ExpressionProcessor, Displayable, AssemblerOptions } from "./types.js";
 import * as parseUtils from "./utils/parseUtils.js";
@@ -210,7 +211,15 @@ export class Assembler implements Displayable {
                 if (tempArgList.length !== 1) {
                     throw new AssemblyError("Expected 1 argument.");
                 }
-                const path = tempArgList[0].evaluateToString();
+                let path = tempArgList[0].evaluateToString();
+                if (!pathUtils.isAbsolute(path)) {
+                    const linePath = line.filePath;
+                    if (linePath === null) {
+                        throw new AssemblyError("Unable to determine path for file inclusion.");
+                    }
+                    const directoryPath = pathUtils.dirname(linePath);
+                    path = pathUtils.join(directoryPath, path);
+                }
                 const lineTextList = parseUtils.loadAssemblyFileContent(path);
                 return this.parseAndExpandAssemblyLines(lineTextList, path);
             }
