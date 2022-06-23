@@ -1,5 +1,5 @@
 
-import { LineProcessor, Displayable } from "../types.js";
+import { LineProcessor, InstructionTypeMap, Displayable } from "../types.js";
 import * as niceUtils from "../utils/niceUtils.js";
 import * as variableUtils from "../utils/variableUtils.js";
 import { Identifier, IdentifierMap } from "../identifier.js";
@@ -118,11 +118,12 @@ export class FunctionDefinition extends IndexDefinition {
         idExpression: Expression,
         isGuarded: boolean,
         lineList: AssemblyLine[],
+        instructionTypeMap: InstructionTypeMap,
     ) {
         super(identifier, indexConstantConverter);
         this.idExpression = idExpression;
         this.isGuarded = isGuarded;
-        this.lineList = new InstructionLineList(lineList);
+        this.lineList = new InstructionLineList(lineList, instructionTypeMap);
         this.argVariableDefinitionMap = new IdentifierMap();
         this.argFrameSize = null;
         this.scope = null;

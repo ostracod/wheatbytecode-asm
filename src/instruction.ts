@@ -1,10 +1,10 @@
 
-import { InstructionArgProcessor, Displayable } from "./types.js";
+import { InstructionArgProcessor, InstructionTypeMap, Displayable } from "./types.js";
 import * as niceUtils from "./utils/niceUtils.js";
 import * as mathUtils from "./utils/mathUtils.js";
 import * as instructionUtils from "./utils/instructionUtils.js";
 import { DataType, NumberType, SignedIntegerType, signedInteger8Type, signedInteger32Type } from "./delegates/dataType.js";
-import { instructionTypeMap, InstructionType } from "./delegates/instructionType.js";
+import { InstructionType } from "./delegates/instructionType.js";
 import { AssemblyError } from "./assemblyError.js";
 import { Constant, NumberConstant } from "./constant.js";
 import { Expression } from "./expression.js";
@@ -26,7 +26,7 @@ export class Instruction extends SerializableLine {
     instructionType: InstructionType;
     argList: InstructionArg[];
     
-    constructor(assemblyLine: AssemblyLine) {
+    constructor(assemblyLine: AssemblyLine, instructionTypeMap: InstructionTypeMap) {
         super(assemblyLine);
         if (!(assemblyLine.directiveName in instructionTypeMap)) {
             throw new AssemblyError("Unrecognized opcode mnemonic.");

@@ -2,7 +2,7 @@
 import * as fs from "fs";
 import * as pathUtils from "path";
 import { strict as assert } from "assert";
-import { LineProcessor, ExpressionProcessor, Displayable, AssemblerOptions } from "./types.js";
+import { LineProcessor, ExpressionProcessor, InstructionTypeMap, Displayable, AssemblerOptions } from "./types.js";
 import * as parseUtils from "./utils/parseUtils.js";
 import * as lineUtils from "./utils/lineUtils.js";
 import * as variableUtils from "./utils/variableUtils.js";
@@ -10,6 +10,7 @@ import * as niceUtils from "./utils/niceUtils.js";
 import { AssemblyError } from "./assemblyError.js";
 import { IdentifierMap } from "./identifier.js";
 import { Scope } from "./scope.js";
+import { instructionTypes } from "./delegates/instructionType.js";
 import { AssemblyLine } from "./lines/assemblyLine.js";
 import { AppDataLineList } from "./lines/labeledLineList.js";
 import { MacroDefinition } from "./definitions/macroDefinition.js";
@@ -21,6 +22,7 @@ const fileHeaderSize = 12;
 
 export class Assembler implements Displayable {
     options: AssemblerOptions;
+    instructionTypeMap: InstructionTypeMap;
     logMessages: string[];
     rootLineList: AssemblyLine[];
     aliasDefinitionMap: IdentifierMap<AliasDefinition>;
@@ -42,6 +44,13 @@ export class Assembler implements Displayable {
         this.options = niceUtils.getDictionaryWithDefaults(options, {
             shouldBeVerbose: false,
             shouldPrintLog: false,
+            extraInstructionTypes: [],
+        });
+        this.instructionTypeMap = {};
+        [
+            ...instructionTypes, ...this.options.extraInstructionTypes,
+        ].forEach((instructionType) => {
+            this.instructionTypeMap[instructionType.name] = instructionType;
         });
         this.logMessages = [];
         this.rootLineList = [];
@@ -323,6 +332,7 @@ export class Assembler implements Displayable {
                     tempIdExpression,
                     tempIsGuarded,
                     line.codeBlock,
+                    this.instructionTypeMap,
                 );
                 this.addFunctionDefinition(tempDefinition);
                 return [];

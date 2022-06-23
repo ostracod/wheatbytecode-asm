@@ -1,7 +1,7 @@
 
 import { specUtils } from "wheatsystem-spec";
 
-export const instructionTypeMap: { [name: string]: InstructionType } = {};
+export const instructionTypes: InstructionType[] = [];
 
 export class InstructionType {
     name: string;
@@ -12,7 +12,6 @@ export class InstructionType {
         this.name = name;
         this.opcode = opcode;
         this.argAmount = argAmount;
-        instructionTypeMap[this.name] = this;
     }
 }
 
@@ -21,11 +20,12 @@ const categories = specUtils.parseInstructions(instructionsText);
 
 for (const category of categories) {
     for (const instruction of category.instructions) {
-        new InstructionType(
+        const instructionType = new InstructionType(
             instruction.name,
             instruction.opcode,
             instruction.arguments.length,
         );
+        instructionTypes.push(instructionType);
     }
 }
 

@@ -1,5 +1,6 @@
 
 import { NumberType } from "./delegates/dataType.js";
+import { InstructionType } from "./delegates/instructionType.js";
 import { Expression, ArgNumber } from "./expression.js";
 import { InstructionArg } from "./instruction.js";
 import { AssemblyLine } from "./lines/assemblyLine.js";
@@ -23,6 +24,8 @@ export type ArgNumeric = ArgNumber;
 
 export type MixedNumber = (number | bigint);
 
+export type InstructionTypeMap = { [name: string]: InstructionType };
+
 export interface Displayable {
     getDisplayString(): string;
 }
@@ -30,6 +33,7 @@ export interface Displayable {
 export interface AssemblerOptions {
     shouldBeVerbose?: boolean;
     shouldPrintLog?: boolean;
+    extraInstructionTypes?: InstructionType[];
 }
 
 

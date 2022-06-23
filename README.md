@@ -9,6 +9,7 @@ This repository may also be used as a Node.js module, and exports the following 
 * `Assembler`: Provides methods to assemble a file.
 * `AssemblyError`: Thrown when `Assembler` encounters a problem.
 * `assemblyUtils`: Provides functions to help assemble files.
+* `InstructionType`: Allows specifying non-standard instruction types.
 
 ## Installation and Usage
 

@@ -1,5 +1,5 @@
 
-import { LineProcessor, LabelDefinitionClass } from "../types.js";
+import { LineProcessor, LabelDefinitionClass, InstructionTypeMap } from "../types.js";
 import * as niceUtils from "../utils/niceUtils.js";
 import * as lineUtils from "../utils/lineUtils.js";
 import { AssemblyError } from "../assemblyError.js";
@@ -129,6 +129,12 @@ export abstract class LabeledLineList {
 }
 
 export class InstructionLineList extends LabeledLineList {
+    instructionTypeMap: InstructionTypeMap;
+    
+    constructor(lineList: AssemblyLine[], instructionTypeMap: InstructionTypeMap) {
+        super(lineList);
+        this.instructionTypeMap = instructionTypeMap;
+    }
     
     getLabelDefinitionClass(): LabelDefinitionClass {
         return InstructionLabelDefinition;
@@ -150,7 +156,7 @@ export class InstructionLineList extends LabeledLineList {
     }
     
     assembleSerializableLine(line: AssemblyLine): SerializableLine {
-        return new Instruction(line);
+        return new Instruction(line, this.instructionTypeMap);
     }
 }
 
