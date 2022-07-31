@@ -10,7 +10,7 @@
         "postinstall": "npm run build"
     },
     "dependencies": {
-        "wheatsystem-spec": "github:ostracod/wheatsystem-spec#master"
+        "wheatsystem-spec": "github:ostracod/wheatsystem-spec#revamp"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.7.0",

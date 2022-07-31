@@ -1,5 +1,5 @@
 
-import { specUtils } from "wheatsystem-spec";
+import { instances as specInstances } from "wheatsystem-spec";
 
 export const instructionTypes: InstructionType[] = [];
 
@@ -15,18 +15,16 @@ export class InstructionType {
     }
 }
 
-const instructionsText = specUtils.readInstructionsText();
-const categories = specUtils.parseInstructions(instructionsText);
+const { instructionSpecification } = specInstances;
+const instructionDefinitions = instructionSpecification.getDefinitions();
 
-for (const category of categories) {
-    for (const instruction of category.instructions) {
-        const instructionType = new InstructionType(
-            instruction.name,
-            instruction.opcode,
-            instruction.arguments.length,
-        );
-        instructionTypes.push(instructionType);
-    }
+for (const instructionDefinition of instructionDefinitions) {
+    const instructionType = new InstructionType(
+        instructionDefinition.name,
+        instructionDefinition.opcode,
+        instructionDefinition.args.length,
+    );
+    instructionTypes.push(instructionType);
 }
 
 
