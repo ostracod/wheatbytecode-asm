@@ -4,7 +4,7 @@ import { ArgNumeric } from "../types.js";
 import { unaryOperatorList, binaryOperatorList, Operator, UnaryOperator, BinaryOperator } from "../delegates/operator.js";
 import { compressibleIntegerType, float64Type, signedIntegerTypeList } from "../delegates/dataType.js";
 import { AssemblyError } from "../assemblyError.js";
-import { Expression, SubscriptExpression, ArgWord, ArgNumber, ArgString } from "../expression.js";
+import { Expression, MemberAccessExpression, SubscriptExpression, ArgWord, ArgNumber, ArgString } from "../expression.js";
 import { NumberConstant } from "../constant.js";
 import { AssemblyLine } from "../lines/assemblyLine.js";
 import * as assemblyUtils from "./assemblyUtils.js";
@@ -285,6 +285,23 @@ export const parseArgExpression = (
                 tempIndexExpression,
                 tempDataTypeExpression,
             );
+            continue;
+        }
+        if (tempCharacter === ".") {
+            // Create a member access expression.
+            index += 1;
+            index = skipWhitespace(text, index);
+            if (index >= text.length) {
+                throw new AssemblyError("Expected identifier.");
+            }
+            const firstCharacter = text.charAt(index);
+            if (!isFirstArgWordCharacter(firstCharacter)) {
+                throw new AssemblyError("Expected identifier.");
+            }
+            const result = parseArgWord(text, index);
+            ({ index } = result);
+            const memberName = result.argWord.text;
+            outputExpression = new MemberAccessExpression(outputExpression, memberName);
             continue;
         }
         // Look for binary operator.

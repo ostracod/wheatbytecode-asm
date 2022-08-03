@@ -6,7 +6,7 @@ import { compressibleIntegerType, DataType, NumberType, IntegerType } from "../d
 import { AssemblyError } from "../assemblyError.js";
 import { Identifier } from "../identifier.js";
 import { Constant, NumberConstant, StringConstant } from "../constant.js";
-import { Expression, UnaryExpression, MacroIdentifierExpression, BinaryExpression } from "../expression.js";
+import { Expression, UnaryOperatorExpression, MacroIdentifierExpression, BinaryExpression } from "../expression.js";
 import { InstructionArg } from "../instruction.js";
 
 export const unaryOperatorList = [];
@@ -28,7 +28,7 @@ export class UnaryOperator extends Operator {
     }
     
     createExpression(operand: Expression): Expression {
-        return new UnaryExpression(this, operand);
+        return new UnaryOperatorExpression(this, operand);
     }
     
     getConstantDataType(operand: Expression): DataType {

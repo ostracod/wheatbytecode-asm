@@ -306,31 +306,38 @@ export class ArgString extends ArgTerm {
     }
 }
 
-export class UnaryExpression extends Expression {
-    operator: UnaryOperator;
+export abstract class UnaryExpression extends Expression {
     operand: Expression;
     
-    constructor(operator: UnaryOperator, operand: Expression) {
+    constructor(operand: Expression) {
         super();
-        this.operator = operator;
         this.operand = operand;
     }
     
+    processExpressionsHelper(processExpression: ExpressionProcessor, shouldRecurAfterProcess?: boolean): Expression {
+        const result = processExpression(this);
+        if (result !== null) {
+            return result;
+        }
+        this.operand = this.operand.processExpressions(processExpression, shouldRecurAfterProcess);
+        return null;
+    }
+}
+
+export class UnaryOperatorExpression extends UnaryExpression {
+    operator: UnaryOperator;
+    
+    constructor(operator: UnaryOperator, operand: Expression) {
+        super(operand);
+        this.operator = operator;
+    }
+    
     copy(): Expression {
-        return new UnaryExpression(this.operator, this.operand.copy());
+        return new UnaryOperatorExpression(this.operator, this.operand.copy());
     }
     
     getDisplayString(): string {
         return this.operator.text + this.operand.getDisplayString();
-    }
-    
-    processExpressionsHelper(processExpression: ExpressionProcessor, shouldRecurAfterProcess?: boolean): Expression {
-        const tempResult = processExpression(this);
-        if (tempResult !== null) {
-            return tempResult;
-        }
-        this.operand = this.operand.processExpressions(processExpression, shouldRecurAfterProcess);
-        return null;
     }
     
     evaluateToConstantOrNull(): Constant {
@@ -358,7 +365,7 @@ export class UnaryExpression extends Expression {
     }
 }
 
-export class MacroIdentifierExpression extends UnaryExpression {
+export class MacroIdentifierExpression extends UnaryOperatorExpression {
     macroInvocationId: number;
     
     constructor(operand: Expression) {
@@ -391,6 +398,23 @@ export class MacroIdentifierExpression extends UnaryExpression {
         if (this.macroInvocationId === null) {
             this.macroInvocationId = macroInvocationId;
         }
+    }
+}
+
+export class MemberAccessExpression extends UnaryExpression {
+    memberName: string;
+    
+    constructor(operand: Expression, memberName: string) {
+        super(operand);
+        this.memberName = memberName;
+    }
+    
+    copy(): Expression {
+        return new MemberAccessExpression(this.operand.copy(), this.memberName);
+    }
+    
+    getDisplayString(): string {
+        return `(${this.operand.getDisplayString()}.${this.memberName})`;
     }
 }
 
