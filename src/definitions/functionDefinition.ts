@@ -1,6 +1,7 @@
 
 import { LineProcessor, ExpressionProcessor, InstructionTypeMap, Displayable } from "../types.js";
 import * as variableUtils from "../utils/variableUtils.js";
+import * as niceUtils from "../utils/niceUtils.js";
 import * as lineUtils from "../utils/lineUtils.js";
 import { Identifier, IdentifierMap } from "../identifier.js";
 import { Expression } from "../expression.js";
@@ -21,7 +22,7 @@ export class FunctionType {
     
     constructor(identifier: Identifier) {
         this.identifier = identifier;
-        this.id = null
+        this.id = null;
         this.argVariableDefinitionMap = null;
         this.argFrameSize = null;
     }
@@ -46,8 +47,7 @@ export class FunctionIndexDefinition extends IndexDefinition {
     }
     
     getDisplayString(): string {
-        // TODO: Implement.
-        return "(Function Index Definition)";
+        return this.functionImpl.getDisplayString();
     }
 }
 
@@ -64,6 +64,8 @@ export abstract class FunctionDefinition implements Displayable {
         this.idExpression = idExpression;
         this.scope = null;
     }
+    
+    abstract getTitlePrefix(): string;
     
     abstract processLines(processLine: LineProcessor): void;
     
@@ -99,9 +101,31 @@ export abstract class FunctionDefinition implements Displayable {
         this.scope.indexDefinitionMapList = [this.type.argVariableDefinitionMap];
     }
     
+    getDisplayStringHelper(): string[] {
+        return [];
+    }
+    
     getDisplayString(): string {
-        // TODO: Implement.
-        return "(Function Definition)";
+        const indentation = niceUtils.getIndentation(1);
+        let idText: string;
+        if (this.idExpression === null) {
+            idText = "0";
+        } else {
+            idText = this.idExpression.getDisplayString();
+        }
+        const textList = [
+            `${this.getTitlePrefix()} ${this.type.identifier.name}:`,
+            `${indentation}Function ID: ${idText}`,
+        ];
+        for (const text of this.getDisplayStringHelper()) {
+            textList.push(text);
+        }
+        textList.push(niceUtils.getIdentifierMapDisplayString(
+            "Argument variables",
+            this.type.argVariableDefinitionMap,
+            1,
+        ));
+        return niceUtils.joinTextList(textList);
     }
 }
 
@@ -119,6 +143,10 @@ export class FunctionTypeDefinition extends FunctionDefinition {
     
     processLines(processLine: LineProcessor): void {
         lineUtils.processLines(this.lines, processLine);
+    }
+    
+    getTitlePrefix(): string {
+        return "function type";
     }
 }
 
@@ -177,6 +205,34 @@ export class FunctionImplDefinition extends FunctionDefinition {
             this.localVariableDefinitionMap,
             this.instructionLineList.labelDefinitionMap,
         );
+    }
+    
+    getTitlePrefix(): string {
+        return "function";
+    }
+    
+    getDisplayStringHelper(): string[] {
+        const indentation = niceUtils.getIndentation(1);
+        const output = [
+            `${indentation}Is guarded: ${this.isGuarded}`,
+            this.instructionLineList.getDisplayString(
+                "Instruction body",
+                1,
+            ),
+        ];
+        if (this.instructions !== null) {
+            output.push(niceUtils.getDisplayableListDisplayString(
+                "Assembled instructions",
+                this.instructions,
+                1,
+            ));
+        }
+        output.push(niceUtils.getIdentifierMapDisplayString(
+            "Local variables",
+            this.localVariableDefinitionMap,
+            1,
+        ));
+        return output;
     }
     
     createTableEntryBuffer(instructionsFilePos: number, instructionsSize: number): Buffer {
