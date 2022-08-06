@@ -107,6 +107,9 @@ Declares an alias to an expression.
 `FUNC name, funcId?, funcModifiers? ... END`  
 Declares a function. If no function ID is provided, the function ID will be zero.
 
+`FUNC_TYPE name, funcId? ... END`  
+Declares the type of a function which may be implemented in another application.
+
 `VAR name, dataType, arrayLen?`  
 Declares a local or global variable.
 

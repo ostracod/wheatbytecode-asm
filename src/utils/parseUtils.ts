@@ -9,7 +9,7 @@ import { NumberConstant } from "../constant.js";
 import { AssemblyLine } from "../lines/assemblyLine.js";
 import * as assemblyUtils from "./assemblyUtils.js";
 
-const codeBlockDirectiveNameSet = ["FUNC", "APP_DATA", "MACRO"];
+const codeBlockDirectiveNameSet = ["FUNC", "FUNC_TYPE", "APP_DATA", "MACRO"];
 
 export const skipWhitespace = (text: string, index: number): number => {
     while (index < text.length) {

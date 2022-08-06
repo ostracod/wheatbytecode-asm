@@ -8,6 +8,7 @@ import * as lineUtils from "./utils/lineUtils.js";
 import * as variableUtils from "./utils/variableUtils.js";
 import * as niceUtils from "./utils/niceUtils.js";
 import { AssemblyError } from "./assemblyError.js";
+import { Expression } from "./expression.js";
 import { IdentifierMap } from "./identifier.js";
 import { Scope } from "./scope.js";
 import { instructionTypes } from "./delegates/instructionType.js";
@@ -16,7 +17,7 @@ import { AppDataLineList } from "./lines/labeledLineList.js";
 import { MacroDefinition } from "./definitions/macroDefinition.js";
 import { AliasDefinition } from "./definitions/aliasDefinition.js";
 import { VariableDefinition } from "./definitions/variableDefinition.js";
-import { FunctionIndexDefinition, FunctionImplDefinition, functionTableEntrySize } from "./definitions/functionDefinition.js";
+import { FunctionIndexDefinition, FunctionDefinition, FunctionTypeDefinition, FunctionImplDefinition, functionTableEntrySize } from "./definitions/functionDefinition.js";
 
 const fileHeaderSize = 12;
 
@@ -29,6 +30,7 @@ export class Assembler implements Displayable {
     macroDefinitionMap: { [name: string]: MacroDefinition };
     nextMacroInvocationId: number;
     functionIndexDefinitionMap: IdentifierMap<FunctionIndexDefinition>;
+    functionTypeDefinitionMap: IdentifierMap<FunctionTypeDefinition>;
     nextFunctionDefinitionIndex: number;
     scope: Scope;
     globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
@@ -58,6 +60,7 @@ export class Assembler implements Displayable {
         this.macroDefinitionMap = {};
         this.nextMacroInvocationId = 0;
         this.functionIndexDefinitionMap = new IdentifierMap();
+        this.functionTypeDefinitionMap = new IdentifierMap();
         this.nextFunctionDefinitionIndex = 0;
         this.scope = new Scope();
         this.globalVariableDefinitionMap = new IdentifierMap();
@@ -97,6 +100,11 @@ export class Assembler implements Displayable {
         }
         tempTextList.push("= = = FUNCTION DEFINITIONS = = =\n");
         this.functionIndexDefinitionMap.iterate((definition) => {
+            tempTextList.push(definition.getDisplayString());
+            tempTextList.push("");
+        });
+        tempTextList.push("= = = FUNCTION TYPES = = =\n");
+        this.functionTypeDefinitionMap.iterate((definition) => {
             tempTextList.push(definition.getDisplayString());
             tempTextList.push("");
         });
@@ -279,14 +287,23 @@ export class Assembler implements Displayable {
         });
     }
     
+    prepareFunctionDefinition(definition: FunctionDefinition): void {
+        definition.populateScope(this.scope);
+        definition.extractDefinitions();
+        definition.populateScopeDefinitions();
+    }
+    
     addFunctionImplDefinition(implDefinition: FunctionImplDefinition): void {
         const { indexDefinition } = implDefinition;
         indexDefinition.index = this.nextFunctionDefinitionIndex;
         this.nextFunctionDefinitionIndex += 1;
-        implDefinition.populateScope(this.scope);
-        implDefinition.extractDefinitions();
-        implDefinition.populateScopeDefinitions();
+        this.prepareFunctionDefinition(implDefinition);
         this.functionIndexDefinitionMap.setIndexDefinition(indexDefinition);
+    }
+    
+    addFunctionTypeDefinition(typeDefinition: FunctionTypeDefinition): void {
+        this.prepareFunctionDefinition(typeDefinition);
+        this.functionTypeDefinitionMap.set(typeDefinition.type.identifier, typeDefinition);
     }
     
     extractDefinitions(): void {
@@ -297,45 +314,54 @@ export class Assembler implements Displayable {
     
     extractFunctionDefinitions(): void {
         this.processLines((line) => {
-            const tempDirectiveName = line.directiveName;
-            const tempArgList = line.argList;
-            const tempArgCount = tempArgList.length;
-            if (tempDirectiveName === "FUNC") {
-                if (tempArgCount < 1 || tempArgCount > 3) {
+            const { directiveName, argList: args } = line;
+            const argCount = args.length;
+            if (directiveName === "FUNC") {
+                if (argCount < 1 || argCount > 3) {
                     throw new AssemblyError("Expected between 1 and 3 arguments.");
                 }
-                const tempIdentifier = tempArgList[0].evaluateToIdentifier();
-                let tempIsGuarded;
-                let tempIdIndex;
-                if (tempArgCount >= 2) {
-                    const tempExpression = tempArgList[tempArgCount - 1];
-                    const tempName = tempExpression.evaluateToIdentifierNameOrNull();
-                    tempIsGuarded = (tempName !== null && tempName === "guarded");
-                    if (tempIsGuarded) {
-                        tempIdIndex = tempArgCount - 2;
-                    } else {
-                        tempIdIndex = tempArgCount - 1;
-                    }
+                const identifier = args[0].evaluateToIdentifier();
+                let isGuarded: boolean;
+                let idIndex: number;
+                if (argCount >= 2) {
+                    const lastExpression = args[argCount - 1];
+                    const name = lastExpression.evaluateToIdentifierNameOrNull();
+                    isGuarded = (name === "guarded");
+                    idIndex = (isGuarded) ? argCount - 2 : argCount - 1;
                 } else {
-                    tempIsGuarded = false;
-                    tempIdIndex = null;
+                    isGuarded = false;
+                    idIndex = null;
                 }
-                let tempIdExpression = null;
-                if (tempIdIndex !== null) {
-                    if (tempIdIndex > 1) {
+                let idExpression: Expression = null;
+                if (idIndex !== null) {
+                    if (idIndex > 1) {
                         throw new AssemblyError("Unexpected expression.");
-                    } else if (tempIdIndex > 0) {
-                        tempIdExpression = tempArgList[tempIdIndex];
+                    } else if (idIndex > 0) {
+                        idExpression = args[idIndex];
                     }
                 }
                 const definition = new FunctionImplDefinition(
-                    tempIdentifier,
-                    tempIdExpression,
-                    tempIsGuarded,
+                    identifier,
+                    idExpression,
+                    isGuarded,
                     line.codeBlock,
                     this.instructionTypeMap,
                 );
                 this.addFunctionImplDefinition(definition);
+                return [];
+            }
+            if (directiveName === "FUNC_TYPE") {
+                if (argCount < 1 || argCount > 2) {
+                    throw new AssemblyError("Expected 1 or 2 arguments.");
+                }
+                const identifier = args[0].evaluateToIdentifier();
+                const idExpression = (argCount >= 2) ? args[1] : null;
+                const definition = new FunctionTypeDefinition(
+                    identifier,
+                    idExpression,
+                    line.codeBlock,
+                );
+                this.addFunctionTypeDefinition(definition);
                 return [];
             }
             return null;

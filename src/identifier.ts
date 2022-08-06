@@ -69,7 +69,7 @@ export class IdentifierMap<T> {
         this.keyList = [];
     }
     
-    get(identifier: Identifier): any {
+    get(identifier: Identifier): T {
         const tempKey = identifier.getMapKey();
         if (tempKey in this.map) {
             return this.map[tempKey];
@@ -78,7 +78,7 @@ export class IdentifierMap<T> {
         }
     }
     
-    set(identifier: Identifier, value: any): void {
+    set(identifier: Identifier, value: T): void {
         const tempKey = identifier.getMapKey();
         if (tempKey in this.map) {
             throw new AssemblyError("Duplicate identifier.");
@@ -87,17 +87,17 @@ export class IdentifierMap<T> {
         this.map[tempKey] = value;
     }
     
-    setIndexDefinition(indexDefinition: IndexDefinition): void {
+    setIndexDefinition(indexDefinition: T & IndexDefinition): void {
         this.set(indexDefinition.identifier, indexDefinition);
     }
     
-    iterate(handle: (value: any) => void): void {
+    iterate(handle: (value: T) => void): void {
         for (const key of this.keyList) {
             handle(this.map[key]);
         }
     }
     
-    getValueList(): any[] {
+    getValueList(): T[] {
         const output = [];
         this.iterate((value) => {
             output.push(value);
