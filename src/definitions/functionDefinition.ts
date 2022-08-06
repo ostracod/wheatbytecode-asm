@@ -1,7 +1,7 @@
 
-import { LineProcessor, InstructionTypeMap, Displayable } from "../types.js";
-import * as niceUtils from "../utils/niceUtils.js";
+import { LineProcessor, ExpressionProcessor, InstructionTypeMap, Displayable } from "../types.js";
 import * as variableUtils from "../utils/variableUtils.js";
+import * as lineUtils from "../utils/lineUtils.js";
 import { Identifier, IdentifierMap } from "../identifier.js";
 import { Expression } from "../expression.js";
 import { Scope } from "../scope.js";
@@ -13,73 +13,155 @@ import { VariableDefinition, ArgVariableDefinition } from "./variableDefinition.
 
 export const functionTableEntrySize = 21;
 
-export class FunctionImplementation implements Displayable {
-    functionDefinition: FunctionDefinition;
-    localVariableDefinitionMap: IdentifierMap<VariableDefinition>;
-    localFrameSize: number;
-    instructionList: Instruction[];
+export class FunctionType {
+    identifier: Identifier;
+    id: number;
+    argVariableDefinitionMap: IdentifierMap<ArgVariableDefinition>;
+    argFrameSize: number;
     
-    constructor(functionDefinition: FunctionDefinition) {
-        this.functionDefinition = functionDefinition;
-        this.localVariableDefinitionMap = new IdentifierMap();
-        this.localFrameSize = null;
-        this.instructionList = null;
+    constructor(identifier: Identifier) {
+        this.identifier = identifier;
+        this.id = null
+        this.argVariableDefinitionMap = null;
+        this.argFrameSize = null;
     }
     
-    getDisplayString(indentationLevel = 0): string {
-        const tempTextList = [];
-        const tempIndentation = niceUtils.getIndentation(indentationLevel);
-        const tempIsGuarded = this.functionDefinition.isGuarded;
-        tempTextList.push(`${tempIndentation}Is guarded: ${tempIsGuarded}`);
-        const tempIdExpression = this.functionDefinition.idExpression;
-        let tempIdText;
-        if (this.functionDefinition.idExpression === null) {
-            tempIdText = "0";
-        } else {
-            tempIdText = tempIdExpression.getDisplayString();
+    setArgs(args: ArgVariableDefinition[]): void {
+        this.argVariableDefinitionMap = new IdentifierMap();
+        for (const arg of args) {
+            this.argVariableDefinitionMap.setIndexDefinition(arg);
         }
-        tempTextList.push(`${tempIndentation}Function ID: ${tempIdText}`);
-        tempTextList.push(this.getLineList().getDisplayString(
-            "Instruction body",
-            indentationLevel,
-        ));
-        if (this.instructionList !== null) {
-            tempTextList.push(niceUtils.getDisplayableListDisplayString(
-                "Assembled instructions",
-                this.instructionList,
-                indentationLevel,
-            ));
-        }
-        tempTextList.push(niceUtils.getIdentifierMapDisplayString(
-            "Local variables",
-            this.localVariableDefinitionMap,
-            indentationLevel,
-        ));
-        return niceUtils.joinTextList(tempTextList);
+        this.argFrameSize = variableUtils.populateVariableDefinitionIndexes(
+            this.argVariableDefinitionMap,
+        );
+    }
+}
+
+export class FunctionIndexDefinition extends IndexDefinition {
+    functionImpl: FunctionImplDefinition;
+    
+    constructor(functionImpl: FunctionImplDefinition) {
+        super(functionImpl.type.identifier, indexConstantConverter);
+        this.functionImpl = functionImpl;
     }
     
-    getScope(): Scope {
-        return this.functionDefinition.scope;
+    getDisplayString(): string {
+        // TODO: Implement.
+        return "(Function Index Definition)";
+    }
+}
+
+export abstract class FunctionDefinition implements Displayable {
+    type: FunctionType;
+    idExpression: Expression;
+    scope: Scope;
+    
+    constructor(
+        identifier: Identifier,
+        idExpression: Expression,
+    ) {
+        this.type = new FunctionType(identifier);
+        this.idExpression = idExpression;
+        this.scope = null;
     }
     
-    getLineList(): InstructionLineList {
-        return this.functionDefinition.lineList;
+    abstract processLines(processLine: LineProcessor): void;
+    
+    processExpressionsInLines(processExpression: ExpressionProcessor): void {
+        this.processLines((line) => {
+            line.processExpressions(processExpression);
+            return null;
+        });
     }
     
-    processLines(processLine: LineProcessor): void {
-        this.functionDefinition.processLines(processLine);
+    populateScope(parentScope: Scope): void {
+        this.scope = new Scope(parentScope);
+        this.processExpressionsInLines((expression) => {
+            expression.scope = this.scope;
+            return null;
+        });
     }
     
     extractDefinitions(): void {
+        const args: ArgVariableDefinition[] = [];
+        this.processLines((line) => {
+            const arg = variableUtils.extractArgVariableDefinition(line);
+            if (arg !== null) {
+                args.push(arg);
+                return [];
+            }
+            return null;
+        });
+        this.type.setArgs(args);
+    }
+    
+    populateScopeDefinitions(): void {
+        this.scope.indexDefinitionMapList = [this.type.argVariableDefinitionMap];
+    }
+    
+    getDisplayString(): string {
+        // TODO: Implement.
+        return "(Function Definition)";
+    }
+}
+
+export class FunctionTypeDefinition extends FunctionDefinition {
+    lines: AssemblyLine[];
+    
+    constructor(
+        identifier: Identifier,
+        idExpression: Expression,
+        lines: AssemblyLine[],
+    ) {
+        super(identifier, idExpression);
+        this.lines = lines;
+    }
+    
+    processLines(processLine: LineProcessor): void {
+        lineUtils.processLines(this.lines, processLine);
+    }
+}
+
+export class FunctionImplDefinition extends FunctionDefinition {
+    indexDefinition: FunctionIndexDefinition;
+    isGuarded: boolean;
+    localVariableDefinitionMap: IdentifierMap<VariableDefinition>;
+    localFrameSize: number;
+    instructionLineList: InstructionLineList;
+    instructions: Instruction[];
+    
+    constructor(
+        identifier: Identifier,
+        idExpression: Expression,
+        isGuarded: boolean,
+        lines: AssemblyLine[],
+        instructionTypeMap: InstructionTypeMap,
+    ) {
+        super(identifier, idExpression);
+        this.indexDefinition = new FunctionIndexDefinition(this);
+        this.isGuarded = isGuarded;
+        this.instructionLineList = new InstructionLineList(lines, instructionTypeMap);
+        this.localVariableDefinitionMap = null;
+        this.localFrameSize = null;
+        this.instructions = null;
+    }
+    
+    processLines(processLine: LineProcessor): void {
+        this.instructionLineList.processLines(processLine);
+    }
+    
+    extractDefinitions(): void {
+        super.extractDefinitions();
         this.extractLocalVariableDefinitions();
-        this.getLineList().extractLabelDefinitions();
+        this.instructionLineList.extractLabelDefinitions();
     }
     
     extractLocalVariableDefinitions(): void {
+        this.localVariableDefinitionMap = new IdentifierMap();
         this.processLines((line) => {
-            const tempLocalDefinition = variableUtils.extractLocalVariableDefinition(line);
-            if (tempLocalDefinition !== null) {
-                this.localVariableDefinitionMap.setIndexDefinition(tempLocalDefinition);
+            const localVar = variableUtils.extractLocalVariableDefinition(line);
+            if (localVar !== null) {
+                this.localVariableDefinitionMap.setIndexDefinition(localVar);
                 return [];
             }
             return null;
@@ -90,119 +172,34 @@ export class FunctionImplementation implements Displayable {
     }
     
     populateScopeDefinitions(): void {
-        this.getScope().indexDefinitionMapList.push(
+        super.populateScopeDefinitions();
+        this.scope.indexDefinitionMapList.push(
             this.localVariableDefinitionMap,
-            this.getLineList().labelDefinitionMap,
+            this.instructionLineList.labelDefinitionMap,
         );
     }
     
-    assembleInstructions(): Buffer {
-        const tempLineList = this.getLineList();
-        const output = tempLineList.createBuffer();
-        this.instructionList = tempLineList.serializableLineList as Instruction[];
-        return output;
-    }
-}
-
-export class FunctionDefinition extends IndexDefinition {
-    idExpression: Expression;
-    isGuarded: boolean;
-    lineList: InstructionLineList;
-    argVariableDefinitionMap: IdentifierMap<ArgVariableDefinition>;
-    argFrameSize: number;
-    scope: Scope;
-    functionImplementation: FunctionImplementation;
-    
-    constructor(
-        identifier: Identifier,
-        idExpression: Expression,
-        isGuarded: boolean,
-        lineList: AssemblyLine[],
-        instructionTypeMap: InstructionTypeMap,
-    ) {
-        super(identifier, indexConstantConverter);
-        this.idExpression = idExpression;
-        this.isGuarded = isGuarded;
-        this.lineList = new InstructionLineList(lineList, instructionTypeMap);
-        this.argVariableDefinitionMap = new IdentifierMap();
-        this.argFrameSize = null;
-        this.scope = null;
-        this.functionImplementation = new FunctionImplementation(this);
-    }
-    
-    processLines(processLine: LineProcessor): void {
-        this.lineList.processLines(processLine);
-    }
-    
-    populateScope(parentScope: Scope): void {
-        this.scope = new Scope(parentScope);
-        this.lineList.populateScope(this.scope);
-    }
-    
-    extractDefinitions(): void {
-        this.extractArgVariableDefinitions();
-        if (this.functionImplementation !== null) {
-            this.functionImplementation.extractDefinitions();
-        }
-    }
-    
-    getDisplayString(): string {
-        const tempTitle = `function ${this.identifier.name}`;
-        const tempTextList = [tempTitle + ":"];
-        if (this.functionImplementation !== null) {
-            tempTextList.push(this.functionImplementation.getDisplayString(1));
-        }
-        tempTextList.push(niceUtils.getIdentifierMapDisplayString(
-            "Argument variables",
-            this.argVariableDefinitionMap,
-            1,
-        ));
-        return niceUtils.joinTextList(tempTextList);
-    }
-    
-    extractArgVariableDefinitions(): void {
-        this.processLines((line) => {
-            const tempArgDefinition = variableUtils.extractArgVariableDefinition(line);
-            if (tempArgDefinition !== null) {
-                this.argVariableDefinitionMap.setIndexDefinition(tempArgDefinition);
-                return [];
-            }
-            return null;
-        });
-        this.argFrameSize = variableUtils.populateVariableDefinitionIndexes(
-            this.argVariableDefinitionMap,
-        );
-    }
-    
-    populateScopeDefinitions(): void {
-        this.scope.indexDefinitionMapList = [this.argVariableDefinitionMap];
-        if (this.functionImplementation !== null) {
-            this.functionImplementation.populateScopeDefinitions();
-        }
-    }
-    
-    createTableEntryBuffer(
-        instructionsFilePos: number,
-        instructionsSize: number,
-    ): Buffer {
+    createTableEntryBuffer(instructionsFilePos: number, instructionsSize: number): Buffer {
         const output = Buffer.alloc(functionTableEntrySize);
-        let tempId;
+        let id: number;
         if (this.idExpression === null) {
-            tempId = 0;
+            id = 0;
         } else {
-            tempId = this.idExpression.evaluateToNumber();
+            id = this.idExpression.evaluateToNumber();
         }
-        output.writeInt32LE(tempId, 0);
+        output.writeInt32LE(id, 0);
         output.writeUInt8(this.isGuarded ? 1 : 0, 4);
-        output.writeUInt32LE(this.argFrameSize, 5);
-        output.writeUInt32LE(this.functionImplementation.localFrameSize, 9);
+        output.writeUInt32LE(this.type.argFrameSize, 5);
+        output.writeUInt32LE(this.localFrameSize, 9);
         output.writeUInt32LE(instructionsFilePos, 13);
         output.writeUInt32LE(instructionsSize, 17);
         return output;
     }
     
     createInstructionsBuffer(): Buffer {
-        return this.functionImplementation.assembleInstructions();
+        const output = this.instructionLineList.createBuffer();
+        this.instructions = this.instructionLineList.serializableLineList as Instruction[];
+        return output;
     }
 }
 

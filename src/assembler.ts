@@ -16,7 +16,7 @@ import { AppDataLineList } from "./lines/labeledLineList.js";
 import { MacroDefinition } from "./definitions/macroDefinition.js";
 import { AliasDefinition } from "./definitions/aliasDefinition.js";
 import { VariableDefinition } from "./definitions/variableDefinition.js";
-import { FunctionDefinition, functionTableEntrySize } from "./definitions/functionDefinition.js";
+import { FunctionIndexDefinition, FunctionImplDefinition, functionTableEntrySize } from "./definitions/functionDefinition.js";
 
 const fileHeaderSize = 12;
 
@@ -28,7 +28,7 @@ export class Assembler implements Displayable {
     aliasDefinitionMap: IdentifierMap<AliasDefinition>;
     macroDefinitionMap: { [name: string]: MacroDefinition };
     nextMacroInvocationId: number;
-    functionDefinitionMap: IdentifierMap<FunctionDefinition>;
+    functionIndexDefinitionMap: IdentifierMap<FunctionIndexDefinition>;
     nextFunctionDefinitionIndex: number;
     scope: Scope;
     globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
@@ -57,7 +57,7 @@ export class Assembler implements Displayable {
         this.aliasDefinitionMap = new IdentifierMap();
         this.macroDefinitionMap = {};
         this.nextMacroInvocationId = 0;
-        this.functionDefinitionMap = new IdentifierMap();
+        this.functionIndexDefinitionMap = new IdentifierMap();
         this.nextFunctionDefinitionIndex = 0;
         this.scope = new Scope();
         this.globalVariableDefinitionMap = new IdentifierMap();
@@ -96,7 +96,7 @@ export class Assembler implements Displayable {
             tempTextList.push("");
         }
         tempTextList.push("= = = FUNCTION DEFINITIONS = = =\n");
-        this.functionDefinitionMap.iterate((definition) => {
+        this.functionIndexDefinitionMap.iterate((definition) => {
             tempTextList.push(definition.getDisplayString());
             tempTextList.push("");
         });
@@ -279,13 +279,14 @@ export class Assembler implements Displayable {
         });
     }
     
-    addFunctionDefinition(functionDefinition: FunctionDefinition): void {
-        functionDefinition.index = this.nextFunctionDefinitionIndex;
+    addFunctionImplDefinition(implDefinition: FunctionImplDefinition): void {
+        const { indexDefinition } = implDefinition;
+        indexDefinition.index = this.nextFunctionDefinitionIndex;
         this.nextFunctionDefinitionIndex += 1;
-        functionDefinition.populateScope(this.scope);
-        functionDefinition.extractDefinitions();
-        functionDefinition.populateScopeDefinitions();
-        this.functionDefinitionMap.setIndexDefinition(functionDefinition);
+        implDefinition.populateScope(this.scope);
+        implDefinition.extractDefinitions();
+        implDefinition.populateScopeDefinitions();
+        this.functionIndexDefinitionMap.setIndexDefinition(indexDefinition);
     }
     
     extractDefinitions(): void {
@@ -327,14 +328,14 @@ export class Assembler implements Displayable {
                         tempIdExpression = tempArgList[tempIdIndex];
                     }
                 }
-                const tempDefinition = new FunctionDefinition(
+                const definition = new FunctionImplDefinition(
                     tempIdentifier,
                     tempIdExpression,
                     tempIsGuarded,
                     line.codeBlock,
                     this.instructionTypeMap,
                 );
-                this.addFunctionDefinition(tempDefinition);
+                this.addFunctionImplDefinition(definition);
                 return [];
             }
             return null;
@@ -377,7 +378,7 @@ export class Assembler implements Displayable {
         this.scope.indexDefinitionMapList = [
             this.globalVariableDefinitionMap,
             this.appDataLineList.labelDefinitionMap,
-            this.functionDefinitionMap,
+            this.functionIndexDefinitionMap,
         ];
     }
     
@@ -395,27 +396,27 @@ export class Assembler implements Displayable {
         }
         
         // Create a list of function definitions in the correct order.
-        const functionDefinitionList = [];
-        this.functionDefinitionMap.iterate((definition) => {
-            functionDefinitionList[definition.index] = definition;
+        const functionImplDefinitions = [];
+        this.functionIndexDefinitionMap.iterate((definition) => {
+            functionImplDefinitions[definition.index] = definition.functionImpl;
         });
         
         // Create the header buffer. App data file position will not
         // be known until later.
         this.headerBuffer = Buffer.alloc(fileHeaderSize);
         this.headerBuffer.writeUInt32LE(this.globalFrameSize, 0);
-        this.headerBuffer.writeUInt32LE(functionDefinitionList.length, 4);
+        this.headerBuffer.writeUInt32LE(functionImplDefinitions.length, 4);
         
         // Create app data buffer. This must happen before assembling
         // instructions, because instructions may use app data labels.
         this.appDataBuffer = this.appDataLineList.createBuffer();
         
         // Create function table buffer and instructions buffer.
-        const functionTableSize = functionDefinitionList.length * functionTableEntrySize;
+        const functionTableSize = functionImplDefinitions.length * functionTableEntrySize;
         let instructionsFilePos = this.headerBuffer.length + functionTableSize;
         const functionTableBufferList = [];
         const instructionsBufferList = [];
-        for (const definition of functionDefinitionList) {
+        for (const definition of functionImplDefinitions) {
             const tempInstructionsBuffer = definition.createInstructionsBuffer();
             const tempEntryBuffer = definition.createTableEntryBuffer(
                 instructionsFilePos,
