@@ -303,7 +303,7 @@ export class Assembler implements Displayable {
     
     addFunctionTypeDefinition(typeDefinition: FunctionTypeDefinition): void {
         this.prepareFunctionDefinition(typeDefinition);
-        this.functionTypeDefinitionMap.set(typeDefinition.type.identifier, typeDefinition);
+        this.functionTypeDefinitionMap.set(typeDefinition.identifier, typeDefinition);
     }
     
     extractDefinitions(): void {

@@ -14,18 +14,20 @@ import { VariableDefinition, ArgVariableDefinition } from "./variableDefinition.
 
 export const functionTableEntrySize = 21;
 
-export class FunctionType {
+export abstract class AbstractFunction implements Displayable {
     identifier: Identifier;
-    id: number;
     argVariableDefinitionMap: IdentifierMap<ArgVariableDefinition>;
     argFrameSize: number;
     
     constructor(identifier: Identifier) {
         this.identifier = identifier;
-        this.id = null;
         this.argVariableDefinitionMap = null;
         this.argFrameSize = null;
     }
+    
+    abstract getId(): number;
+    
+    abstract getTitlePrefix(): string;
     
     setArgs(args: ArgVariableDefinition[]): void {
         this.argVariableDefinitionMap = new IdentifierMap();
@@ -36,23 +38,47 @@ export class FunctionType {
             this.argVariableDefinitionMap,
         );
     }
-}
-
-export class FunctionIndexDefinition extends IndexDefinition {
-    functionImpl: FunctionImplDefinition;
     
-    constructor(functionImpl: FunctionImplDefinition) {
-        super(functionImpl.type.identifier, indexConstantConverter);
-        this.functionImpl = functionImpl;
+    getDisplayStringHelper(): string[] {
+        return [];
     }
     
     getDisplayString(): string {
-        return this.functionImpl.getDisplayString();
+        const indentation = niceUtils.getIndentation(1);
+        const textList = [
+            `${this.getTitlePrefix()} ${this.identifier.name}:`,
+            `${indentation}Function ID: ${this.getId()}`,
+        ];
+        for (const text of this.getDisplayStringHelper()) {
+            textList.push(text);
+        }
+        textList.push(niceUtils.getIdentifierMapDisplayString(
+            "Argument variables",
+            this.argVariableDefinitionMap,
+            1,
+        ));
+        return niceUtils.joinTextList(textList);
     }
 }
 
-export abstract class FunctionDefinition implements Displayable {
-    type: FunctionType;
+export class SpecFunctionType extends AbstractFunction {
+    id: number;
+    
+    constructor(identifier: Identifier, id: number) {
+        super(identifier);
+        this.id = id;
+    }
+    
+    getId(): number {
+        return this.id;
+    }
+    
+    getTitlePrefix(): string {
+        return "built-in function type";
+    }
+}
+
+export abstract class FunctionDefinition extends AbstractFunction {
     idExpression: Expression;
     scope: Scope;
     
@@ -60,14 +86,16 @@ export abstract class FunctionDefinition implements Displayable {
         identifier: Identifier,
         idExpression: Expression,
     ) {
-        this.type = new FunctionType(identifier);
+        super(identifier);
         this.idExpression = idExpression;
         this.scope = null;
     }
     
-    abstract getTitlePrefix(): string;
-    
     abstract processLines(processLine: LineProcessor): void;
+    
+    getId(): number {
+        return (this.idExpression === null) ? null : this.idExpression.evaluateToNumber();
+    }
     
     processExpressionsInLines(processExpression: ExpressionProcessor): void {
         this.processLines((line) => {
@@ -94,38 +122,11 @@ export abstract class FunctionDefinition implements Displayable {
             }
             return null;
         });
-        this.type.setArgs(args);
+        this.setArgs(args);
     }
     
     populateScopeDefinitions(): void {
-        this.scope.indexDefinitionMapList = [this.type.argVariableDefinitionMap];
-    }
-    
-    getDisplayStringHelper(): string[] {
-        return [];
-    }
-    
-    getDisplayString(): string {
-        const indentation = niceUtils.getIndentation(1);
-        let idText: string;
-        if (this.idExpression === null) {
-            idText = "0";
-        } else {
-            idText = this.idExpression.getDisplayString();
-        }
-        const textList = [
-            `${this.getTitlePrefix()} ${this.type.identifier.name}:`,
-            `${indentation}Function ID: ${idText}`,
-        ];
-        for (const text of this.getDisplayStringHelper()) {
-            textList.push(text);
-        }
-        textList.push(niceUtils.getIdentifierMapDisplayString(
-            "Argument variables",
-            this.type.argVariableDefinitionMap,
-            1,
-        ));
-        return niceUtils.joinTextList(textList);
+        this.scope.indexDefinitionMapList = [this.argVariableDefinitionMap];
     }
 }
 
@@ -237,15 +238,9 @@ export class FunctionImplDefinition extends FunctionDefinition {
     
     createTableEntryBuffer(instructionsFilePos: number, instructionsSize: number): Buffer {
         const output = Buffer.alloc(functionTableEntrySize);
-        let id: number;
-        if (this.idExpression === null) {
-            id = 0;
-        } else {
-            id = this.idExpression.evaluateToNumber();
-        }
-        output.writeInt32LE(id, 0);
+        output.writeInt32LE(this.getId(), 0);
         output.writeUInt8(this.isGuarded ? 1 : 0, 4);
-        output.writeUInt32LE(this.type.argFrameSize, 5);
+        output.writeUInt32LE(this.argFrameSize, 5);
         output.writeUInt32LE(this.localFrameSize, 9);
         output.writeUInt32LE(instructionsFilePos, 13);
         output.writeUInt32LE(instructionsSize, 17);
@@ -256,6 +251,19 @@ export class FunctionImplDefinition extends FunctionDefinition {
         const output = this.instructionLineList.createBuffer();
         this.instructions = this.instructionLineList.serializableLineList as Instruction[];
         return output;
+    }
+}
+
+export class FunctionIndexDefinition extends IndexDefinition {
+    functionImpl: FunctionImplDefinition;
+    
+    constructor(functionImpl: FunctionImplDefinition) {
+        super(functionImpl.identifier, indexConstantConverter);
+        this.functionImpl = functionImpl;
+    }
+    
+    getDisplayString(): string {
+        return this.functionImpl.getDisplayString();
     }
 }
 
