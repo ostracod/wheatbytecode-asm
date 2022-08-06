@@ -94,7 +94,7 @@ export abstract class FunctionDefinition extends AbstractFunction {
     abstract processLines(processLine: LineProcessor): void;
     
     getId(): number {
-        return (this.idExpression === null) ? null : this.idExpression.evaluateToNumber();
+        return (this.idExpression === null) ? 0 : this.idExpression.evaluateToNumber();
     }
     
     processExpressionsInLines(processExpression: ExpressionProcessor): void {

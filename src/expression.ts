@@ -10,6 +10,7 @@ import { builtInConstantSet, Constant, NumberConstant, StringConstant } from "./
 import { Scope } from "./scope.js";
 import { AssemblyLine } from "./lines/assemblyLine.js";
 import { IndexDefinition } from "./definitions/indexDefinition.js";
+import { AbstractFunction } from "./definitions/functionDefinition.js";
 
 export abstract class Expression implements Displayable {
     line: AssemblyLine;
@@ -86,6 +87,14 @@ export abstract class Expression implements Displayable {
             return null;
         }
         return this.scope.getIndexDefinitionByIdentifier(tempIdentifier);
+    }
+    
+    evaluateToFunctionOrNull(): AbstractFunction {
+        const identifier = this.evaluateToIdentifierOrNull();
+        if (identifier === null) {
+            return null;
+        }
+        return this.scope.getFunctionByIdentifier(identifier);
     }
     
     evaluateToConstant(): Constant {
@@ -415,6 +424,22 @@ export class MemberAccessExpression extends UnaryExpression {
     
     getDisplayString(): string {
         return `(${this.operand.getDisplayString()}.${this.memberName})`;
+    }
+    
+    evaluateToConstantOrNull(): Constant {
+        const resultFunction = this.operand.evaluateToFunctionOrNull();
+        if (resultFunction !== null) {
+            let value: number = null;
+            if (this.memberName === "id") {
+                value = resultFunction.getId();
+            } else if (this.memberName === "argsSize") {
+                value = resultFunction.argFrameSize;
+            }
+            if (value !== null) {
+                return new NumberConstant(value, compressibleIntegerType);
+            }
+        }
+        return null;
     }
 }
 

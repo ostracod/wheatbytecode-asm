@@ -30,7 +30,7 @@ export class Assembler implements Displayable {
     macroDefinitionMap: { [name: string]: MacroDefinition };
     nextMacroInvocationId: number;
     functionIndexDefinitionMap: IdentifierMap<FunctionIndexDefinition>;
-    functionTypeDefinitionMap: IdentifierMap<FunctionTypeDefinition>;
+    functionDefinitionMap: IdentifierMap<FunctionDefinition>;
     nextFunctionDefinitionIndex: number;
     scope: Scope;
     globalVariableDefinitionMap: IdentifierMap<VariableDefinition>;
@@ -60,7 +60,7 @@ export class Assembler implements Displayable {
         this.macroDefinitionMap = {};
         this.nextMacroInvocationId = 0;
         this.functionIndexDefinitionMap = new IdentifierMap();
-        this.functionTypeDefinitionMap = new IdentifierMap();
+        this.functionDefinitionMap = new IdentifierMap();
         this.nextFunctionDefinitionIndex = 0;
         this.scope = new Scope();
         this.globalVariableDefinitionMap = new IdentifierMap();
@@ -99,12 +99,7 @@ export class Assembler implements Displayable {
             tempTextList.push("");
         }
         tempTextList.push("= = = FUNCTION DEFINITIONS = = =\n");
-        this.functionIndexDefinitionMap.iterate((definition) => {
-            tempTextList.push(definition.getDisplayString());
-            tempTextList.push("");
-        });
-        tempTextList.push("= = = FUNCTION TYPES = = =\n");
-        this.functionTypeDefinitionMap.iterate((definition) => {
+        this.functionDefinitionMap.iterate((definition) => {
             tempTextList.push(definition.getDisplayString());
             tempTextList.push("");
         });
@@ -287,23 +282,19 @@ export class Assembler implements Displayable {
         });
     }
     
-    prepareFunctionDefinition(definition: FunctionDefinition): void {
+    addFunctionDefinition(definition: FunctionDefinition): void {
         definition.populateScope(this.scope);
         definition.extractDefinitions();
         definition.populateScopeDefinitions();
+        this.functionDefinitionMap.set(definition.identifier, definition);
     }
     
     addFunctionImplDefinition(implDefinition: FunctionImplDefinition): void {
         const { indexDefinition } = implDefinition;
         indexDefinition.index = this.nextFunctionDefinitionIndex;
         this.nextFunctionDefinitionIndex += 1;
-        this.prepareFunctionDefinition(implDefinition);
         this.functionIndexDefinitionMap.setIndexDefinition(indexDefinition);
-    }
-    
-    addFunctionTypeDefinition(typeDefinition: FunctionTypeDefinition): void {
-        this.prepareFunctionDefinition(typeDefinition);
-        this.functionTypeDefinitionMap.set(typeDefinition.identifier, typeDefinition);
+        this.addFunctionDefinition(implDefinition);
     }
     
     extractDefinitions(): void {
@@ -361,7 +352,7 @@ export class Assembler implements Displayable {
                     idExpression,
                     line.codeBlock,
                 );
-                this.addFunctionTypeDefinition(definition);
+                this.addFunctionDefinition(definition);
                 return [];
             }
             return null;
@@ -405,6 +396,9 @@ export class Assembler implements Displayable {
             this.globalVariableDefinitionMap,
             this.appDataLineList.labelDefinitionMap,
             this.functionIndexDefinitionMap,
+        ];
+        this.scope.functionMaps = [
+            this.functionDefinitionMap,
         ];
     }
     
