@@ -172,4 +172,24 @@ FUNC myFunc
 END
 ```
 
+Use period operator (`.`) to retrieve the following attributes of a function or function type:
+
+* `func.id` = Function ID
+* `func.args.(name)` = Function argument in next argument frame
+* `func.argsSize` = Size of function argument frame
+
+```
+FUNC myFunc
+    ARG x, s32
+    ARG y, s8
+END
+
+FUNC anotherFunc
+    newArgFrame myFunc.argsSize
+    wrt myFunc.args.x, 5
+    wrt myFunc.args.y, 10
+    call myFunc
+END
+```
+
 

@@ -10,6 +10,7 @@ import { builtInConstantSet, Constant, NumberConstant, StringConstant } from "./
 import { Scope } from "./scope.js";
 import { AssemblyLine } from "./lines/assemblyLine.js";
 import { IndexDefinition } from "./definitions/indexDefinition.js";
+import { ArgVariableDefinition, NextArgDefinition } from "./definitions/variableDefinition.js";
 import { AbstractFunction } from "./definitions/functionDefinition.js";
 
 export abstract class Expression implements Displayable {
@@ -95,6 +96,10 @@ export abstract class Expression implements Displayable {
             return null;
         }
         return this.scope.getFunctionByIdentifier(identifier);
+    }
+    
+    evaluateToArgMapOrNull(): IdentifierMap<ArgVariableDefinition> {
+        return null;
     }
     
     evaluateToConstant(): Constant {
@@ -185,9 +190,13 @@ export abstract class Expression implements Displayable {
                 return new ExpressionInstructionArg(this);
             }
         }
-        const tempIdentifier = this.evaluateToIdentifierOrNull();
-        if (tempIdentifier !== null && !tempIdentifier.getIsBuiltIn()) {
-            throw this.createError(`Unknown identifier "${tempIdentifier.getDisplayString()}".`);
+        const identifier = this.evaluateToIdentifierOrNull();
+        if (identifier !== null && !identifier.getIsBuiltIn()) {
+            if (this.scope.getFunctionByIdentifier(identifier) !== null) {
+                throw this.createError("Cannot use function type as instruction argument.");
+            } else {
+                throw this.createError(`Unknown identifier "${identifier.getDisplayString()}".`);
+            }
         } else {
             throw this.createError("Expected number or pointer.");
         }
@@ -426,6 +435,21 @@ export class MemberAccessExpression extends UnaryExpression {
         return `(${this.operand.getDisplayString()}.${this.memberName})`;
     }
     
+    evaluateToIndexDefinitionOrNull(): IndexDefinition {
+        const argMap = this.operand.evaluateToArgMapOrNull();
+        console.log(argMap);
+        console.log(this.memberName);
+        if (argMap !== null) {
+            const identifier = new Identifier(this.memberName);
+            const definition = argMap.get(identifier);
+            if (definition === null) {
+                throw this.createError(`Could not find an argument named "${this.memberName}".`);
+            }
+            return new NextArgDefinition(definition);
+        }
+        return null;
+    }
+    
     evaluateToConstantOrNull(): Constant {
         const resultFunction = this.operand.evaluateToFunctionOrNull();
         if (resultFunction !== null) {
@@ -440,6 +464,14 @@ export class MemberAccessExpression extends UnaryExpression {
             }
         }
         return null;
+    }
+    
+    evaluateToArgMapOrNull(): IdentifierMap<ArgVariableDefinition> {
+        if (this.memberName !== "args") {
+            return null;
+        }
+        const resultFunction = this.operand.evaluateToFunctionOrNull();
+        return (resultFunction === null) ? null : resultFunction.argVariableDefinitionMap;
     }
 }
 

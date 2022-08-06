@@ -1,4 +1,5 @@
 
+import { strict as assert } from "assert";
 import { DataType } from "../delegates/dataType.js";
 import { Identifier } from "../identifier.js";
 import { INSTRUCTION_REF_PREFIX } from "../instruction.js";
@@ -58,6 +59,22 @@ export class ArgVariableDefinition extends VariableDefinition {
     
     getDisplayStringHelper(): string {
         return "ARG";
+    }
+}
+
+export class NextArgDefinition extends IndexDefinition {
+    
+    constructor(arg: ArgVariableDefinition) {
+        super(
+            arg.identifier,
+            new IndexRefConverter(INSTRUCTION_REF_PREFIX.nextArgFrame, arg.dataType),
+        );
+        this.index = arg.index;
+        assert(this.index !== null);
+    }
+    
+    getDisplayString(): string {
+        return `NEXT_ARG ${this.identifier.getDisplayString()}`;
     }
 }
 
