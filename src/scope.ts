@@ -41,6 +41,12 @@ export class Scope {
             return this.parentScope.getFunctionByIdentifier(identifier);
         }
     }
+    
+    identifierIsKnown(identifier: Identifier): boolean {
+        return (identifier.getIsBuiltIn()
+            || this.getIndexDefinitionByIdentifier(identifier) !== null
+            || this.getFunctionByIdentifier(identifier) !== null);
+    }
 }
 
 

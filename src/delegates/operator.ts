@@ -120,14 +120,11 @@ export class IndexOperator extends UnaryOperator {
     }
     
     createConstantOrNull(operand: Expression): Constant {
-        const tempIdentifier = operand.evaluateToIdentifier();
-        const tempDefinition = operand.scope.getIndexDefinitionByIdentifier(
-            tempIdentifier,
-        );
-        if (tempDefinition === null) {
+        const definition = operand.evaluateToIndexDefinitionOrNull();
+        if (definition === null) {
             throw new AssemblyError("Expected index definition.");
         }
-        return new NumberConstant(tempDefinition.index, compressibleIntegerType);
+        return new NumberConstant(definition.index, compressibleIntegerType);
     }
 }
 

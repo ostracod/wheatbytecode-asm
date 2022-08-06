@@ -191,14 +191,10 @@ export abstract class Expression implements Displayable {
             }
         }
         const identifier = this.evaluateToIdentifierOrNull();
-        if (identifier !== null && !identifier.getIsBuiltIn()) {
-            if (this.scope.getFunctionByIdentifier(identifier) !== null) {
-                throw this.createError("Cannot use function type as instruction argument.");
-            } else {
-                throw this.createError(`Unknown identifier "${identifier.getDisplayString()}".`);
-            }
+        if (identifier !== null && !this.scope.identifierIsKnown(identifier)) {
+            throw this.createError(`Unknown identifier "${identifier.getDisplayString()}".`);
         } else {
-            throw this.createError("Expected number or pointer.");
+            throw this.createError(`Cannot use "${this.getDisplayString()}" as instruction argument.`);
         }
     }
     
@@ -437,8 +433,6 @@ export class MemberAccessExpression extends UnaryExpression {
     
     evaluateToIndexDefinitionOrNull(): IndexDefinition {
         const argMap = this.operand.evaluateToArgMapOrNull();
-        console.log(argMap);
-        console.log(this.memberName);
         if (argMap !== null) {
             const identifier = new Identifier(this.memberName);
             const definition = argMap.get(identifier);
