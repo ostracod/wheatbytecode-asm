@@ -1,6 +1,7 @@
 
+import { dataType as specDataType } from "wheatsystem-spec";
 import { NumberTypeClass } from "../types.js";
-import { numberTypeList, numberTypeMap, DataType, NumberType } from "../delegates/dataType.js";
+import { numberTypeList, numberTypeMap, DataType, NumberType, IntegerType, UnsignedIntegerType, SignedIntegerType } from "../delegates/dataType.js";
 import { AssemblyError } from "../assemblyError.js";
 
 export const getDataTypeByName = (name: string): DataType => {
@@ -50,6 +51,32 @@ export const mergeNumberTypes = (
     }
     
     return getNumberType(tempClass, tempByteAmount);
+};
+
+export const convertSpecIntegerType = (dataType: specDataType.IntegerType): IntegerType => (
+    getNumberType(
+        dataType.isSigned ? SignedIntegerType : UnsignedIntegerType,
+        dataType.bitAmount / 8,
+    ) as IntegerType
+);
+
+export const convertSpecDataType = (dataType: specDataType.DataType): {
+    dataType: DataType,
+    arrayLength: number,
+} => {
+    if (dataType instanceof specDataType.IntegerType) {
+        const integerType = convertSpecIntegerType(dataType);
+        return { dataType: integerType, arrayLength: 1 };
+    }
+    if (dataType instanceof specDataType.ArrayType) {
+        const { elementType } = dataType;
+        if (!(elementType instanceof specDataType.IntegerType)) {
+            throw new AssemblyError("Unsupported specification array type.");
+        }
+        const integerType = convertSpecIntegerType(elementType);
+        return { dataType: integerType, arrayLength: dataType.length };
+    }
+    throw new AssemblyError("Unsupported specification data type.");
 };
 
 

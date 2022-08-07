@@ -96,6 +96,10 @@ export const pluralize = (word: string, amount: number): string => (
     (amount === 1) ? word : word + "s"
 );
 
+export const capitalize = (text: string): string => (
+    text.charAt(0).toUpperCase() + text.substring(1, text.length)
+);
+
 export const getDictionaryWithDefaults = <T extends {}>(
     dictionary: T,
     defaultValues: T,

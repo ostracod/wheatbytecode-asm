@@ -5,7 +5,7 @@ MACRO newTextAlloc, dest, startLbl, endLbl
     wrtBuff dest[0]:s8, startLbl, ?endLbl - ?startLbl
 END
 
-FUNC init, init_ID
+FUNC init, wsInit.id
     
     # Create text allocations we will need.
     VAR termName, s32
@@ -17,13 +17,13 @@ FUNC init, init_ID
     VAR termHandle, s32
     VAR wrtTermIndex, s32
     openFile termHandle, termName
-    findFunc wrtTermIndex, termHandle, wrtTerm_ID
+    findFunc wrtTermIndex, termHandle, wsWrtTerm.id
     
     # Invoke wrtTerm on the terminal application.
-    newArgFrame 12
-    wrt nextArgFrame[0]:s32, 0
-    wrt nextArgFrame[4]:s32, 0
-    wrt nextArgFrame[8]:s32, welcomeMessage
+    newArgFrame wsWrtTerm.argsSize
+    wrt wsWrtTerm.args.x, 0
+    wrt wsWrtTerm.args.y, 0
+    wrt wsWrtTerm.args.text, welcomeMessage
     callRemote termHandle, wrtTermIndex
     
     # Clean up.

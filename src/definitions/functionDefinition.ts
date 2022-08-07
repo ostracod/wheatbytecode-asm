@@ -1,8 +1,10 @@
 
+import { instances as specInstances } from "wheatsystem-spec";
 import { LineProcessor, ExpressionProcessor, InstructionTypeMap, Displayable } from "../types.js";
 import * as variableUtils from "../utils/variableUtils.js";
 import * as niceUtils from "../utils/niceUtils.js";
 import * as lineUtils from "../utils/lineUtils.js";
+import * as dataTypeUtils from "../utils/dataTypeUtils.js";
 import { Identifier, IdentifierMap } from "../identifier.js";
 import { Expression } from "../expression.js";
 import { Scope } from "../scope.js";
@@ -265,6 +267,22 @@ export class FunctionIndexDefinition extends IndexDefinition {
     getDisplayString(): string {
         return this.functionImpl.getDisplayString();
     }
+}
+
+export const specFunctionMap = new IdentifierMap<SpecFunctionType>();
+
+const { functionSpecification } = specInstances;
+for (const definition of functionSpecification.getDefinitions()) {
+    const name = "ws" + niceUtils.capitalize(definition.name);
+    const identifier = new Identifier(name);
+    const functionType = new SpecFunctionType(identifier, definition.id);
+    const args = definition.args.map((arg) => {
+        const identifier = new Identifier(arg.name);
+        const { dataType, arrayLength } = dataTypeUtils.convertSpecDataType(arg.type);
+        return new ArgVariableDefinition(identifier, dataType, arrayLength);
+    });
+    functionType.setArgs(args);
+    specFunctionMap.set(identifier, functionType);
 }
 
 

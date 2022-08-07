@@ -17,7 +17,7 @@ import { AppDataLineList } from "./lines/labeledLineList.js";
 import { MacroDefinition } from "./definitions/macroDefinition.js";
 import { AliasDefinition } from "./definitions/aliasDefinition.js";
 import { VariableDefinition } from "./definitions/variableDefinition.js";
-import { FunctionIndexDefinition, FunctionDefinition, FunctionTypeDefinition, FunctionImplDefinition, functionTableEntrySize } from "./definitions/functionDefinition.js";
+import { FunctionIndexDefinition, FunctionDefinition, FunctionTypeDefinition, FunctionImplDefinition, functionTableEntrySize, specFunctionMap } from "./definitions/functionDefinition.js";
 
 const fileHeaderSize = 12;
 
@@ -399,6 +399,7 @@ export class Assembler implements Displayable {
         ];
         this.scope.functionMaps = [
             this.functionDefinitionMap,
+            specFunctionMap,
         ];
     }
     

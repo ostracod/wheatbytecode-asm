@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 
+import { instances as specInstances } from "wheatsystem-spec";
 import { MixedNumber } from "./types.js";
 import { DataType, SignedIntegerType, compressibleIntegerType, NumberType, StringType } from "./delegates/dataType.js";
 import { AssemblyError } from "./assemblyError.js";
@@ -103,42 +104,15 @@ export class StringConstant extends Constant {
 export const builtInConstantMap = new IdentifierMap<Constant>();
 
 const tempMap: { [name: string]: number } = {
-    
     null: 0,
-    
-    genericErr: 0x01,
-    noImplErr: 0x02,
-    typeErr: 0x03,
-    numRangeErr: 0x04,
-    indexErr: 0x05,
-    lenErr: 0x06,
-    ptrErr: 0x07,
-    nullErr: 0x08,
-    dataErr: 0x09,
-    argFrameErr: 0x0A,
-    missingErr: 0x0B,
-    stateErr: 0x0C,
-    permErr: 0x0D,
-    capacityErr: 0x0E,
-    throttleErr: 0x0F,
-    
-    init_ID: 1,
-    kill_ID: 2,
-    listenTerm_ID: 3,
-    termSize_ID: 4,
-    wrtTerm_ID: 5,
-    termInput_ID: 6,
-    startSerial_ID: 7,
-    stopSerial_ID: 8,
-    wrtSerial_ID: 9,
-    serialInput_ID: 10,
-    setGpioMode_ID: 11,
-    readGpio_ID: 12,
-    wrtGpio_ID: 13,
-    
     guardedAllocAttr: 1,
     sentryAllocAttr: 2,
 };
+
+const { errorSpecification } = specInstances;
+for (const definition of errorSpecification.getDefinitions()) {
+    tempMap[definition.name] = definition.value;
+}
 
 for (const name in tempMap) {
     const identifier = new Identifier(name);
