@@ -1,17 +1,7 @@
 
 import { Displayable } from "./types.js";
 import { AssemblyError } from "./assemblyError.js";
-import { builtInConstantSet } from "./constant.js";
-import { nameInstructionRefMap } from "./instruction.js";
 import { IndexDefinition } from "./definitions/indexDefinition.js";
-
-const builtInIdentifierNameSet = {};
-for (const name in nameInstructionRefMap) {
-    builtInIdentifierNameSet[name] = true;
-}
-for (const name in builtInConstantSet) {
-    builtInIdentifierNameSet[name] = true;
-}
 
 export class Identifier implements Displayable {
     name: string;
@@ -27,10 +17,6 @@ export class Identifier implements Displayable {
     
     getMapKey(): string {
         return this.name;
-    }
-    
-    getIsBuiltIn(): boolean {
-        return (this.name in builtInIdentifierNameSet);
     }
     
     equals(identifier: Identifier): boolean {
@@ -52,10 +38,6 @@ export class MacroIdentifier extends Identifier {
     
     getMapKey(): string {
         return `${this.name}@${this.macroInvocationId}`;
-    }
-    
-    getIsBuiltIn(): boolean {
-        return false;
     }
 }
 

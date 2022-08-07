@@ -3,6 +3,7 @@
 import { MixedNumber } from "./types.js";
 import { DataType, SignedIntegerType, compressibleIntegerType, NumberType, StringType } from "./delegates/dataType.js";
 import { AssemblyError } from "./assemblyError.js";
+import { Identifier, IdentifierMap } from "./identifier.js";
 
 export abstract class Constant {
     
@@ -99,9 +100,9 @@ export class StringConstant extends Constant {
     }
 }
 
-export const builtInConstantSet = {};
+export const builtInConstantMap = new IdentifierMap<Constant>();
 
-const tempNumberSet = {
+const tempMap: { [name: string]: number } = {
     
     null: 0,
     
@@ -139,9 +140,10 @@ const tempNumberSet = {
     sentryAllocAttr: 2,
 };
 
-for (const key in tempNumberSet) {
-    const tempNumber = tempNumberSet[key];
-    builtInConstantSet[key] = new NumberConstant(tempNumber, compressibleIntegerType);
+for (const name in tempMap) {
+    const identifier = new Identifier(name);
+    const constant = new NumberConstant(tempMap[name], compressibleIntegerType);
+    builtInConstantMap.set(identifier, constant);
 }
 
 

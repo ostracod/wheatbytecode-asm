@@ -5,8 +5,8 @@ import { compressibleIntegerType, instructionDataTypeList, DataType } from "./de
 import { macroIdentifierOperator, UnaryOperator, BinaryOperator } from "./delegates/operator.js";
 import { AssemblyError, UnresolvedIndexError } from "./assemblyError.js";
 import { Identifier, MacroIdentifier, IdentifierMap } from "./identifier.js";
-import { InstructionRef, PointerInstructionRef, InstructionArg, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, nameInstructionRefMap } from "./instruction.js";
-import { builtInConstantSet, Constant, NumberConstant, StringConstant } from "./constant.js";
+import { InstructionRef, PointerInstructionRef, InstructionArg, ResolvedConstantInstructionArg, ExpressionInstructionArg, RefInstructionArg, instructionRefMap } from "./instruction.js";
+import { Constant, NumberConstant, StringConstant } from "./constant.js";
 import { Scope } from "./scope.js";
 import { AssemblyLine } from "./lines/assemblyLine.js";
 import { IndexDefinition } from "./definitions/indexDefinition.js";
@@ -87,7 +87,7 @@ export abstract class Expression implements Displayable {
         if (tempIdentifier === null) {
             return null;
         }
-        return this.scope.getIndexDefinitionByIdentifier(tempIdentifier);
+        return this.scope.getIndexDefinition(tempIdentifier);
     }
     
     evaluateToFunctionOrNull(): AbstractFunction {
@@ -95,7 +95,7 @@ export abstract class Expression implements Displayable {
         if (identifier === null) {
             return null;
         }
-        return this.scope.getFunctionByIdentifier(identifier);
+        return this.scope.getFunction(identifier);
     }
     
     evaluateToArgMapOrNull(): IdentifierMap<ArgVariableDefinition> {
@@ -151,9 +151,16 @@ export abstract class Expression implements Displayable {
     }
     
     evaluateToConstantOrNull(): Constant {
-        const tempDefinition = this.evaluateToIndexDefinitionOrNull();
-        if (tempDefinition !== null) {
-            return tempDefinition.createConstantOrNull();
+        const identifier = this.evaluateToIdentifierOrNull();
+        if (identifier !== null) {
+            const constant = this.scope.getBuiltInConstant(identifier);
+            if (constant !== null) {
+                return constant;
+            }
+        }
+        const definition = this.evaluateToIndexDefinitionOrNull();
+        if (definition !== null) {
+            return definition.createConstantOrNull();
         }
         return null;
     }
@@ -199,8 +206,15 @@ export abstract class Expression implements Displayable {
     }
     
     evaluateToInstructionRef(): InstructionRef {
-        const tempArg = this.evaluateToInstructionArg();
-        return new PointerInstructionRef(tempArg);
+        const identifier = this.evaluateToIdentifierOrNull();
+        if (identifier !== null) {
+            const instructionRef = this.scope.getInstructionRef(identifier);
+            if (instructionRef !== null) {
+                return instructionRef;
+            }
+        }
+        const arg = this.evaluateToInstructionArg();
+        return new PointerInstructionRef(arg);
     }
     
     populateMacroInvocationId(macroInvocationId: number): void {
@@ -247,22 +261,8 @@ export class ArgWord extends ArgTerm {
         return new Identifier(this.text);
     }
     
-    evaluateToConstantOrNull(): Constant {
-        if (this.text in builtInConstantSet) {
-            return builtInConstantSet[this.text].copy();
-        }
-        return super.evaluateToConstantOrNull();
-    }
-    
     evaluateToDataType(): DataType {
         return dataTypeUtils.getDataTypeByName(this.text);
-    }
-    
-    evaluateToInstructionRef(): InstructionRef {
-        if (this.text in nameInstructionRefMap) {
-            return nameInstructionRefMap[this.text];
-        }
-        return super.evaluateToInstructionRef();
     }
     
     getConstantDataTypeHelper(): DataType {

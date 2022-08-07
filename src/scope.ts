@@ -1,5 +1,7 @@
 
 import { Identifier, IdentifierMap } from "./identifier.js";
+import { Constant, builtInConstantMap } from "./constant.js";
+import { InstructionRef, instructionRefMap } from "./instruction.js";
 import { IndexDefinition } from "./definitions/indexDefinition.js";
 import { AbstractFunction } from "./definitions/functionDefinition.js";
 
@@ -14,7 +16,7 @@ export class Scope {
         this.parentScope = parentScope;
     }
     
-    getIndexDefinitionByIdentifier(identifier: Identifier): IndexDefinition {
+    getIndexDefinition(identifier: Identifier): IndexDefinition {
         for (const identifierMap of this.indexDefinitionMapList) {
             const tempDefinition = identifierMap.get(identifier);
             if (tempDefinition !== null) {
@@ -24,11 +26,11 @@ export class Scope {
         if (this.parentScope === null) {
             return null;
         } else {
-            return this.parentScope.getIndexDefinitionByIdentifier(identifier);
+            return this.parentScope.getIndexDefinition(identifier);
         }
     }
     
-    getFunctionByIdentifier(identifier: Identifier): AbstractFunction {
+    getFunction(identifier: Identifier): AbstractFunction {
         for (const identifierMap of this.functionMaps) {
             const definition = identifierMap.get(identifier);
             if (definition !== null) {
@@ -38,14 +40,23 @@ export class Scope {
         if (this.parentScope === null) {
             return null;
         } else {
-            return this.parentScope.getFunctionByIdentifier(identifier);
+            return this.parentScope.getFunction(identifier);
         }
     }
     
+    getBuiltInConstant(identifier: Identifier): Constant {
+        return builtInConstantMap.get(identifier);
+    }
+    
+    getInstructionRef(identifier: Identifier): InstructionRef {
+        return instructionRefMap.get(identifier);
+    }
+    
     identifierIsKnown(identifier: Identifier): boolean {
-        return (identifier.getIsBuiltIn()
-            || this.getIndexDefinitionByIdentifier(identifier) !== null
-            || this.getFunctionByIdentifier(identifier) !== null);
+        return (this.getBuiltInConstant(identifier) !== null
+            || this.getInstructionRef(identifier) !== null
+            || this.getIndexDefinition(identifier) !== null
+            || this.getFunction(identifier) !== null);
     }
 }
 

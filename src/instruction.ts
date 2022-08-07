@@ -7,6 +7,7 @@ import { DataType, NumberType, SignedIntegerType, signedInteger8Type, signedInte
 import { InstructionType } from "./delegates/instructionType.js";
 import { AssemblyError } from "./assemblyError.js";
 import { Constant, NumberConstant } from "./constant.js";
+import { Identifier, IdentifierMap } from "./identifier.js";
 import { Expression } from "./expression.js";
 import { AssemblyLine } from "./lines/assemblyLine.js";
 import { SerializableLine } from "./lines/serializableLine.js";
@@ -304,12 +305,13 @@ export class RefInstructionArg extends InstructionArg {
     }
 }
 
-export const nameInstructionRefMap = {
-    globalFrame: new InstructionRef(INSTRUCTION_REF_PREFIX.globalFrame),
-    localFrame: new InstructionRef(INSTRUCTION_REF_PREFIX.localFrame),
-    prevArgFrame: new InstructionRef(INSTRUCTION_REF_PREFIX.prevArgFrame),
-    nextArgFrame: new InstructionRef(INSTRUCTION_REF_PREFIX.nextArgFrame),
-    appData: new InstructionRef(INSTRUCTION_REF_PREFIX.appData),
-};
+export const instructionRefMap = new IdentifierMap<InstructionRef>();
+
+const tempNames = ["globalFrame", "localFrame", "prevArgFrame", "nextArgFrame", "appData"];
+for (const name of tempNames) {
+    const identifier = new Identifier(name);
+    const instructionRef = new InstructionRef(INSTRUCTION_REF_PREFIX[name]);
+    instructionRefMap.set(identifier, instructionRef);
+}
 
 
