@@ -41,7 +41,7 @@ export class MacroIdentifier extends Identifier {
     }
 }
 
-export class IdentifierMap<T> {
+export class IdentifierMap<T = any> {
     map: { [key: string]: T };
     keyList: string[];
     

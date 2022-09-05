@@ -21,6 +21,7 @@ export const INSTRUCTION_REF_PREFIX = {
     nextArgFrame: 4,
     appData: 5,
     heapAlloc: 6,
+    prevArg: 7,
 };
 
 export class Instruction extends SerializableLine {
@@ -131,8 +132,6 @@ export abstract class InstructionArg implements Displayable {
         
     }
     
-    abstract getDataType(): DataType;
-    
     abstract setDataType(dataType: DataType): void;
     
     abstract getBufferLength(): number;
@@ -154,6 +153,8 @@ export abstract class InstructionArg implements Displayable {
 }
 
 export abstract class ConstantInstructionArg extends InstructionArg {
+    
+    abstract getDataType(): DataType;
     
     abstract getConstant(): Constant;
     
@@ -288,10 +289,6 @@ export class RefInstructionArg extends InstructionArg {
         this.indexArg.processArgs(processArg);
     }
     
-    getDataType(): DataType {
-        return this.dataType;
-    }
-    
     setDataType(dataType: DataType): void {
         this.dataType = dataType;
     }
@@ -305,6 +302,25 @@ export class RefInstructionArg extends InstructionArg {
     }
 }
 
+export class PrevInstructionArg extends InstructionArg {
+    
+    getBufferLength(): number {
+        return instructionUtils.getArgBufferLength(0);
+    }
+    
+    createBuffer(): Buffer {
+        return instructionUtils.createArgBuffer(
+            INSTRUCTION_REF_PREFIX.prevArg,
+            signedInteger8Type,
+            Buffer.from([]),
+        );
+    }
+    
+    setDataType(dataType: DataType): void {
+        throw new AssemblyError("Cannot change data type of prevArg.");
+    }
+}
+
 export const instructionRefMap = new IdentifierMap<InstructionRef>();
 
 const tempNames = ["globalFrame", "localFrame", "prevArgFrame", "nextArgFrame", "appData"];
@@ -313,5 +329,8 @@ for (const name of tempNames) {
     const instructionRef = new InstructionRef(INSTRUCTION_REF_PREFIX[name]);
     instructionRefMap.set(identifier, instructionRef);
 }
+
+export const miscInstructionArgMap = new IdentifierMap<InstructionArg>();
+miscInstructionArgMap.set(new Identifier("prevArg"), new PrevInstructionArg());
 
 

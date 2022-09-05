@@ -1,9 +1,11 @@
 
 import { Identifier, IdentifierMap } from "./identifier.js";
 import { Constant, builtInConstantMap } from "./constant.js";
-import { InstructionRef, instructionRefMap } from "./instruction.js";
+import { InstructionRef, InstructionArg, instructionRefMap, miscInstructionArgMap } from "./instruction.js";
 import { IndexDefinition } from "./definitions/indexDefinition.js";
 import { AbstractFunction } from "./definitions/functionDefinition.js";
+
+const builtInIdentifierMaps: IdentifierMap[] = [builtInConstantMap, instructionRefMap, miscInstructionArgMap];
 
 export class Scope {
     indexDefinitionMapList: IdentifierMap<IndexDefinition>[];
@@ -52,11 +54,18 @@ export class Scope {
         return instructionRefMap.get(identifier);
     }
     
+    getMiscInstructionArg(identifier: Identifier): InstructionArg {
+        return miscInstructionArgMap.get(identifier);
+    }
+    
     identifierIsKnown(identifier: Identifier): boolean {
-        return (this.getBuiltInConstant(identifier) !== null
-            || this.getInstructionRef(identifier) !== null
-            || this.getIndexDefinition(identifier) !== null
-            || this.getFunction(identifier) !== null);
+        if (this.getIndexDefinition(identifier) !== null
+                || this.getFunction(identifier) !== null) {
+            return true;
+        }
+        return builtInIdentifierMaps.some((identifierMap) => (
+            identifierMap.get(identifier) !== null
+        ));
     }
 }
 

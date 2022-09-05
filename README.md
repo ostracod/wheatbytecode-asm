@@ -68,7 +68,7 @@ Data types:
 * `s8`, `s16`, `s32`, and `s64` = Signed integer
 * `f32` and `f64` = Floating point number
 
-Note that all instruction arguments will be coerced to `s8` and `s32`, because these are the only data types supported by WheatBytecode.
+Note that all instruction arguments will be coerced to `s8`, `s16`, and `s32`, because these are the only data types supported by WheatBytecode.
 
 Built-in identifiers:
 
@@ -77,6 +77,7 @@ Built-in identifiers:
 * `prevArgFrame` refers to the argument frame supplied by the caller
 * `nextArgFrame` refers to the argument frame for the next function invocation
 * `appData` refers to the application data region
+* `prevArg` refers to the previous argument of the same instruction
 * `null` refers to the null pointer value
 * All of the WheatSystem function types with the prefix `ws` (Ex: `wsInit`, `wsKill`)
 * All of the error constants (Ex: `typeErr`, `permErr`)

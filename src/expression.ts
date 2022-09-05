@@ -155,7 +155,7 @@ export abstract class Expression implements Displayable {
         if (identifier !== null) {
             const constant = this.scope.getBuiltInConstant(identifier);
             if (constant !== null) {
-                return constant;
+                return constant.copy();
             }
         }
         const definition = this.evaluateToIndexDefinitionOrNull();
@@ -198,11 +198,16 @@ export abstract class Expression implements Displayable {
             }
         }
         const identifier = this.evaluateToIdentifierOrNull();
-        if (identifier !== null && !this.scope.identifierIsKnown(identifier)) {
-            throw this.createError(`Unknown identifier "${identifier.getDisplayString()}".`);
-        } else {
-            throw this.createError(`Cannot use "${this.getDisplayString()}" as instruction argument.`);
+        if (identifier !== null) {
+            const tempArg = this.scope.getMiscInstructionArg(identifier);
+            if (tempArg !== null) {
+                return tempArg;
+            }
+            if (!this.scope.identifierIsKnown(identifier)) {
+                throw this.createError(`Unknown identifier "${identifier.getDisplayString()}".`);
+            }
         }
+        throw this.createError(`Cannot use "${this.getDisplayString()}" as instruction argument.`);
     }
     
     evaluateToInstructionRef(): InstructionRef {
